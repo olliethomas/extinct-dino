@@ -14,7 +14,6 @@ python = "^3.9"
 pytorch-lightning = "*"
 wandb = "*"
 
-
 [tool.poetry.dev-dependencies]
 black = "*"
 isort = "*"
@@ -24,6 +23,9 @@ pydocstyle = "*"
 pytest = "*"
 python-type-stubs = {git = "https://github.com/predictive-analytics-lab/python-type-stubs.git", branch = "main"}
 pylint = "^2.8.2"
+
+[tool.poetry.scripts]
+rawr = "extinct.main:launcher"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
