@@ -1,0 +1,63 @@
+[tool.poetry]
+name = "extinct-dino"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+license = "Apache 2"
+
+[tool.poetry.dependencies]
+fair-bolts = {git = "https://github.com/predictive-analytics-lab/fair-bolts.git", branch = "main"}
+hydra-submitit-launcher = {version = "^1.1.1", allow-prereleases = true}
+neoconfigen = {git = "https://github.com/predictive-analytics-lab/neoconfigen.git", branch = "master"}
+palkit = "*"
+python = "^3.9"
+pytorch-lightning = "*"
+wandb = "*"
+
+
+[tool.poetry.dev-dependencies]
+black = "*"
+isort = "*"
+mypy = "*"
+pre-commit = "*"
+pydocstyle = "*"
+pytest = "*"
+python-type-stubs = {git = "https://github.com/predictive-analytics-lab/python-type-stubs.git", branch = "main"}
+pylint = "^2.8.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 100
+target-version = ['py38']
+skip-string-normalization = true
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )/
+  | foo.py           # also separately exclude a file named foo.py in
+                     # the root of the project
+)
+'''
+
+[tool.isort]
+known_third_party = ["ethicml", "fair_bolts", "hydra", "kit", "numpy", "omegaconf", "pandas", "pl_bolts", "pytest", "pytorch_lightning", "sklearn", "torch", "torchmetrics", "torchvision", "wandb"]
+known_future_library = []
+extra_standard_library = []
+line_length = 88
+profile = "black"
+force_sort_within_sections = true
+classes = ["MISSING"]
