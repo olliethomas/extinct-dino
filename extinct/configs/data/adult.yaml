@@ -1,0 +1,6 @@
+defaults:
+  - /schema/data: adult
+
+batch_size: 64
+num_workers: 0
+seed: ${exp.seed}

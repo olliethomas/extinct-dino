@@ -1,12 +1,17 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional, Dict
+from typing import Any, Optional, Dict, Final
 
 import hydra
+from hydra.core.config_store import ConfigStore
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf, MISSING
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
+
+from extinct.hydra.extinct.models.configs import DinoModelConf
+from extinct.hydra.fair_bolts.datamodules.configs import AdultDataModuleConf, CelebaDataModuleConf
+from extinct.hydra.pytorch_lightning.trainer.configs import TrainerConf
 
 
 @dataclass
@@ -29,6 +34,18 @@ class Config:
     exp_group: str = "Testing"
     model: Any = MISSING
     trainer: Any = MISSING
+
+# ConfigStore enables type validation
+cs = ConfigStore.instance()
+cs.store(name="main_schema", node=Config)
+cs.store(name="trainer_schema", node=TrainerConf, package="trainer")
+
+DATA: Final[str] = "data"
+cs.store(group=f"schema/{DATA}", name="celeba", node=CelebaDataModuleConf, package=DATA)
+cs.store(group=f"schema/{DATA}", name="adult", node=AdultDataModuleConf, package=DATA)
+
+MODEL: Final[str] = "model"
+cs.store(group=f"schema/{MODEL}", name="dino", node=DinoModelConf, package=MODEL)
 
 
 @hydra.main(config_path="configs", config_name="main")
@@ -57,3 +74,7 @@ def start(cfg: Config, raw_config: Optional[Dict[str, Any]]) -> None:
     cfg.trainer.test(model=cfg.model, datamodule=cfg.data)
 
     exp_logger.experiment.finish()
+
+
+if __name__ == '__main__':
+    launcher()

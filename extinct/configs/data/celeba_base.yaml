@@ -1,0 +1,7 @@
+defaults:
+  - /schema/data: celeba
+
+batch_size: 32
+num_workers: 0
+seed: ${exp.seed}
+image_size: 64

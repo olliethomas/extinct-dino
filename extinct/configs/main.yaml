@@ -1,0 +1,7 @@
+defaults:
+  - main_schema
+  - data: celeba
+  - exp: srv
+  - model: dino
+  - trainer: srv
+
