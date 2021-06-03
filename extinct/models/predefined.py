@@ -1,11 +1,13 @@
 from typing import List
 
-from torch import nn
+from torch import Tensor, nn
 
 
-class Mp64x64Net:
-    def __init__(self, batch_norm: bool):
+class Mp64x64Net(nn.Module):
+    def __init__(self, batch_norm: bool, in_chans: int, target_dim: int):
+        super().__init__()
         self.batch_norm = batch_norm
+        self.net = self._build(in_chans=in_chans, target_dim=target_dim)
 
     def _conv_block(
         self, in_chans: int, out_dim: int, kernel_size: int, stride: int, padding: int
@@ -19,7 +21,7 @@ class Mp64x64Net:
         _block += [nn.LeakyReLU()]
         return _block
 
-    def __call__(self, in_chans: int, target_dim: int) -> nn.Sequential:
+    def _build(self, in_chans: int, target_dim: int) -> nn.Sequential:
         layers: List[nn.Module] = []
         layers.extend(self._conv_block(in_chans, 64, 5, 1, 0))
         layers += [nn.MaxPool2d(2, 2)]
@@ -40,3 +42,6 @@ class Mp64x64Net:
         layers += [nn.Linear(512, target_dim)]
 
         return nn.Sequential(*layers)
+
+    def forward(self, x: Tensor) -> Tensor:
+        return self.net(x)

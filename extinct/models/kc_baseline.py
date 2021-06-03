@@ -1,7 +1,6 @@
-import pytorch_lightning as pl
 from kit import implements
+import pytorch_lightning as pl
 from torch import Tensor, nn, optim
-
 import torch.nn.functional as F
 
 from extinct.datamodules.structures import DataBatch
@@ -13,7 +12,7 @@ class KCBaseline(pl.LightningModule):
         super().__init__()
         self.learning_rate = lr
         self.weight_decay = weight_decay
-        self.net = Mp64x64Net(batch_norm=batch_norm)(in_chans=3, target_dim=1)
+        self.net = Mp64x64Net(batch_norm=batch_norm, in_chans=3, target_dim=1)
 
     @implements(pl.LightningModule)
     def configure_optimizers(
