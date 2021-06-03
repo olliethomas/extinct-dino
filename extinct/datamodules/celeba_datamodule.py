@@ -32,7 +32,7 @@ class TiWrapper(Dataset):
     def __getitem__(self, index: int) -> T_co:
         x, s, y = self.ti[index]
         iw = self.iws[index].clone().detach()
-        return DataBatch(x=x, s=s, y=y, iw=iw.unsqueeze(-1))
+        return DataBatch(x=x, s=s.float(), y=y.float(), iw=iw.unsqueeze(-1))
 
     def __len__(self) -> int:
         return len(self.ti)
