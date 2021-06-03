@@ -1,0 +1,5 @@
+defaults:
+  - /schema/model: kc
+  - base
+
+batch_norm: True
