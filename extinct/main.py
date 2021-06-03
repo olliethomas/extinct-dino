@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import os
 from pathlib import Path
 from typing import Any, Dict, Final, Optional
 
@@ -62,11 +63,15 @@ def start(cfg: Config, raw_config: Optional[Dict[str, Any]]) -> None:
     """Script entrypoint."""
     pl.seed_everything(cfg.exp.seed)
 
+    print(f"Current working directory: '{os.getcwd()}'")
+
+    print("-----\n" + str(raw_config) + "\n-----")
     exp_logger = WandbLogger(
         entity="predictive-analytics-lab",
         project="extinct",
         offline=cfg.exp.log_offline,
         group=cfg.exp_group,
+        reinit=True,
     )
     exp_logger.log_hyperparams(raw_config)
     cfg.trainer.logger = exp_logger
