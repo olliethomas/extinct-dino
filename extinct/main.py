@@ -61,11 +61,9 @@ def launcher(hydra_config: DictConfig) -> None:
 
 def start(cfg: Config, raw_config: Optional[Dict[str, Any]]) -> None:
     """Script entrypoint."""
-    pl.seed_everything(cfg.exp.seed)
-
     print(f"Current working directory: '{os.getcwd()}'")
-
     print("-----\n" + str(raw_config) + "\n-----")
+
     exp_logger = WandbLogger(
         entity="predictive-analytics-lab",
         project="extinct",
@@ -73,9 +71,11 @@ def start(cfg: Config, raw_config: Optional[Dict[str, Any]]) -> None:
         group=cfg.exp_group,
         reinit=True,
     )
+
     exp_logger.log_hyperparams(raw_config)
     cfg.trainer.logger = exp_logger
 
+    pl.seed_everything(cfg.exp.seed)
     cfg.data.prepare_data()
     cfg.data.setup()
 
