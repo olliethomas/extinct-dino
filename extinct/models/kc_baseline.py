@@ -30,7 +30,7 @@ class KCBaseline(pl.LightningModule):
     ) -> optim.Optimizer:
         return optim.AdamW(self.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
 
-    def _inference_step(self, batch: DataBatch, stage: str):
+    def _inference_step(self, batch: DataBatch, stage: str) -> Dict[str, Tensor]:
         out = self(batch.x)
         loss = F.binary_cross_entropy_with_logits(out, batch.y)
         tm_acc = self.val_acc if stage == "val" else self.train_acc
