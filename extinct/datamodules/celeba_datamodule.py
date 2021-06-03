@@ -1,5 +1,4 @@
 """CelebA DataModule."""
-from functools import lru_cache
 from typing import Any, Optional
 
 import ethicml as em
@@ -53,7 +52,6 @@ class CelebaDataModule(VisionBaseDataModule):
         s_label: str = "Male",
         seed: int = 0,
         persist_workers: bool = False,
-        cache_data: bool = False,
     ):
         super().__init__(
             data_dir=data_dir,
@@ -72,7 +70,6 @@ class CelebaDataModule(VisionBaseDataModule):
         self.num_sens = 2
         self.y_label = y_label
         self.s_label = s_label
-        self.cache_data = cache_data
 
     @implements(LightningDataModule)
     def prepare_data(self, *args: Any, **kwargs: Any) -> None:
@@ -105,9 +102,6 @@ class CelebaDataModule(VisionBaseDataModule):
                 data=dataset.load(), root=base_dir, transform=transform, target_transform=None
             )
         )
-
-        if self.cache_data:
-            all_data.__getitem__ = lru_cache(None)(all_data.__getitem__)
 
         num_train_val, num_test = self._get_splits(int(len(all_data)), self.test_split)
         num_train, num_val = self._get_splits(num_train_val, self.val_split)
