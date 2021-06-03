@@ -32,7 +32,7 @@ class TiWrapper(Dataset):
 
     def __getitem__(self, index: int) -> T_co:
         x, s, y = self.ti[index]
-        iw = x.new_tensor(self.iws[index])
+        iw = torch.tensor(self.iws[index])
         return DataBatch(x=x, s=s, y=y, iw=iw.unsqueeze(-1))
 
     def __len__(self) -> int:
