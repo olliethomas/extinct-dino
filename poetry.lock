@@ -40,7 +40,7 @@ python-versions = "*"
 name = "appdirs"
 version = "1.4.4"
 description = "A small Python module for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -194,7 +194,7 @@ six = "*"
 name = "distlib"
 version = "0.3.2"
 description = "Distribution utilities"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -210,8 +210,8 @@ python-versions = "*"
 six = ">=1.4.0"
 
 [[package]]
-name = "EthicML"
-version = "0.3.0.dev1"
+name = "ethicml"
+version = "0.2.3"
 description = "A toolkit for understanding and researching algorithmic bias"
 category = "main"
 optional = false
@@ -236,12 +236,6 @@ all = ["fairlearn (0.4.6)"]
 ci = ["fairlearn (0.4.6)", "pytest (>=3.3.2)", "pytest-cov (>=2.6.0)", "torch (1.8.0)", "torchvision (0.9.0)"]
 dev = ["black", "isort (5.5.4)", "mypy", "pydocstyle", "pylint", "pytest", "pytest-cov", "pre-commit"]
 
-[package.source]
-type = "git"
-url = "https://github.com/predictive-analytics-lab/EthicML.git"
-reference = "master"
-resolved_reference = "3b2fb28028e77d1071820c81d8731d0e55a59923"
-
 [[package]]
 name = "fair-bolts"
 version = "0.1.0"
@@ -251,7 +245,7 @@ optional = false
 python-versions = "^3.7"
 
 [package.dependencies]
-EthicML = "branch master"
+EthicML = "^0.2.3"
 lightning-bolts = "^0.3"
 pal-bolts = "branch main"
 torch = "^1.8"
@@ -261,13 +255,13 @@ torchvision = "^0.9"
 type = "git"
 url = "https://github.com/predictive-analytics-lab/fair-bolts.git"
 reference = "main"
-resolved_reference = "aa5e0a4364bfa5ba3a6c0082fd58c7c249168828"
+resolved_reference = "646efc8cc0797fdde1d04044790026224419232b"
 
 [[package]]
 name = "filelock"
 version = "3.0.12"
 description = "A platform independent file lock."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -717,6 +711,23 @@ description = "Python Imaging Library (Fork)"
 category = "main"
 optional = false
 python-versions = ">=3.6"
+
+[[package]]
+name = "pipenv"
+version = "2021.5.29"
+description = "Python Development Workflow for Humans."
+category = "main"
+optional = false
+python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
+
+[package.dependencies]
+certifi = "*"
+virtualenv = "*"
+virtualenv-clone = ">=0.2.5"
+
+[package.extras]
+dev = ["towncrier", "bs4", "twine", "sphinx (<2)", "flake8 (>=3.3.0,<4.0)", "parver", "invoke", "black"]
+tests = ["pytest (<5.0)", "pytest-timeout", "pytest-xdist (<2.0)", "flaky", "mock"]
 
 [[package]]
 name = "pluggy"
@@ -1288,7 +1299,7 @@ socks = ["PySocks (>=1.5.6,<1.5.7 || >1.5.7,<2.0)"]
 name = "virtualenv"
 version = "20.4.7"
 description = "Virtual Python Environment builder"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,>=2.7"
 
@@ -1301,6 +1312,14 @@ six = ">=1.9.0,<2"
 [package.extras]
 docs = ["proselint (>=0.10.2)", "sphinx (>=3)", "sphinx-argparse (>=0.2.5)", "sphinx-rtd-theme (>=0.4.3)", "towncrier (>=19.9.0rc1)"]
 testing = ["coverage (>=4)", "coverage-enable-subprocess (>=1)", "flaky (>=3)", "pytest (>=4)", "pytest-env (>=0.6.2)", "pytest-freezegun (>=0.4.1)", "pytest-mock (>=2)", "pytest-randomly (>=1)", "pytest-timeout (>=1)", "packaging (>=20.0)", "xonsh (>=0.9.16)"]
+
+[[package]]
+name = "virtualenv-clone"
+version = "0.5.4"
+description = "script to clone virtualenvs."
+category = "main"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [[package]]
 name = "wandb"
@@ -1369,7 +1388,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "90f8c917f301301126ba2f09a9e8c61d3065b69ceab9272d77bf6ec4b67b52fd"
+content-hash = "04250e0fff6094444b0e93fce0d2cbfa36f36071bcead583bf1e21199a1e57dd"
 
 [metadata.files]
 absl-py = [
@@ -1486,7 +1505,10 @@ docker-pycreds = [
     {file = "docker-pycreds-0.4.0.tar.gz", hash = "sha256:6ce3270bcaf404cc4c3e27e4b6c70d3521deae82fb508767870fdbf772d584d4"},
     {file = "docker_pycreds-0.4.0-py2.py3-none-any.whl", hash = "sha256:7266112468627868005106ec19cd0d722702d2b7d5912a28e19b826c3d37af49"},
 ]
-EthicML = []
+ethicml = [
+    {file = "EthicML-0.2.3-py3-none-any.whl", hash = "sha256:90d051d492702c4595dab95e5d3fff63681600c1cbc7b9e2dee21a6429c5adf4"},
+    {file = "EthicML-0.2.3.tar.gz", hash = "sha256:a836800c758b644fb1a04d9f9f25aa167d152caf2c2864b80d23c2239e588c58"},
+]
 fair-bolts = []
 filelock = [
     {file = "filelock-3.0.12-py3-none-any.whl", hash = "sha256:929b7d63ec5b7d6b71b0fa5ac14e030b3f70b75747cef1b10da9b879fef15836"},
@@ -1902,6 +1924,10 @@ pillow = [
     {file = "Pillow-8.2.0-pp37-pypy37_pp73-win32.whl", hash = "sha256:e98eca29a05913e82177b3ba3d198b1728e164869c613d76d0de4bde6768a50e"},
     {file = "Pillow-8.2.0.tar.gz", hash = "sha256:a787ab10d7bb5494e5f76536ac460741788f1fbce851068d73a87ca7c35fc3e1"},
 ]
+pipenv = [
+    {file = "pipenv-2021.5.29-py2.py3-none-any.whl", hash = "sha256:d180f5be4775c552fd5e69ae18a9d6099d9dafb462efe54f11c72cb5f4d5e977"},
+    {file = "pipenv-2021.5.29.tar.gz", hash = "sha256:05958fadcd70b2de6a27542fcd2bd72dd5c59c6d35307fdac3e06361fb06e30e"},
+]
 pluggy = [
     {file = "pluggy-0.13.1-py2.py3-none-any.whl", hash = "sha256:966c145cd83c96502c3c3868f50408687b38434af77734af1e9ca461a4081d2d"},
     {file = "pluggy-0.13.1.tar.gz", hash = "sha256:15b2acde666561e1298d71b523007ed7364de07029219b604cf808bfa1c765b0"},
@@ -2316,6 +2342,10 @@ urllib3 = [
 virtualenv = [
     {file = "virtualenv-20.4.7-py2.py3-none-any.whl", hash = "sha256:2b0126166ea7c9c3661f5b8e06773d28f83322de7a3ff7d06f0aed18c9de6a76"},
     {file = "virtualenv-20.4.7.tar.gz", hash = "sha256:14fdf849f80dbb29a4eb6caa9875d476ee2a5cf76a5f5415fa2f1606010ab467"},
+]
+virtualenv-clone = [
+    {file = "virtualenv-clone-0.5.4.tar.gz", hash = "sha256:665e48dd54c84b98b71a657acb49104c54e7652bce9c1c4f6c6976ed4c827a29"},
+    {file = "virtualenv_clone-0.5.4-py2.py3-none-any.whl", hash = "sha256:07e74418b7cc64f4fda987bf5bc71ebd59af27a7bc9e8a8ee9fd54b1f2390a27"},
 ]
 wandb = [
     {file = "wandb-0.10.31-py2.py3-none-any.whl", hash = "sha256:7a52bf0c853130f65be106c32bea4f4b56bda66c0151b4d1234c08467a403269"},
