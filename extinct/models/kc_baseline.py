@@ -44,37 +44,6 @@ class KCBaseline(pl.LightningModule):
             }
         )
 
-        return {"y": batch.y, "s": batch.s, "preds": out.sigmoid().round().squeeze(-1)}
-
-    @implements(pl.LightningModule)
-    def test_epoch_end(self, output_results: List[Dict[str, Tensor]]) -> None:
-        all_y = torch.cat([_r["y"] for _r in output_results], 0)
-        all_s = torch.cat([_r["s"] for _r in output_results], 0)
-        all_preds = torch.cat([_r["preds"] for _r in output_results], 0)
-
-        dt = em.DataTuple(
-            x=pd.DataFrame(
-                torch.rand_like(all_s, dtype=float).detach().cpu().numpy(), columns=['x0']
-            ),
-            s=pd.DataFrame(all_s.detach().cpu().numpy(), columns=["s"]),
-            y=pd.DataFrame(all_y.detach().cpu().numpy(), columns=["y"])
-            if self.target_label == "y"
-            else pd.DataFrame(all_s.detach().cpu().numpy(), columns=["s"]),
-        )
-
-        results = em.run_metrics(
-            predictions=em.Prediction(hard=pd.Series(all_preds.detach().cpu().numpy())),
-            actual=dt,
-            metrics=[em.Accuracy(), em.RenyiCorrelation(), em.Yanovich()],
-            per_sens_metrics=[em.Accuracy(), em.ProbPos(), em.TPR()],
-        )
-
-        acc = self.test_acc.compute().item()
-        results_dict = {f"test_{self.target_name}_clf/pl_acc": acc}
-        results_dict.update({f"test_{self.target_name}_clf/{k}": v for k, v in results.items()})
-
-        self.log_dict(results_dict)
-
     @implements(nn.Module)
     def forward(self, x: Tensor) -> Tensor:
         return self.net(x)
