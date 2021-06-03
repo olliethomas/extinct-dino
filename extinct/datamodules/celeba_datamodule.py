@@ -27,12 +27,12 @@ class TiWrapper(Dataset):
             s=pd.DataFrame(ti.s.cpu().numpy(), columns=["s"]),
             y=pd.DataFrame(ti.y.cpu().numpy(), columns=["y"]),
         )
-        self.iws = em.compute_instance_weights(dt)
+        self.iws = torch.tensor(em.compute_instance_weights(dt)["instance weights"].values)
 
     def __getitem__(self, index: int) -> T_co:
         x, s, y = self.ti[index]
-        iw = x.new_tensor(self.iws.iloc[index])
-        return DataBatch(x=x, s=s.squeeze(), y=y.squeeze(), iw=iw)
+        iw = self.iws[index].clone().detach()
+        return DataBatch(x=x, s=s, y=y, iw=iw.unsqueeze(-1))
 
     def __len__(self) -> int:
         return len(self.ti)
