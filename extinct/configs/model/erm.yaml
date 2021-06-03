@@ -1,0 +1,5 @@
+defaults:
+  - /schema/model: erm
+  - base
+
+batch_norm: True

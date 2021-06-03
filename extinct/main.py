@@ -3,16 +3,19 @@ import os
 from pathlib import Path
 from typing import Any, Dict, Final, Optional
 
+from extinct.hydra.extinct.datamodules.configs import CelebaDataModuleConf
+from extinct.hydra.extinct.models.configs import (
+    DinoModelConf,
+    ErmBaselineConf,
+    KCBaselineConf,
+)
+from extinct.hydra.pytorch_lightning.trainer.configs import TrainerConf
 import hydra
 from hydra.core.config_store import ConfigStore
 from hydra.utils import instantiate
 from omegaconf import DictConfig, MISSING, OmegaConf
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
-
-from extinct.hydra.extinct.datamodules.configs import CelebaDataModuleConf
-from extinct.hydra.extinct.models.configs import DinoModelConf, KCBaselineConf
-from extinct.hydra.pytorch_lightning.trainer.configs import TrainerConf
 
 
 @dataclass
@@ -48,6 +51,7 @@ cs.store(group=f"schema/{DATA}", name="celeba", node=CelebaDataModuleConf, packa
 MODEL: Final[str] = "model"
 cs.store(group=f"schema/{MODEL}", name="dino", node=DinoModelConf, package=MODEL)
 cs.store(group=f"schema/{MODEL}", name="kc", node=KCBaselineConf, package=MODEL)
+cs.store(group=f"schema/{MODEL}", name="erm", node=ErmBaselineConf, package=MODEL)
 
 
 @hydra.main(config_path="configs", config_name="main")
@@ -86,5 +90,5 @@ def start(cfg: Config, raw_config: Optional[Dict[str, Any]]) -> None:
     exp_logger.experiment.finish()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     launcher()

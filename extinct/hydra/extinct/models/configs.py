@@ -21,3 +21,11 @@ class KCBaselineConf:
     lr: float = MISSING
     weight_decay: float = MISSING
     batch_norm: bool = MISSING
+
+
+@dataclass
+class ErmBaselineConf:
+    _target_: str = "extinct.models.ErmBaseline"
+    lr: float = MISSING
+    weight_decay: float = MISSING
+    batch_norm: bool = MISSING
