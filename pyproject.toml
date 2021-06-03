@@ -8,10 +8,16 @@ license = "Apache 2"
 [tool.poetry.dependencies]
 fair-bolts = {git = "https://github.com/predictive-analytics-lab/fair-bolts.git", branch = "main"}
 hydra-submitit-launcher = {version = "^1.1.1", allow-prereleases = true}
+matplotlib = "^3.4.2"
 neoconfigen = {git = "https://github.com/predictive-analytics-lab/neoconfigen.git", branch = "master"}
 palkit = "*"
+pandas = "^1.2.4"
 python = "^3.9"
 pytorch-lightning = "*"
+scikit-learn = "^0.24.2"
+seaborn = "^0.11.1"
+teext = "^0.1.2"
+typed-argument-parser = "1.4"
 wandb = "*"
 
 [tool.poetry.dev-dependencies]
