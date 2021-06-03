@@ -43,7 +43,7 @@ class KCBaseline(pl.LightningModule):
         )
         return {"y": batch.y, "s": batch.s, "preds": out.sigmoid().round().squeeze(-1)}
 
-    def _inference_epoch_end(self, output_results: List[Dict[str, Tensor]], stage: str):
+    def _inference_epoch_end(self, output_results: List[Dict[str, Tensor]], stage: str) -> None:
         all_y = torch.cat([_r["y"] for _r in output_results], 0)
         all_s = torch.cat([_r["s"] for _r in output_results], 0)
         all_preds = torch.cat([_r["preds"] for _r in output_results], 0)
