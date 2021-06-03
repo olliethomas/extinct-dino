@@ -34,7 +34,7 @@ class KCBaseline(pl.LightningModule):
         out = self(batch.x)
         loss = F.binary_cross_entropy_with_logits(out, batch.y)
         tm_acc = self.val_acc if stage == "val" else self.train_acc
-        acc = tm_acc(out.sigmoid(), batch.y.long())
+        acc = tm_acc(out >= 0, batch.y.long())
         self.log_dict(
             {
                 f"{stage}/loss": loss.item(),
@@ -82,7 +82,7 @@ class KCBaseline(pl.LightningModule):
     def training_step(self, batch: DataBatch, batch_idx: int) -> Tensor:
         out = self(batch.x)
         loss = F.binary_cross_entropy_with_logits(input=out, target=batch.y, weight=batch.iw)
-        acc = self.train_acc(out.sigmoid(), batch.y.long())
+        acc = self.train_acc(out >= 0, batch.y.long())
         self.log_dict(
             {
                 f"train/loss": loss.item(),
