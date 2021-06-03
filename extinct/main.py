@@ -69,7 +69,7 @@ def start(cfg: Config, raw_config: Optional[Dict[str, Any]]) -> None:
         project="extinct",
         offline=cfg.exp.log_offline,
         group=cfg.exp_group,
-        reinit=True,
+        reinit=True,  # for multirun compatibility
     )
 
     exp_logger.log_hyperparams(raw_config)
@@ -82,6 +82,7 @@ def start(cfg: Config, raw_config: Optional[Dict[str, Any]]) -> None:
     cfg.trainer.fit(model=cfg.model, datamodule=cfg.data)
     cfg.trainer.test(model=cfg.model, datamodule=cfg.data)
 
+    # Manually invoke finish for multirun-compatibility
     exp_logger.experiment.finish()
 
 
