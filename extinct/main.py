@@ -9,8 +9,8 @@ from omegaconf import DictConfig, OmegaConf, MISSING
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 
-from extinct.hydra.extinct.models.configs import DinoModelConf
-from extinct.hydra.fair_bolts.datamodules.configs import AdultDataModuleConf, CelebaDataModuleConf
+from extinct.hydra.extinct.datamodules.configs import CelebaDataModuleConf
+from extinct.hydra.extinct.models.configs import DinoModelConf, KCBaselineConf
 from extinct.hydra.pytorch_lightning.trainer.configs import TrainerConf
 
 
@@ -35,6 +35,7 @@ class Config:
     model: Any = MISSING
     trainer: Any = MISSING
 
+
 # ConfigStore enables type validation
 cs = ConfigStore.instance()
 cs.store(name="main_schema", node=Config)
@@ -42,10 +43,10 @@ cs.store(name="trainer_schema", node=TrainerConf, package="trainer")
 
 DATA: Final[str] = "data"
 cs.store(group=f"schema/{DATA}", name="celeba", node=CelebaDataModuleConf, package=DATA)
-cs.store(group=f"schema/{DATA}", name="adult", node=AdultDataModuleConf, package=DATA)
 
 MODEL: Final[str] = "model"
 cs.store(group=f"schema/{MODEL}", name="dino", node=DinoModelConf, package=MODEL)
+cs.store(group=f"schema/{MODEL}", name="kc", node=KCBaselineConf, package=MODEL)
 
 
 @hydra.main(config_path="configs", config_name="main")
@@ -65,10 +66,13 @@ def start(cfg: Config, raw_config: Optional[Dict[str, Any]]) -> None:
         entity="predictive-analytics-lab",
         project="extinct",
         offline=cfg.exp.log_offline,
-        group= cfg.exp_group,
+        group=cfg.exp_group,
     )
     exp_logger.log_hyperparams(raw_config)
     cfg.trainer.logger = exp_logger
+
+    cfg.data.prepare_data()
+    cfg.data.setup()
 
     cfg.trainer.fit(model=cfg.model, datamodule=cfg.data)
     cfg.trainer.test(model=cfg.model, datamodule=cfg.data)

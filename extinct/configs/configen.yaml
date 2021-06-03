@@ -16,13 +16,13 @@ configen:
 
   # list of modules to generate configs for
   modules:
-    - name: fair_bolts.datamodules
+    - name: extinct.datamodules
       classes:
         - CelebaDataModule
-        - AdultDataModule
     - name: extinct.models
       classes:
         - DinoModel
+        - KCBaseline
     - name: pytorch_lightning.trainer
       classes:
         - Trainer

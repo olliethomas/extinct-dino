@@ -1,7 +1,7 @@
 import pytorch_lightning as pl
 from fair_bolts.datasets.ethicml_datasets import DataBatch
 from kit import implements
-from torch import Tensor, optim
+from torch import Tensor, optim, nn
 
 
 class DinoModel(pl.LightningModule):
@@ -10,16 +10,16 @@ class DinoModel(pl.LightningModule):
         self.learning_rate = lr
         self.weight_decay = weight_decay
 
-    def training_step(self, batch: DataBatch, batch_idx: int) -> Tensor:
-        return self(batch.x)
-
-    def forward(self, x: Tensor) -> Tensor:
-        return x
-
     @implements(pl.LightningModule)
     def configure_optimizers(
         self,
     ) -> optim.Optimizer:
-        return optim.AdamW(
-            self.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay
-        )
+        return optim.AdamW(self.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
+
+    @implements(pl.LightningModule)
+    def training_step(self, batch: DataBatch, batch_idx: int) -> Tensor:
+        return self(batch.x)
+
+    @implements(nn.Module)
+    def forward(self, x: Tensor) -> Tensor:
+        return x
