@@ -1,15 +1,17 @@
+from typing import List, Tuple
+
 from __future__ import annotations
+import ethicml as em
 from kit import implements
 import pandas as pd
-import torch
 import pytorch_lightning as pl
+import torch
 from torch import Tensor, nn, optim
 import torch.nn.functional as F
+import torchmetrics
 
 from extinct.datamodules.structures import DataBatch
 from extinct.models.predefined import Mp64x64Net
-import ethicml as em
-import torchmetrics
 
 __all__ = ["ErmBaseline"]
 
@@ -29,8 +31,10 @@ class ErmBaseline(pl.LightningModule):
     @implements(pl.LightningModule)
     def configure_optimizers(
         self,
-    ) -> optim.Optimizer:
-        return optim.AdamW(self.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
+    ) -> Tuple[List[optim.Optimizer], List[optim.lr_scheduler.ExponentialLR]]:
+        opt = optim.AdamW(self.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
+        sched = optim.lr_scheduler.ExponentialLR(optimizer=opt, gamma=1 - 1e-3)
+        return [opt], [sched]
 
     def _get_loss(self, logits: Tensor, batch: DataBatch) -> Tensor:
         return self._loss_fn(input=logits, target=batch.y.float())
