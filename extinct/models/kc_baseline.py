@@ -25,7 +25,7 @@ class KCBaseline(pl.LightningModule):
     def training_step(self, batch: DataBatch, batch_idx: int) -> Tensor:
         out = self(batch.x)
         return F.binary_cross_entropy_with_logits(
-            input=out, target=batch.y.unsqueeze(-1).float(), weight=batch.iw
+            input=out, target=batch.y.float(), weight=batch.iw
         )
 
     @implements(nn.Module)
