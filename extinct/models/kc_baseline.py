@@ -1,7 +1,6 @@
-import pytorch_lightning as pl
 from kit import implements
+import pytorch_lightning as pl
 from torch import Tensor, nn, optim
-
 import torch.nn.functional as F
 
 from extinct.datamodules.structures import DataBatch

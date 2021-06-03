@@ -3,19 +3,18 @@ from functools import lru_cache
 from typing import Any, Optional
 
 import ethicml as em
-import ethicml.vision as emvi
-import torch
 from ethicml import implements
+import ethicml.vision as emvi
+from fair_bolts.datamodules.vision_datamodule import VisionBaseDataModule
+import numpy as np
+import pandas as pd
 from pytorch_lightning import LightningDataModule
+import torch
 from torch.utils.data import Dataset
 from torch.utils.data.dataset import T_co, random_split
 from torchvision import transforms as TF
 
-from fair_bolts.datamodules.vision_datamodule import VisionBaseDataModule
-
 from extinct.datamodules.structures import DataBatch
-import numpy as np
-import pandas as pd
 
 
 class TiWrapper(Dataset):

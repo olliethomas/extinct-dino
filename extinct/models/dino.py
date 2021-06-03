@@ -1,7 +1,7 @@
-import pytorch_lightning as pl
 from fair_bolts.datasets.ethicml_datasets import DataBatch
 from kit import implements
-from torch import Tensor, optim, nn
+import pytorch_lightning as pl
+from torch import Tensor, nn, optim
 
 
 class DinoModel(pl.LightningModule):

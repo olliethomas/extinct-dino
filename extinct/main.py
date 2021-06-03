@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional, Dict, Final
+from typing import Any, Dict, Final, Optional
 
 import hydra
 from hydra.core.config_store import ConfigStore
 from hydra.utils import instantiate
-from omegaconf import DictConfig, OmegaConf, MISSING
+from omegaconf import DictConfig, MISSING, OmegaConf
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 
