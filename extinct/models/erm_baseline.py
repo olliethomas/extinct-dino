@@ -110,11 +110,6 @@ class ErmBaseline(pl.LightningModule):
     def validation_epoch_end(self, output_results: list[dict[str, Tensor]]) -> None:
         self._inference_epoch_end(output_results=output_results, stage="val")
 
-    @implements(pl.LightningModule)
-    def training_step(self, batch: DataBatch, batch_idx: int) -> Tensor:
-        logits = self(batch.x)
-        return self._get_loss(logits=logits, batch=batch)
-
     @implements(nn.Module)
     def forward(self, x: Tensor) -> Tensor:
         return self.net(x)
