@@ -4,7 +4,7 @@
 # isort:skip_file
 # flake8: noqa
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from omegaconf import MISSING
 
 
@@ -21,6 +21,7 @@ class KCBaselineConf:
     lr: float = MISSING
     weight_decay: float = MISSING
     batch_norm: bool = MISSING
+    lr_gamma: float = MISSING
 
 
 @dataclass
@@ -29,3 +30,4 @@ class ErmBaselineConf:
     lr: float = MISSING
     weight_decay: float = MISSING
     batch_norm: bool = MISSING
+    lr_gamma: float = MISSING

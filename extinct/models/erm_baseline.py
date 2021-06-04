@@ -1,23 +1,25 @@
-from __future__ import annotations
+from typing import List, Tuple
+
+import ethicml as em
 from kit import implements
 import pandas as pd
-import torch
 import pytorch_lightning as pl
+import torch
 from torch import Tensor, nn, optim
 import torch.nn.functional as F
+import torchmetrics
 
 from extinct.datamodules.structures import DataBatch
 from extinct.models.predefined import Mp64x64Net
-import ethicml as em
-import torchmetrics
 
 __all__ = ["ErmBaseline"]
 
 
 class ErmBaseline(pl.LightningModule):
-    def __init__(self, lr: float, weight_decay: float, batch_norm: bool):
+    def __init__(self, lr: float, weight_decay: float, batch_norm: bool, lr_gamma: float):
         super().__init__()
         self.learning_rate = lr
+        self.lr_gamma = lr_gamma
         self.weight_decay = weight_decay
         self.net = Mp64x64Net(batch_norm=batch_norm, in_chans=3, target_dim=1)
         self._loss_fn = F.binary_cross_entropy_with_logits
@@ -29,8 +31,10 @@ class ErmBaseline(pl.LightningModule):
     @implements(pl.LightningModule)
     def configure_optimizers(
         self,
-    ) -> optim.Optimizer:
-        return optim.AdamW(self.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
+    ) -> Tuple[List[optim.Optimizer], List[optim.lr_scheduler.ExponentialLR]]:
+        opt = optim.AdamW(self.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
+        sched = optim.lr_scheduler.ExponentialLR(optimizer=opt, gamma=self.lr_gamma)
+        return [opt], [sched]
 
     def _get_loss(self, logits: Tensor, batch: DataBatch) -> Tensor:
         return self._loss_fn(input=logits, target=batch.y.float())
