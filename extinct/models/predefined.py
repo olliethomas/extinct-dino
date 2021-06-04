@@ -23,7 +23,7 @@ class Mp64x64Net(nn.Module):
         return _block
 
     def _build(self, in_chans: int, target_dim: int) -> nn.Sequential:
-        layers: List[nn.Module] = []
+        layers = nn.ModuleList()
         layers.extend(self._conv_block(in_chans, 64, 5, 1, 0))
         layers += [nn.MaxPool2d(2, 2)]
 
@@ -100,7 +100,7 @@ class Encoder(nn.Module):
         encoding_dim: int,
     ):
         super().__init__()
-        layers: list[nn.Module] = []
+        layers = nn.ModuleList()
         c_in, height, width = input_shape
         c_out = initial_hidden_channels
 
@@ -138,7 +138,7 @@ class Decoder(nn.Module):
         decoder_out_act: Optional[nn.Module] = None,
     ):
         super().__init__()
-        layers: List[nn.Module] = []
+        layers = nn.ModuleList()
         c_in, height, width = input_shape
         c_out = initial_hidden_channels
 
