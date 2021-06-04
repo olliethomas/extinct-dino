@@ -8,6 +8,7 @@ from hydra.core.config_store import ConfigStore
 from hydra.utils import instantiate
 from omegaconf import DictConfig, MISSING, OmegaConf
 import pytorch_lightning as pl
+from pytorch_lightning.callbacks import EarlyStopping
 from pytorch_lightning.loggers import WandbLogger
 
 from extinct.hydra.extinct.datamodules.configs import (
@@ -15,6 +16,7 @@ from extinct.hydra.extinct.datamodules.configs import (
 )
 from extinct.hydra.extinct.models.configs import (  # type: ignore[import]
     DinoModelConf,
+    ErmBaselineConf,
     KCBaselineConf,
 )
 from extinct.hydra.pytorch_lightning.trainer.configs import (
@@ -24,6 +26,8 @@ from extinct.hydra.pytorch_lightning.trainer.configs import (
 
 @dataclass
 class ExpConfig:
+    early_stopping: bool = True
+    es_patience: int = 3
     log_offline: bool = False
     save_dir: Optional[str] = None
     seed: int = 42
@@ -55,6 +59,7 @@ cs.store(group=f"schema/{DATA}", name="celeba", node=CelebaDataModuleConf, packa
 MODEL: Final[str] = "model"
 cs.store(group=f"schema/{MODEL}", name="dino", node=DinoModelConf, package=MODEL)
 cs.store(group=f"schema/{MODEL}", name="kc", node=KCBaselineConf, package=MODEL)
+cs.store(group=f"schema/{MODEL}", name="erm", node=ErmBaselineConf, package=MODEL)
 
 
 @hydra.main(config_path="configs", config_name="main")
@@ -81,6 +86,14 @@ def start(cfg: Config, raw_config: Optional[Dict[str, Any]]) -> None:
 
     exp_logger.log_hyperparams(raw_config)
     cfg.trainer.logger = exp_logger
+    early_stop_callback = EarlyStopping(
+        monitor='val/loss',
+        min_delta=0.00,
+        patience=cfg.exp.es_patience,
+        verbose=False,
+    )
+    if cfg.exp.early_stopping:
+        cfg.trainer.callbacks += [early_stop_callback]
 
     pl.seed_everything(cfg.exp.seed)
     cfg.data.prepare_data()
@@ -93,5 +106,5 @@ def start(cfg: Config, raw_config: Optional[Dict[str, Any]]) -> None:
     exp_logger.experiment.finish()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     launcher()

@@ -3,6 +3,8 @@ from kit import implements
 import pytorch_lightning as pl
 from torch import Tensor, nn, optim
 
+__all__ = ["DinoModel"]
+
 
 class DinoModel(pl.LightningModule):
     def __init__(self, lr: float, weight_decay: float):
