@@ -39,3 +39,4 @@ class LaftrBaselineConf:
     lr: float = MISSING
     weight_decay: float = MISSING
     lr_gamma: float = MISSING
+    disc_steps: int = MISSING

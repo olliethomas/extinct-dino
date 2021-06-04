@@ -42,7 +42,7 @@ class ErmBaseline(pl.LightningModule):
     def _inference_step(self, batch: DataBatch, stage: str) -> dict[str, Tensor]:
         logits = self(batch.x)
         loss = self._get_loss(logits, batch)
-        tm_acc = self.val_acc if stage == "val" else self.train_acc
+        tm_acc = self.val_acc if stage == "val" else self.test_acc
         acc = tm_acc(logits >= 0, batch.y.long())
         self.log_dict(
             {
@@ -72,7 +72,7 @@ class ErmBaseline(pl.LightningModule):
             per_sens_metrics=[em.Accuracy(), em.ProbPos(), em.TPR()],
         )
 
-        tm_acc = self.val_acc if stage == "val" else self.train_acc
+        tm_acc = self.val_acc if stage == "val" else self.test_acc
         acc = tm_acc.compute().item()
         results_dict = {f"{stage}/acc": acc}
         results_dict.update({f"{stage}/{k}": v for k, v in results.items()})
