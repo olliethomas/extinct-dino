@@ -1,0 +1,4 @@
+defaults:
+  - /schema/model: laftr
+  - base
+

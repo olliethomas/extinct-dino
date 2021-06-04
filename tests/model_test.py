@@ -16,7 +16,7 @@ SCHEMAS: Final[List[str]] = [
 ]
 
 
-@pytest.mark.parametrize("model_schema", ["erm", "kc"])
+@pytest.mark.parametrize("model_schema", ["erm", "kc", "laftr"])
 def test_entrypoint(model_schema: str) -> None:
     """Quick run on models to check nothing's broken.
 

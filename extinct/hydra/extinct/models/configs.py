@@ -31,3 +31,11 @@ class ErmBaselineConf:
     weight_decay: float = MISSING
     batch_norm: bool = MISSING
     lr_gamma: float = MISSING
+
+
+@dataclass
+class LaftrBaselineConf:
+    _target_: str = "extinct.models.LaftrBaseline"
+    lr: float = MISSING
+    weight_decay: float = MISSING
+    lr_gamma: float = MISSING

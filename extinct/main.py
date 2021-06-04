@@ -18,6 +18,7 @@ from extinct.hydra.extinct.models.configs import (  # type: ignore[import]
     DinoModelConf,
     ErmBaselineConf,
     KCBaselineConf,
+    LaftrBaselineConf,
 )
 from extinct.hydra.pytorch_lightning.trainer.configs import (
     TrainerConf,  # type: ignore[import]
@@ -60,6 +61,7 @@ MODEL: Final[str] = "model"
 cs.store(group=f"schema/{MODEL}", name="dino", node=DinoModelConf, package=MODEL)
 cs.store(group=f"schema/{MODEL}", name="kc", node=KCBaselineConf, package=MODEL)
 cs.store(group=f"schema/{MODEL}", name="erm", node=ErmBaselineConf, package=MODEL)
+cs.store(group=f"schema/{MODEL}", name="laftr", node=LaftrBaselineConf, package=MODEL)
 
 
 @hydra.main(config_path="configs", config_name="main")
