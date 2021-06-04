@@ -1,6 +1,5 @@
 from typing import List, Tuple
 
-from __future__ import annotations
 import ethicml as em
 from kit import implements
 import pandas as pd
