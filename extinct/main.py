@@ -26,6 +26,8 @@ from extinct.hydra.pytorch_lightning.trainer.configs import (
 
 @dataclass
 class ExpConfig:
+    early_stopping: bool = True
+    es_patience: int = 3
     log_offline: bool = False
     save_dir: Optional[str] = None
     seed: int = 42
@@ -87,10 +89,11 @@ def start(cfg: Config, raw_config: Optional[Dict[str, Any]]) -> None:
     early_stop_callback = EarlyStopping(
         monitor='val/loss',
         min_delta=0.00,
-        patience=3,
+        patience=cfg.exp.es_patience,
         verbose=False,
     )
-    cfg.trainer.callbacks += [early_stop_callback]
+    if cfg.exp.early_stopping:
+        cfg.trainer.callbacks += [early_stop_callback]
 
     pl.seed_everything(cfg.exp.seed)
     cfg.data.prepare_data()

@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Literal, Tuple
 
 from __future__ import annotations
 import ethicml as em
@@ -14,6 +14,8 @@ from extinct.datamodules.structures import DataBatch
 from extinct.models.predefined import Mp64x64Net
 
 __all__ = ["ErmBaseline"]
+
+Stage = Literal["val", "test"]
 
 
 class ErmBaseline(pl.LightningModule):
@@ -39,7 +41,7 @@ class ErmBaseline(pl.LightningModule):
     def _get_loss(self, logits: Tensor, batch: DataBatch) -> Tensor:
         return self._loss_fn(input=logits, target=batch.y.float())
 
-    def _inference_step(self, batch: DataBatch, stage: str) -> dict[str, Tensor]:
+    def _inference_step(self, batch: DataBatch, stage: Stage) -> dict[str, Tensor]:
         logits = self(batch.x)
         loss = self._get_loss(logits, batch)
         tm_acc = self.val_acc if stage == "val" else self.train_acc
@@ -52,7 +54,7 @@ class ErmBaseline(pl.LightningModule):
         )
         return {"y": batch.y, "s": batch.s, "preds": logits.sigmoid().round().squeeze(-1)}
 
-    def _inference_epoch_end(self, output_results: list[dict[str, Tensor]], stage: str) -> None:
+    def _inference_epoch_end(self, output_results: list[dict[str, Tensor]], stage: Stage) -> None:
         all_y = torch.cat([_r["y"] for _r in output_results], 0)
         all_s = torch.cat([_r["s"] for _r in output_results], 0)
         all_preds = torch.cat([_r["preds"] for _r in output_results], 0)
