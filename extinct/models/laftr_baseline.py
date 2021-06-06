@@ -1,4 +1,5 @@
 from collections import namedtuple
+from enum import Enum
 import itertools
 from typing import Any, List, Tuple, Union
 
@@ -17,10 +18,18 @@ __all__ = ["LaftrBaseline"]
 from extinct.models.predefined import Decoder, EmbeddingClf, Encoder
 
 ModelOut = namedtuple("ModelOut", ["y", "z", "s", "x"])
+FairnessType = Enum("FairnessType", "DP EO EqOp")
 
 
 class LaftrBaseline(pl.LightningModule):
-    def __init__(self, lr: float, weight_decay: float, lr_gamma: float, disc_steps: int):
+    def __init__(
+        self,
+        lr: float,
+        weight_decay: float,
+        lr_gamma: float,
+        disc_steps: int,
+        fairness: FairnessType,
+    ):
         super().__init__()
         self.enc = Encoder(
             input_shape=(3, 64, 64), initial_hidden_channels=64, levels=3, encoding_dim=128
@@ -46,6 +55,7 @@ class LaftrBaseline(pl.LightningModule):
         self._adv_clf_loss = nn.L1Loss(reduction="mean")
 
         self.disc_steps = disc_steps
+        self.fairness = fairness
         self.lr = lr
         self.lr_gamma = lr_gamma
         self.weight_decay = weight_decay
@@ -56,9 +66,32 @@ class LaftrBaseline(pl.LightningModule):
 
     def _adv_loss(self, s_pred: Tensor, batch: DataBatch) -> Tensor:
         # For Demographic Parity, for EqOpp is a different loss term.
-        s0 = self._adv_clf_loss(s_pred[batch.s == 0], batch.s[batch.s == 0])
-        s1 = self._adv_clf_loss(s_pred[batch.s == 1], batch.s[batch.s == 1])
-        return (s0 + s1) / 2
+        if self.fairness is FairnessType.DP:
+            s0 = self._adv_clf_loss(s_pred[batch.s == 0], batch.s[batch.s == 0])
+            s1 = self._adv_clf_loss(s_pred[batch.s == 1], batch.s[batch.s == 1])
+            loss = (s0 + s1) / 2
+        elif self.fairness is FairnessType.EO:
+            loss = torch.tensor(0.0)
+            for s, y in itertools.product([0, 1], repeat=2):
+                if len(batch.s[(batch.s == s) & (batch.y == y)]) > 0:
+                    loss += self._adv_clf_loss(
+                        s_pred[(batch.s == s) & (batch.y == y)],
+                        batch.s[(batch.s == s) & (batch.y == y)],
+                    )
+            loss = 2 - loss
+        elif self.fairness is FairnessType.EqOp:
+            # TODO: How to best handle this if no +ve samples in the batch?
+            loss = torch.tensor(0.0)
+            for s in (0, 1):
+                if len(batch.s[(batch.s == s) & (batch.y == 1)]) > 0:
+                    loss += self._adv_clf_loss(
+                        s_pred[(batch.s == s) & (batch.y == 1)],
+                        batch.s[(batch.s == s) & (batch.y == 1)],
+                    )
+            loss = 2 - loss
+        else:
+            raise RuntimeError("Only DP and EO fairness accepted.")
+        return loss
 
     def _inference_step(self, batch: DataBatch, stage: str) -> dict[str, Tensor]:
         model_out = self(batch.x, batch.s)

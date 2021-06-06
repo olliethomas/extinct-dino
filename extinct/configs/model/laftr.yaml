@@ -3,3 +3,4 @@ defaults:
   - base
 
 disc_steps: 3
+fairness: "DP"
