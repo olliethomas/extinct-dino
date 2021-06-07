@@ -1,7 +1,7 @@
 from collections import namedtuple
 from enum import Enum
 import itertools
-from typing import Any, List, Tuple, Union
+from typing import Any, List, Optional, Tuple, Union
 
 import ethicml as em
 from kit import implements
@@ -64,6 +64,17 @@ class LaftrBaseline(pl.LightningModule):
         self.train_acc = torchmetrics.Accuracy()
         self.val_acc = torchmetrics.Accuracy()
 
+        self._target: Optional[str] = None
+
+    @property
+    def target(self) -> str:
+        assert self._target is not None
+        return self._target
+
+    @target.setter
+    def target(self, target: str) -> None:
+        self._target = target
+
     def _adv_loss(self, s_pred: Tensor, batch: DataBatch) -> Tensor:
         # For Demographic Parity, for EqOpp is a different loss term.
         if self.fairness is FairnessType.DP:
@@ -104,7 +115,7 @@ class LaftrBaseline(pl.LightningModule):
                 f"{stage}/loss": (laftr_loss + adv_loss).item(),
                 f"{stage}/model_loss": laftr_loss.item(),
                 f"{stage}/adv_loss": adv_loss.item(),
-                f"{stage}/acc": acc,
+                f"{stage}/{self.target}_acc": acc,
             }
         )
         return {"y": batch.y, "s": batch.s, "preds": model_out.y.sigmoid().round().squeeze(-1)}
@@ -132,7 +143,7 @@ class LaftrBaseline(pl.LightningModule):
         tm_acc = self.val_acc if stage == "val" else self.test_acc
         acc = tm_acc.compute().item()
         results_dict = {f"{stage}/acc": acc}
-        results_dict.update({f"{stage}/{k}": v for k, v in results.items()})
+        results_dict.update({f"{stage}/{self.target}_{k}": v for k, v in results.items()})
 
         self.log_dict(results_dict)
 

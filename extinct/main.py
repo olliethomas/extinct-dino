@@ -101,7 +101,15 @@ def start(cfg: Config, raw_config: Optional[Dict[str, Any]]) -> None:
     cfg.data.prepare_data()
     cfg.data.setup()
 
+    cfg.model.target = cfg.data.train_data.dataset.ti.y_label
     cfg.trainer.fit(model=cfg.model, datamodule=cfg.data)
+    cfg.trainer.test(model=cfg.model, datamodule=cfg.data)
+
+    cfg.data.train_data.dataset.ti.new_task("Smiling")  # Amends the underlying dataset
+    cfg.model.target = cfg.data.train_data.dataset.ti.y_label
+    cfg.trainer.test(model=cfg.model, datamodule=cfg.data)
+    cfg.data.train_data.dataset.ti.new_task("Rosy_Cheeks")  # Amends the underlying dataset
+    cfg.model.target = cfg.data.train_data.dataset.ti.y_label
     cfg.trainer.test(model=cfg.model, datamodule=cfg.data)
 
     # Manually invoke finish for multirun-compatibility
