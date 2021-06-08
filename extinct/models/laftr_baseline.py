@@ -206,7 +206,7 @@ class LaftrBaseline(pl.LightningModule):
                     f"train/acc": acc,
                 }
             )
-            return laftr_loss
+            return laftr_loss + adv_loss
         elif optimizer_idx == 1:
             # Adversarial update
             self.set_requires_grad([self.enc, self.dec, self.clf], requires_grad=False)
@@ -222,7 +222,7 @@ class LaftrBaseline(pl.LightningModule):
                     f"train/acc": acc,
                 }
             )
-            return adv_loss
+            return -(laftr_loss + adv_loss)
         else:
             raise RuntimeError("There should only be 2 optimizers, but 3rd received.")
 
