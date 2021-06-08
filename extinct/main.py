@@ -1,3 +1,4 @@
+import copy
 from dataclasses import dataclass
 import os
 from pathlib import Path
@@ -18,8 +19,15 @@ from extinct.hydra.extinct.models.configs import (
     KCBaselineConf,
     LaftrBaselineConf,
 )
+<<<<<<< HEAD
 from extinct.hydra.pytorch_lightning.trainer.configs import TrainerConf
 from extinct.utils.callbacks import IterationBasedProgBar
+=======
+from extinct.hydra.pytorch_lightning.trainer.configs import (
+    TrainerConf,  # type: ignore[import]
+)
+from extinct.models.aux_classifier import AuxClassifier
+>>>>>>> e6695a1 (auxillary classifier)
 
 
 @dataclass
@@ -44,12 +52,14 @@ class Config:
     exp_group: str = "Testing"
     model: Any = MISSING
     trainer: Any = MISSING
+    aux_trainer: Any = MISSING
 
 
 # ConfigStore enables type validation
 cs = ConfigStore.instance()
 cs.store(name="main_schema", node=Config)
 cs.store(name="trainer_schema", node=TrainerConf, package="trainer")
+cs.store(name="aux_trainer_schema", node=TrainerConf, package="aux_trainer")
 
 DATA: Final[str] = "data"
 cs.store(group=f"schema/{DATA}", name="celeba", node=CelebaDataModuleConf, package=DATA)
@@ -98,6 +108,7 @@ def start(cfg: Config, raw_config: Optional[Dict[str, Any]]) -> None:
     cfg.data.prepare_data()
     cfg.data.setup()
 
+<<<<<<< HEAD
     cfg.model.target = cfg.data.train_data.dataset.dataset.ti.y_label
     cfg.trainer.callbacks = [IterationBasedProgBar()]
     cfg.trainer.fit(model=cfg.model, datamodule=cfg.data)
@@ -109,9 +120,29 @@ def start(cfg: Config, raw_config: Optional[Dict[str, Any]]) -> None:
     cfg.data.train_data.dataset.ti.new_task("Rosy_Cheeks")  # Amends the underlying dataset
     cfg.model.target = cfg.data.train_data.dataset.dataset.ti.y_label
     cfg.trainer.test(model=cfg.model, datamodule=cfg.data)
+=======
+    cfg.model.target = cfg.data.train_data.dataset.ti.y_label
+    fit_and_train(cfg)
+
+    cfg.data.train_data.dataset.ti.new_task("Smiling")  # Amends the underlying dataset
+    cfg.model.target = cfg.data.train_data.dataset.ti.y_label
+    fit_and_train(cfg)
+    cfg.data.train_data.dataset.ti.new_task("Rosy_Cheeks")  # Amends the underlying dataset
+    cfg.model.target = cfg.data.train_data.dataset.ti.y_label
+    fit_and_train(cfg)
+>>>>>>> e6695a1 (auxillary classifier)
 
     # Manually invoke finish for multirun-compatibility
     exp_logger.experiment.finish()
+
+
+def fit_and_train(cfg):
+    _trainer = copy.deepcopy(cfg.aux_trainer)
+    clf_model = AuxClassifier(
+        enc=cfg.model.enc, classifier=cfg.model.clf, lr=1e-3, weight_decay=1e-8, lr_gamma=0.999
+    )
+    _trainer.fit(clf_model, cfg.data)
+    _trainer.test(clf_model, cfg.data)
 
 
 if __name__ == "__main__":

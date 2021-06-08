@@ -12,6 +12,7 @@ SCHEMAS: Final[List[str]] = [
     "data=celeba_local",
     "exp=unit_test",
     "trainer=unit_test",
+    "aux_trainer=unit_test",
 ]
 
 

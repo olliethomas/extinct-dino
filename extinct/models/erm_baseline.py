@@ -26,7 +26,9 @@ class ErmBaseline(pl.LightningModule):
         self.learning_rate = lr
         self.lr_gamma = lr_gamma
         self.weight_decay = weight_decay
-        self.net = Mp64x64Net(batch_norm=batch_norm, in_chans=3, target_dim=1)
+        self.enc = Mp64x64Net(batch_norm=batch_norm, in_chans=3, target_dim=10)
+        self.clf = nn.Linear(10, 1)
+        self.net = nn.Sequential(self.enc, self.clf)
         self._loss_fn = F.binary_cross_entropy_with_logits
 
         self.test_acc = torchmetrics.Accuracy()
