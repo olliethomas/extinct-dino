@@ -24,6 +24,7 @@ configen:
         - DinoModel
         - KCBaseline
         - ErmBaseline
+        - LaftrBaseline
     - name: pytorch_lightning.trainer
       classes:
         - Trainer

@@ -5,3 +5,5 @@ batch_size: 32
 num_workers: 0
 seed: ${exp.seed}
 image_size: 64
+y_label: Blond_Hair
+s_label: Male

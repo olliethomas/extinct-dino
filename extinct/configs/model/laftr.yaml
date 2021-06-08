@@ -1,0 +1,6 @@
+defaults:
+  - /schema/model: laftr
+  - base
+
+disc_steps: 3
+fairness: "DP"
