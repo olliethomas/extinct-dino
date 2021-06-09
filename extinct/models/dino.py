@@ -7,10 +7,11 @@ __all__ = ["DinoModel"]
 
 
 class DinoModel(pl.LightningModule):
-    def __init__(self, lr: float, weight_decay: float):
+    def __init__(self, lr: float, weight_decay: float, lr_gamma: float):
         super().__init__()
         self.learning_rate = lr
         self.weight_decay = weight_decay
+        self.lr_gamma = lr_gamma
 
     @implements(pl.LightningModule)
     def configure_optimizers(

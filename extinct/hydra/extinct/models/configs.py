@@ -14,6 +14,7 @@ class DinoModelConf:
     _target_: str = "extinct.models.DinoModel"
     lr: float = MISSING
     weight_decay: float = MISSING
+    lr_gamma: float = MISSING
 
 
 @dataclass
