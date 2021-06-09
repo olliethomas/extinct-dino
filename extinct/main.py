@@ -122,6 +122,7 @@ def start(cfg: Config, raw_config: Optional[Dict[str, Any]]) -> None:
     cfg.trainer.test(model=cfg.model, datamodule=cfg.data)
 =======
     cfg.model.target = cfg.data.train_data.dataset.ti.y_label
+    cfg.trainer.fit(cfg.model, cfg.data)
     fit_and_train(cfg)
 
     cfg.data.train_data.dataset.ti.new_task("Smiling")  # Amends the underlying dataset
