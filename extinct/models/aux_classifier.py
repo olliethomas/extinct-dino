@@ -4,11 +4,12 @@ from kit import implements
 import pytorch_lightning as pl
 import torch
 from torch import Tensor, nn, optim
+import torchmetrics
 
-from extinct.datamodules.structures import DataBatch
+from extinct.models import ErmBaseline
 
 
-class AuxClassifier(pl.LightningModule):
+class AuxClassifier(ErmBaseline):
     def __init__(
         self,
         enc: nn.Module,
@@ -17,18 +18,15 @@ class AuxClassifier(pl.LightningModule):
         weight_decay: float,
         lr_gamma: float,
     ):
-        super().__init__()
+        super().__init__(lr=lr, weight_decay=weight_decay, batch_norm=True, lr_gamma=lr_gamma)
         self.enc = enc
         self.enc.eval()
         self.clf = classifier
-        self.learning_rate = lr
-        self.weight_decay = weight_decay
-        self.lr_gamma = lr_gamma
-        self._clf_loss = nn.BCEWithLogitsLoss(reduction="mean")
+        self._loss_fn = nn.BCEWithLogitsLoss(reduction="mean")
 
-    def training_step(self, batch: DataBatch, batch_idx: int) -> Tensor:
-        logits = self(batch.x)
-        return self._clf_loss(logits, batch.y)
+        self.test_acc = torchmetrics.Accuracy()
+        self.train_acc = torchmetrics.Accuracy()
+        self.val_acc = torchmetrics.Accuracy()
 
     def forward(self, x: Tensor) -> Tensor:
         with torch.no_grad():
