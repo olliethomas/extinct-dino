@@ -1,44 +1,25 @@
 """CelebA DataModule."""
-from typing import Any, Optional
+from typing import Any, ClassVar, Optional
 
 import ethicml as em
 from ethicml import implements
 import ethicml.vision as emvi
-from fair_bolts.datamodules.vision_datamodule import VisionBaseDataModule
-import numpy as np
-import pandas as pd
 from pytorch_lightning import LightningDataModule
 import torch
-from torch.utils.data import Dataset
-from torch.utils.data.dataset import T_co, random_split
+from torch.utils.data.dataset import random_split
 from torchvision import transforms as TF
 
-from extinct.datamodules.structures import DataBatch
+from extinct.datamodules.base import VisionDataModule
+from extinct.datamodules.structures import TiWrapper
+
+__all__ = ["CelebaDataModule"]
 
 
-class TiWrapper(Dataset):
-    """Wrapper for a Torch Image Datasets."""
-
-    def __init__(self, ti: emvi.TorchImageDataset):
-        self.ti = ti
-        dt = em.DataTuple(
-            x=pd.DataFrame(np.random.randint(0, len(ti.s), size=(len(ti.s), 1)), columns=list('x')),
-            s=pd.DataFrame(ti.s.cpu().numpy(), columns=["s"]),
-            y=pd.DataFrame(ti.y.cpu().numpy(), columns=["y"]),
-        )
-        self.iws = torch.tensor(em.compute_instance_weights(dt)["instance weights"].values)
-
-    def __getitem__(self, index: int) -> T_co:
-        x, s, y = self.ti[index]
-        iw = self.iws[index].clone().detach()
-        return DataBatch(x=x, s=s.float(), y=y.float(), iw=iw.unsqueeze(-1))
-
-    def __len__(self) -> int:
-        return len(self.ti)
-
-
-class CelebaDataModule(VisionBaseDataModule):
+class CelebaDataModule(VisionDataModule):
     """CelebA Dataset."""
+
+    num_classes: ClassVar[int] = 2
+    num_sens: ClassVar[int] = 2
 
     def __init__(
         self,
@@ -52,6 +33,8 @@ class CelebaDataModule(VisionBaseDataModule):
         s_label: str = "Male",
         seed: int = 0,
         persist_workers: bool = False,
+        stratified_sampling: bool = False,
+        sample_with_replacement: bool = True,
     ):
         super().__init__(
             data_dir=data_dir,
@@ -63,11 +46,11 @@ class CelebaDataModule(VisionBaseDataModule):
             y_dim=1,
             seed=seed,
             persist_workers=persist_workers,
+            stratified_sampling=stratified_sampling,
+            sample_with_replacement=sample_with_replacement,
         )
         self.image_size = image_size
         self.dims = (3, self.image_size, self.image_size)
-        self.num_classes = 2
-        self.num_sens = 2
         self.y_label = y_label
         self.s_label = s_label
 
@@ -103,7 +86,7 @@ class CelebaDataModule(VisionBaseDataModule):
             )
         )
 
-        num_train_val, num_test = self._get_splits(int(len(all_data)), self.test_split)
+        num_train_val, _ = self._get_splits(int(len(all_data)), self.test_split)
         num_train, num_val = self._get_splits(num_train_val, self.val_split)
 
         g_cpu = torch.Generator()

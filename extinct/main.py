@@ -11,18 +11,15 @@ import pytorch_lightning as pl
 from pytorch_lightning.callbacks import EarlyStopping
 from pytorch_lightning.loggers import WandbLogger
 
-from extinct.hydra.extinct.datamodules.configs import (
-    CelebaDataModuleConf,  # type: ignore[import]
-)
-from extinct.hydra.extinct.models.configs import (  # type: ignore[import]
+from extinct.hydra.extinct.datamodules.configs import CelebaDataModuleConf
+from extinct.hydra.extinct.models.configs import (
     DinoModelConf,
     ErmBaselineConf,
     KCBaselineConf,
     LaftrBaselineConf,
 )
-from extinct.hydra.pytorch_lightning.trainer.configs import (
-    TrainerConf,  # type: ignore[import]
-)
+from extinct.hydra.pytorch_lightning.trainer.configs import TrainerConf
+from extinct.utils.callbacks import IterationBasedProgBar
 
 
 @dataclass
@@ -102,6 +99,7 @@ def start(cfg: Config, raw_config: Optional[Dict[str, Any]]) -> None:
     cfg.data.setup()
 
     cfg.model.target = cfg.data.train_data.dataset.ti.y_label
+    cfg.trainer.callbacks = [IterationBasedProgBar()]
     cfg.trainer.fit(model=cfg.model, datamodule=cfg.data)
     cfg.trainer.test(model=cfg.model, datamodule=cfg.data)
 
