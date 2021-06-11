@@ -21,3 +21,5 @@ class CelebaDataModuleConf:
     s_label: str = "Male"
     seed: int = 0
     persist_workers: bool = False
+    stratified_sampling: bool = False
+    sample_with_replacement: bool = True
