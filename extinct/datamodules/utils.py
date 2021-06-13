@@ -1,18 +1,18 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Union, cast
+from typing import Union, cast
+from typing_extensions import TypeAlias
 
 import ethicml.vision as emvi
 import torch
 from torch import Tensor
 from torch.utils.data import ConcatDataset, Subset
 
-if TYPE_CHECKING:
-    from extinct.datamodules import TiWrapper
-
-    _Dataset = Union[emvi.TorchImageDataset, TiWrapper]
-    ExtractableDataset = Union[ConcatDataset[_Dataset], _Dataset]
+from .structures import TiWrapper
 
 __all__ = ["extract_labels_from_dataset"]
+
+_Dataset: TypeAlias = Union[emvi.TorchImageDataset, TiWrapper]
+ExtractableDataset: TypeAlias = Union[ConcatDataset[_Dataset], _Dataset]
 
 
 def extract_labels_from_dataset(dataset: ExtractableDataset) -> tuple[Tensor, Tensor]:

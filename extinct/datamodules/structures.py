@@ -1,17 +1,22 @@
 from __future__ import annotations
-from collections import namedtuple
+from typing import NamedTuple
 
 import ethicml as em
 import ethicml.vision as emvi
 import numpy as np
 import pandas as pd
 import torch
+from torch import Tensor
 from torch.utils.data import Dataset
 
 __all__ = ["DataBatch", "TiWrapper"]
 
 
-DataBatch = namedtuple("DataBatch", ["x", "s", "y", "iw"])
+class DataBatch(NamedTuple):
+    x: Tensor
+    s: Tensor
+    y: Tensor
+    iw: Tensor
 
 
 class TiWrapper(Dataset):
