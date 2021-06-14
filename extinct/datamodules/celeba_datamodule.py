@@ -10,7 +10,6 @@ import ethicml.vision as emvi
 from pytorch_lightning import LightningDataModule
 import torch
 from torch.utils.data.dataset import random_split
-from torchvision import transforms as TF
 
 from extinct.datamodules.base import VisionDataModule
 from extinct.datamodules.structures import TiWrapper, AlbumentationsDataset
