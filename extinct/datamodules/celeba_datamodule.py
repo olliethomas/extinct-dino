@@ -71,16 +71,13 @@ class CelebaDataModule(VisionDataModule):
         tform_ls = [
             A.Resize(self.image_size, self.image_size),
             A.CenterCrop(self.image_size, self.image_size),
+            A.ToFloat(max_value=1),
+            A.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)),
         ]
         return tform_ls
 
     def _train_augmentations(self) -> list[A.BasicTransform]:
-        tform_ls = [
-            A.ShiftScaleRotate(shift_limit=0.2, scale_limit=0.2, rotate_limit=30, p=0.5),
-            A.RGBShift(r_shift_limit=25, g_shift_limit=25, b_shift_limit=25, p=0.5),
-            A.RandomBrightnessContrast(brightness_limit=0.3, contrast_limit=0.3, p=0.5),
-            A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
-        ]
+        tform_ls = [A.HorizontalFlip(p=0.5), A.ColorJitter(p=0.5), A.ToGray(p=0.1)]
         return tform_ls
 
     def _augmentations(self, train: bool) -> A.Compose:
