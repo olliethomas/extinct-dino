@@ -1,7 +1,9 @@
 from __future__ import annotations
-from typing import NamedTuple
+from typing import NamedTuple, Any
 
+import albumentations as A
 import ethicml as em
+from PIL import Image
 import ethicml.vision as emvi
 import numpy as np
 import pandas as pd
@@ -9,7 +11,7 @@ import torch
 from torch import Tensor
 from torch.utils.data import Dataset
 
-__all__ = ["DataBatch", "TiWrapper"]
+__all__ = ["DataBatch", "TiWrapper", "AlbumentationsDataset"]
 
 
 class DataBatch(NamedTuple):
@@ -43,3 +45,26 @@ class TiWrapper(Dataset):
 
     def __len__(self) -> int:
         return len(self.ti)
+
+
+class AlbumentationsDataset(Dataset):
+    """Wrapper class for interfacing with albumentations."""
+
+    def __init__(self, dataset: Dataset, transform: A.Compose) -> None:
+        self.dataset = dataset
+        self.transform = transform
+
+    def __len__(self) -> int | None:
+        return getattr(self.dataset, "__len__", None)
+
+    def __getitem__(self, index: int) -> Any:
+        data = self.dataset[index]
+        data_type = type(data)
+        if self.transform is not None:
+            image = data[0]
+            if isinstance(image, Image.Image):
+                image = np.array(image)
+            # Apply transformations
+            augmented = self.transform(image)
+            data = data_type((augmented,) + data[1:])
+        return data

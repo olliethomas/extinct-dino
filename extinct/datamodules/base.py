@@ -31,6 +31,7 @@ class VisionDataModule(VisionBaseDataModule):
         persist_workers: bool = False,
         stratified_sampling: bool = False,
         sample_with_replacement: bool = True,
+        data_aug: bool = False,
     ):
         super().__init__(
             data_dir=data_dir,
@@ -45,6 +46,7 @@ class VisionDataModule(VisionBaseDataModule):
         )
         self.stratified_sampling = stratified_sampling
         self.sample_with_replacement = sample_with_replacement
+        self.data_aug = data_aug
 
     @implements(LightningDataModule)
     def train_dataloader(self, shuffle: bool = True) -> DataLoader:
