@@ -80,7 +80,6 @@ class CelebaDataModule(VisionDataModule):
             A.RGBShift(r_shift_limit=25, g_shift_limit=25, b_shift_limit=25, p=0.5),
             A.RandomBrightnessContrast(brightness_limit=0.3, contrast_limit=0.3, p=0.5),
             A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
-            ToTensorV2(),
         ]
         return tform_ls
 
@@ -91,7 +90,7 @@ class CelebaDataModule(VisionDataModule):
         if train and self.data_aug:
             augs.extend(self.train_transforms)
         # ToTensorV2 should always be the final op in the albumenations pipeline
-        augs.append(ToTensorV2())
+        augs.append(ToTensorV2(p=1.0))
         return A.Compose(augs)
 
     @implements(LightningDataModule)
