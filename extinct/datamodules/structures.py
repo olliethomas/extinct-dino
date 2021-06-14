@@ -55,7 +55,9 @@ class AlbumentationsDataset(Dataset):
         self.transform = transform
 
     def __len__(self) -> int | None:
-        return getattr(self.dataset, "__len__", None)
+        if hasattr(self.dataset, "__len__"):
+            return len(self.dataset)  # type: ignore
+        return None
 
     def __getitem__(self, index: int) -> Any:
         data = self.dataset[index]
