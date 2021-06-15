@@ -87,7 +87,7 @@ class CelebaDataModule(VisionDataModule):
             A.HorizontalFlip(p=0.5),
             A.ColorJitter(p=0.4),
             A.ChannelDropout(p=0.2),
-            A.Cutout(max_w_size=4, max_h_size=4),
+            A.CoarseDropout(max_holes=4, max_width=8, max_height=8),
         ]
         return tform_ls
 
