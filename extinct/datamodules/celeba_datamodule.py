@@ -69,6 +69,7 @@ class CelebaDataModule(VisionDataModule):
         )
 
     @property
+    @implements(VisionDataModule)
     def _base_augmentations(self) -> list[A.BasicTransform]:
         tform_ls = [
             A.Resize(self.image_size, self.image_size),
@@ -78,6 +79,8 @@ class CelebaDataModule(VisionDataModule):
         ]
         return tform_ls
 
+    @property
+    @implements(VisionDataModule)
     def _train_augmentations(self) -> list[A.BasicTransform]:
         # Train-time data augmentations - should be refined further
         tform_ls = [
@@ -87,16 +90,6 @@ class CelebaDataModule(VisionDataModule):
             A.Cutout(max_w_size=4, max_h_size=4),
         ]
         return tform_ls
-
-    def _augmentations(self, train: bool) -> A.Compose:
-        # Base augmentations (augmentations that are applied to all splits of the data)
-        augs = self._base_augmentations
-        # Add training augmentations on top of base augmentations
-        if train and self.data_aug:
-            augs.extend(self.train_transforms)
-        # ToTensorV2 should always be the final op in the albumenations pipeline
-        augs.append(ToTensorV2(p=1.0))
-        return A.Compose(augs)
 
     @implements(LightningDataModule)
     def setup(self, stage: str | None = None) -> None:
