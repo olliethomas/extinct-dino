@@ -86,7 +86,7 @@ class CelebaDataModule(VisionDataModule):
         tform_ls = [
             A.HorizontalFlip(p=0.5),
             A.ColorJitter(p=0.4),
-            A.ChannelDropout(0.2),
+            A.ChannelDropout(p=0.2),
             A.Cutout(max_w_size=4, max_h_size=4),
         ]
         return tform_ls
