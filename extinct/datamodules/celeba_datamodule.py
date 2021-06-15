@@ -77,7 +77,13 @@ class CelebaDataModule(VisionDataModule):
         return tform_ls
 
     def _train_augmentations(self) -> list[A.BasicTransform]:
-        tform_ls = [A.HorizontalFlip(p=0.5), A.ColorJitter(p=0.5), A.ToGray(p=0.1)]
+        # Train-time data augmentations - should be refined further
+        tform_ls = [
+            A.HorizontalFlip(p=0.5),
+            A.ColorJitter(p=0.4),
+            A.ChannelDropout(0.2),
+            A.Cutout(max_w_size=4, max_h_size=4),
+        ]
         return tform_ls
 
     def _augmentations(self, train: bool) -> A.Compose:
