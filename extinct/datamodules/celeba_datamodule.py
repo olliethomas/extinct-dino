@@ -37,6 +37,7 @@ class CelebaDataModule(VisionDataModule):
         persist_workers: bool = False,
         stratified_sampling: bool = False,
         sample_with_replacement: bool = True,
+        data_aug: bool = False,
     ):
         super().__init__(
             data_dir=data_dir,
@@ -50,6 +51,7 @@ class CelebaDataModule(VisionDataModule):
             persist_workers=persist_workers,
             stratified_sampling=stratified_sampling,
             sample_with_replacement=sample_with_replacement,
+            data_aug=data_aug,
         )
         self.image_size = image_size
         self.dims = (3, self.image_size, self.image_size)
