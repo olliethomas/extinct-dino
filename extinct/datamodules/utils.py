@@ -1,11 +1,12 @@
 from __future__ import annotations
-from typing import Union, cast, Iterable
+from functools import lru_cache
+from typing import Union, cast
 from typing_extensions import TypeAlias
 
 import ethicml.vision as emvi
 import torch
 from torch import Tensor
-from torch.utils.data import ConcatDataset, Subset
+from torch.utils.data import ConcatDataset, Subset, DataLoader, Dataset
 
 from .structures import TiWrapper
 
@@ -15,8 +16,9 @@ _Dataset: TypeAlias = Union[emvi.TorchImageDataset, TiWrapper]
 ExtractableDataset: TypeAlias = Union[ConcatDataset[_Dataset], _Dataset]
 
 
+@lru_cache(typed=True)
 def extract_labels_from_dataset(
-    dataset: Iterable[tuple[Tensor, Tensor, Tensor]]
+    dataset: ExtractableDataset | Dataset, batch_size: int = 1, num_workers: int = 0
 ) -> tuple[Tensor, Tensor]:
     def _extract(dataset: _Dataset) -> tuple[Tensor, Tensor]:
         if isinstance(dataset, Subset):
@@ -40,7 +42,8 @@ def extract_labels_from_dataset(
             s_all, y_all = _extract(dataset)  # type: ignore
     except AttributeError:
         s_all_ls, y_all_ls = [], []
-        for batch in dataset:
+        dl = DataLoader(dataset, batch_size=batch_size, num_workers=num_workers)
+        for batch in dl:
             s_all_ls.append(batch[1])
             y_all_ls.append(batch[2])
         s_all = torch.cat(s_all_ls, dim=0)

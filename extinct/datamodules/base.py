@@ -51,7 +51,9 @@ class VisionDataModule(VisionBaseDataModule):
     @implements(LightningDataModule)
     def train_dataloader(self, shuffle: bool = True) -> DataLoader:
         if self.stratified_sampling:
-            s_all, y_all = extract_labels_from_dataset(self._train_data)
+            s_all, y_all = extract_labels_from_dataset(
+                self._train_data, batch_size=self.batch_size, num_workers=self.num_workers
+            )
             group_ids = (y_all * len(s_all.unique()) + s_all).squeeze()
             num_samples_per_group = self.batch_size // (num_groups := len(group_ids.unique()))
             if self.batch_size % num_groups:
