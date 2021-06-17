@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import Any, ClassVar, Optional
 
 import albumentations as A
-from albumentations.pytorch import ToTensorV2
 import ethicml as em
 from ethicml import implements
 import ethicml.vision as emvi
