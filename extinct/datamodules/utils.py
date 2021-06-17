@@ -1,4 +1,5 @@
 from __future__ import annotations
+from functools import lru_cache
 from typing import Union, cast
 from typing_extensions import TypeAlias
 
@@ -7,14 +8,15 @@ import torch
 from torch import Tensor
 from torch.utils.data import ConcatDataset, Subset
 
-from .structures import TiWrapper
+from .structures import TiWrapper, AlbumentationsDataset
 
 __all__ = ["extract_labels_from_dataset"]
 
 _Dataset: TypeAlias = Union[emvi.TorchImageDataset, TiWrapper]
-ExtractableDataset: TypeAlias = Union[ConcatDataset[_Dataset], _Dataset]
+ExtractableDataset: TypeAlias = Union[ConcatDataset[_Dataset], _Dataset, AlbumentationsDataset]
 
 
+@lru_cache(typed=True)
 def extract_labels_from_dataset(dataset: ExtractableDataset) -> tuple[Tensor, Tensor]:
     def _extract(dataset: _Dataset) -> tuple[Tensor, Tensor]:
         if isinstance(dataset, Subset):
@@ -25,14 +27,25 @@ def extract_labels_from_dataset(dataset: ExtractableDataset) -> tuple[Tensor, Te
             _y = dataset.y
         return _s, _y
 
-    if isinstance(dataset, ConcatDataset):
+    try:
+        if isinstance(dataset, AlbumentationsDataset):
+            dataset = dataset.dataset  # type: ignore
+        if isinstance(dataset, (ConcatDataset)):
+            s_all_ls, y_all_ls = [], []
+            for _dataset in dataset.datasets:
+                s, y = _extract(_dataset)  # type: ignore
+                s_all_ls.append(s)
+                y_all_ls.append(y)
+            s_all = torch.cat(s_all_ls, dim=0)
+            y_all = torch.cat(y_all_ls, dim=0)
+        else:
+            s_all, y_all = _extract(dataset)  # type: ignore
+    except AttributeError:
+        # Resort to the Brute-force approach of iterating over the dataset
         s_all_ls, y_all_ls = [], []
-        for _dataset in dataset.datasets:
-            s, y = _extract(_dataset)  # type: ignore
-            s_all_ls.append(s)
-            y_all_ls.append(y)
+        for batch in dataset:
+            s_all_ls.append(batch[1])
+            y_all_ls.append(batch[2])
         s_all = torch.cat(s_all_ls, dim=0)
         y_all = torch.cat(y_all_ls, dim=0)
-    else:
-        s_all, y_all = _extract(dataset)  # type: ignore
     return s_all, y_all
