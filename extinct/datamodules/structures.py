@@ -1,9 +1,9 @@
 from __future__ import annotations
-from typing import NamedTuple, Any
+from typing import Any, NamedTuple
 
+from PIL import Image
 import albumentations as A
 import ethicml as em
-from PIL import Image
 import ethicml.vision as emvi
 import numpy as np
 import pandas as pd

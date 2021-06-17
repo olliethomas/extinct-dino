@@ -8,7 +8,7 @@ import torch
 from torch import Tensor
 from torch.utils.data import ConcatDataset, Subset
 
-from .structures import TiWrapper, AlbumentationsDataset
+from .structures import AlbumentationsDataset, TiWrapper
 
 __all__ = ["extract_labels_from_dataset"]
 

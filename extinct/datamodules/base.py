@@ -1,10 +1,11 @@
 from __future__ import annotations
+from abc import abstractmethod
+from enum import Enum, auto
 import logging
 from typing import Optional
+
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
-from abc import abstractmethod
-
 from fair_bolts.datamodules.vision_datamodule import VisionBaseDataModule
 from kit import implements
 from kit.torch import InfSequentialBatchSampler as InfSequentialBatchSampler
@@ -13,11 +14,18 @@ from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
 from extinct.datamodules.utils import extract_labels_from_dataset
+from extinct.models.dino.augmentation import DinoAugmentation
 
-__all__ = ["VisionDataModule"]
+__all__ = ["VisionDataModule", "TrainAugMode"]
 
 
 LOGGER = logging.getLogger(__name__.split(".")[-1].upper())
+
+
+class TrainAugMode(Enum):
+    none = auto()
+    basic = auto()
+    dino = auto()
 
 
 class VisionDataModule(VisionBaseDataModule):
@@ -34,7 +42,11 @@ class VisionDataModule(VisionBaseDataModule):
         persist_workers: bool = False,
         stratified_sampling: bool = False,
         sample_with_replacement: bool = True,
-        data_aug: bool = False,
+        aug_mode: TrainAugMode = TrainAugMode.none,
+        # DINO parameters
+        global_crops_scale: tuple[float, float] = (0.4, 1.0),
+        local_crops_scale: tuple[float, float] = (0.05, 0.4),
+        local_crops_number: int = 8,
     ):
         super().__init__(
             data_dir=data_dir,
@@ -49,30 +61,40 @@ class VisionDataModule(VisionBaseDataModule):
         )
         self.stratified_sampling = stratified_sampling
         self.sample_with_replacement = sample_with_replacement
-        self.data_aug = data_aug
+        self.aug_mode = aug_mode
+        self.global_crops_scale = global_crops_scale
+        self.local_crops_scale = local_crops_scale
+        self.local_crops_number = local_crops_number
 
     @property
     @abstractmethod
-    def _base_augmentations(self) -> list[A.BasicTransform]:
-        tform_ls = [
-            A.ToFloat(max_value=1),
-            A.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)),
-        ]
-        return tform_ls
+    def _base_augmentations(self) -> A.Compose:
+        return A.Compose([])
 
     @property
     @abstractmethod
-    def _train_augmentations(self) -> list[A.BasicTransform]:
-        return []
+    def _train_augmentations(self) -> A.Compose:
+        return A.Compose([])
+
+    @property
+    def _normalization(self) -> A.Compose:
+        return A.Compose([A.ToFloat(), A.Normalize(), ToTensorV2()])
 
     def _augmentations(self, train: bool) -> A.Compose:
         # Base augmentations (augmentations that are applied to all splits of the data)
-        augs = self._base_augmentations
+        augs: list[A.ImageOnlyTransform | A.Compose] = [self._base_augmentations]
         # Add training augmentations on top of base augmentations
-        if train and self.data_aug:
-            augs.extend(self._train_augmentations)
-        # ToTensorV2 should always be the final op in the albumenations pipeline
-        augs.append(ToTensorV2(p=1.0))
+        if train and self.aug_mode is TrainAugMode.basic:
+            augs.append(self._train_augmentations)
+        elif train and self.aug_mode is TrainAugMode.dino:
+            augs.append(
+                DinoAugmentation(
+                    global_crops_scale=self.global_crops_scale,
+                    local_crops_scale=self.local_crops_scale,
+                    local_crops_number=self.local_crops_number,
+                )
+            )  # ToTensorV2 should always be the final op in the albumenations pipeline
+        augs.append(self._normalization)
         return A.Compose(augs)
 
     @implements(LightningDataModule)

@@ -1,15 +1,18 @@
 import albumentations as A
+from albumentations.pytorch import ToTensorV2
 import cv2
 import numpy as np
 from torch import Tensor
-from albumentations.pytorch import ToTensorV2
 
 __all__ = ["DinoAugmentation"]
 
 
 class DinoAugmentation(A.ImageOnlyTransform):
     def __init__(
-        self, global_crops_scale: float, local_crops_scale: float, local_crops_number: int
+        self,
+        global_crops_scale: tuple[float, float],
+        local_crops_scale: tuple[float, float],
+        local_crops_number: int,
     ) -> None:
         flip_and_color_jitter = A.Compose(
             [
