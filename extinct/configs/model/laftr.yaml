@@ -4,3 +4,6 @@ defaults:
 
 disc_steps: 3
 fairness: "DP"
+recon_weight: 1.0
+adv_weight: 1.0
+clf_weight: 0.0

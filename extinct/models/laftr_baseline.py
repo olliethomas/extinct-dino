@@ -29,6 +29,9 @@ class LaftrBaseline(pl.LightningModule):
         lr_gamma: float,
         disc_steps: int,
         fairness: FairnessType,
+        recon_weight: float,
+        clf_weight: float,
+        adv_weight: float,
     ):
         super().__init__()
         self.enc = Encoder(
@@ -59,6 +62,10 @@ class LaftrBaseline(pl.LightningModule):
         self.lr = lr
         self.lr_gamma = lr_gamma
         self.weight_decay = weight_decay
+
+        self.clf_weight = clf_weight
+        self.adv_weight = adv_weight
+        self.recon_weight = recon_weight
 
         self.test_acc = torchmetrics.Accuracy()
         self.train_acc = torchmetrics.Accuracy()
@@ -102,7 +109,7 @@ class LaftrBaseline(pl.LightningModule):
             loss = 2 - loss
         else:
             raise RuntimeError("Only DP and EO fairness accepted.")
-        return loss
+        return self.adv_weight * loss
 
     def _inference_step(self, batch: DataBatch, stage: str) -> dict[str, Tensor]:
         model_out = self(batch.x, batch.s)
@@ -150,7 +157,7 @@ class LaftrBaseline(pl.LightningModule):
     def _laftr_loss(self, y_pred: Tensor, recon: Tensor, batch: DataBatch) -> Tensor:
         clf_loss = self._clf_loss(y_pred, batch.y)
         recon_loss = self._recon_loss(recon, batch.x)
-        return clf_loss + recon_loss
+        return self.clf_weight * clf_loss + self.recon_weight * recon_loss
 
     @implements(pl.LightningModule)
     def configure_optimizers(
@@ -206,7 +213,7 @@ class LaftrBaseline(pl.LightningModule):
                     f"train/acc": acc,
                 }
             )
-            return laftr_loss
+            return laftr_loss + adv_loss
         elif optimizer_idx == 1:
             # Adversarial update
             self.set_requires_grad([self.enc, self.dec, self.clf], requires_grad=False)
@@ -222,7 +229,7 @@ class LaftrBaseline(pl.LightningModule):
                     f"train/acc": acc,
                 }
             )
-            return adv_loss
+            return -(laftr_loss + adv_loss)
         else:
             raise RuntimeError("There should only be 2 optimizers, but 3rd received.")
 
