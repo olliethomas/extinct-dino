@@ -13,6 +13,7 @@ palkit = "*"
 python = "^3.9"
 pytorch-lightning = "*"
 wandb = "*"
+albumentations = "^1.0.0"
 
 [tool.poetry.dev-dependencies]
 black = "*"

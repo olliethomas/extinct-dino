@@ -1,16 +1,17 @@
 """CelebA DataModule."""
+from __future__ import annotations
 from typing import Any, ClassVar, Optional
 
+import albumentations as A
 import ethicml as em
 from ethicml import implements
 import ethicml.vision as emvi
 from pytorch_lightning import LightningDataModule
 import torch
 from torch.utils.data.dataset import random_split
-from torchvision import transforms as TF
 
 from extinct.datamodules.base import VisionDataModule
-from extinct.datamodules.structures import TiWrapper
+from extinct.datamodules.structures import TiWrapper, AlbumentationsDataset
 
 __all__ = ["CelebaDataModule"]
 
@@ -35,6 +36,7 @@ class CelebaDataModule(VisionDataModule):
         persist_workers: bool = False,
         stratified_sampling: bool = False,
         sample_with_replacement: bool = True,
+        data_aug: bool = False,
     ):
         super().__init__(
             data_dir=data_dir,
@@ -48,6 +50,7 @@ class CelebaDataModule(VisionDataModule):
             persist_workers=persist_workers,
             stratified_sampling=stratified_sampling,
             sample_with_replacement=sample_with_replacement,
+            data_aug=data_aug,
         )
         self.image_size = image_size
         self.dims = (3, self.image_size, self.image_size)
@@ -64,8 +67,32 @@ class CelebaDataModule(VisionDataModule):
             check_integrity=True,
         )
 
+    @property
+    @implements(VisionDataModule)
+    def _base_augmentations(self) -> list[A.BasicTransform]:
+        tform_ls = [
+            A.Resize(self.image_size, self.image_size),
+            A.CenterCrop(self.image_size, self.image_size),
+            A.ToFloat(max_value=1),
+            A.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)),
+        ]
+        return tform_ls
+
+    @property
+    @implements(VisionDataModule)
+    def _train_augmentations(self) -> list[A.BasicTransform]:
+        # Train-time data augmentations - should be refined further
+        tform_ls = [
+            A.RandomResizedCrop(height=64, width=64),
+            A.HorizontalFlip(p=0.5),
+            A.ColorJitter(p=0.5),
+            A.GaussNoise(var_limit=(0.01, 0.05), p=0.5),
+            A.ToGray(p=0.1),
+        ]
+        return tform_ls
+
     @implements(LightningDataModule)
-    def setup(self, stage: Optional[str] = None) -> None:
+    def setup(self, stage: str | None = None) -> None:
         dataset, base_dir = em.celeba(
             download_dir=self.data_dir,
             label=self.y_label,
@@ -74,15 +101,13 @@ class CelebaDataModule(VisionDataModule):
             check_integrity=True,
         )
 
-        tform_ls = [TF.Resize(self.image_size), TF.CenterCrop(self.image_size)]
-        tform_ls.append(TF.ToTensor())
-        tform_ls.append(TF.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)))
-        transform = TF.Compose(tform_ls)
+        train_transform = self._augmentations(train=True)
+        test_transform = self._augmentations(train=False)
 
         assert dataset is not None
         all_data = TiWrapper(
             emvi.TorchImageDataset(
-                data=dataset.load(), root=base_dir, transform=transform, target_transform=None
+                data=dataset.load(), root=base_dir, transform=None, target_transform=None
             )
         )
 
@@ -91,7 +116,7 @@ class CelebaDataModule(VisionDataModule):
 
         g_cpu = torch.Generator()
         g_cpu = g_cpu.manual_seed(self.seed)
-        self._train_data, self._val_data, self._test_data = random_split(
+        train_data, val_data, test_data = random_split(
             all_data,
             lengths=(
                 num_train,
@@ -100,3 +125,6 @@ class CelebaDataModule(VisionDataModule):
             ),
             generator=g_cpu,
         )
+        self._train_data = AlbumentationsDataset(dataset=train_data, transform=train_transform)
+        self._val_data = AlbumentationsDataset(dataset=val_data, transform=test_transform)
+        self._test_data = AlbumentationsDataset(dataset=test_data, transform=test_transform)

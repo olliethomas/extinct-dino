@@ -4,7 +4,7 @@
 # isort:skip_file
 # flake8: noqa
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
 
 
@@ -23,3 +23,4 @@ class CelebaDataModuleConf:
     persist_workers: bool = False
     stratified_sampling: bool = False
     sample_with_replacement: bool = True
+    data_aug: bool = False

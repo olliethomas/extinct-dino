@@ -1,6 +1,9 @@
 from __future__ import annotations
 import logging
 from typing import Optional
+import albumentations as A
+from albumentations.pytorch import ToTensorV2
+from abc import abstractmethod
 
 from fair_bolts.datamodules.vision_datamodule import VisionBaseDataModule
 from kit import implements
@@ -31,6 +34,7 @@ class VisionDataModule(VisionBaseDataModule):
         persist_workers: bool = False,
         stratified_sampling: bool = False,
         sample_with_replacement: bool = True,
+        data_aug: bool = False,
     ):
         super().__init__(
             data_dir=data_dir,
@@ -45,6 +49,31 @@ class VisionDataModule(VisionBaseDataModule):
         )
         self.stratified_sampling = stratified_sampling
         self.sample_with_replacement = sample_with_replacement
+        self.data_aug = data_aug
+
+    @property
+    @abstractmethod
+    def _base_augmentations(self) -> list[A.BasicTransform]:
+        tform_ls = [
+            A.ToFloat(max_value=1),
+            A.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)),
+        ]
+        return tform_ls
+
+    @property
+    @abstractmethod
+    def _train_augmentations(self) -> list[A.BasicTransform]:
+        return []
+
+    def _augmentations(self, train: bool) -> A.Compose:
+        # Base augmentations (augmentations that are applied to all splits of the data)
+        augs = self._base_augmentations
+        # Add training augmentations on top of base augmentations
+        if train and self.data_aug:
+            augs.extend(self._train_augmentations)
+        # ToTensorV2 should always be the final op in the albumenations pipeline
+        augs.append(ToTensorV2(p=1.0))
+        return A.Compose(augs)
 
     @implements(LightningDataModule)
     def train_dataloader(self, shuffle: bool = True) -> DataLoader:
