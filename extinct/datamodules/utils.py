@@ -41,6 +41,7 @@ def extract_labels_from_dataset(dataset: ExtractableDataset) -> tuple[Tensor, Te
         else:
             s_all, y_all = _extract(dataset)  # type: ignore
     except AttributeError:
+        # Resort to the Brute-force approach of iterating over the dataset
         s_all_ls, y_all_ls = [], []
         for batch in dataset:
             s_all_ls.append(batch[1])
