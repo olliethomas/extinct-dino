@@ -1,6 +1,4 @@
 from __future__ import annotations
-from typing import List, Optional, Tuple
-from typing_extensions import Literal
 
 import ethicml as em
 from kit import implements
@@ -11,43 +9,38 @@ from torch import Tensor, nn, optim
 import torch.nn.functional as F
 import torchmetrics
 
-from extinct.datamodules.structures import DataBatch
+from extinct.datamodules import DataBatch, Stage, VisionDataModule
 from extinct.models.predefined import Mp64x64Net
+
+from .base import ModelBase
 
 __all__ = ["ErmBaseline"]
 
 
-Stage = Literal["train", "val", "test"]
+class ErmBaseline(ModelBase):
+    net: Mp64x64Net
 
-
-class ErmBaseline(pl.LightningModule):
-    def __init__(self, lr: float, weight_decay: float, batch_norm: bool, lr_gamma: float):
+    def __init__(self, lr: float, weight_decay: float, batch_norm: bool, lr_gamma: float) -> None:
         super().__init__()
         self.learning_rate = lr
         self.lr_gamma = lr_gamma
         self.weight_decay = weight_decay
-        self.net = Mp64x64Net(batch_norm=batch_norm, in_chans=3, target_dim=1)
+        self.batch_norm = batch_norm
         self._loss_fn = F.binary_cross_entropy_with_logits
 
         self.test_acc = torchmetrics.Accuracy()
         self.train_acc = torchmetrics.Accuracy()
         self.val_acc = torchmetrics.Accuracy()
 
-        self._target: Optional[str] = None
+        self._target: str | None = None
 
-    @property
-    def target(self) -> str:
-        assert self._target is not None
-        return self._target
-
-    @target.setter
-    def target(self, target: str) -> None:
-        self._target = target
+    def build(self, datamodule: VisionDataModule, trainer: pl.Trainer) -> None:
+        self.net = Mp64x64Net(batch_norm=self.batch_norm, in_chans=3, target_dim=1)
 
     @implements(pl.LightningModule)
     def configure_optimizers(
         self,
-    ) -> Tuple[List[optim.Optimizer], List[optim.lr_scheduler.ExponentialLR]]:
+    ) -> tuple[list[optim.Optimizer], list[optim.lr_scheduler.ExponentialLR]]:
         opt = optim.AdamW(self.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
         sched = optim.lr_scheduler.ExponentialLR(optimizer=opt, gamma=self.lr_gamma)
         return [opt], [sched]
@@ -55,6 +48,7 @@ class ErmBaseline(pl.LightningModule):
     def _get_loss(self, logits: Tensor, batch: DataBatch) -> Tensor:
         return self._loss_fn(input=logits, target=batch.y.float())
 
+    @implements(ModelBase)
     def _inference_step(self, batch: DataBatch, stage: Stage) -> dict[str, Tensor]:
         logits = self(batch.x)
         loss = self._get_loss(logits, batch)
@@ -68,6 +62,7 @@ class ErmBaseline(pl.LightningModule):
         )
         return {"y": batch.y, "s": batch.s, "preds": logits.sigmoid().round().squeeze(-1)}
 
+    @implements(ModelBase)
     def _inference_epoch_end(self, output_results: list[dict[str, Tensor]], stage: Stage) -> None:
         all_y = torch.cat([_r["y"] for _r in output_results], 0)
         all_s = torch.cat([_r["s"] for _r in output_results], 0)
@@ -96,14 +91,6 @@ class ErmBaseline(pl.LightningModule):
         self.log_dict(results_dict)
 
     @implements(pl.LightningModule)
-    def test_step(self, batch: DataBatch, batch_idx: int) -> dict[str, Tensor]:
-        return self._inference_step(batch=batch, stage="test")
-
-    @implements(pl.LightningModule)
-    def test_epoch_end(self, output_results: list[dict[str, Tensor]]) -> None:
-        self._inference_epoch_end(output_results=output_results, stage="test")
-
-    @implements(pl.LightningModule)
     def training_step(self, batch: DataBatch, batch_idx: int) -> Tensor:
         logits = self(batch.x)
         loss = self._get_loss(logits, batch)
@@ -115,14 +102,6 @@ class ErmBaseline(pl.LightningModule):
             }
         )
         return loss
-
-    @implements(pl.LightningModule)
-    def validation_step(self, batch: DataBatch, batch_idx: int) -> dict[str, Tensor]:
-        return self._inference_step(batch=batch, stage="val")
-
-    @implements(pl.LightningModule)
-    def validation_epoch_end(self, output_results: list[dict[str, Tensor]]) -> None:
-        self._inference_epoch_end(output_results=output_results, stage="val")
 
     @implements(nn.Module)
     def forward(self, x: Tensor) -> Tensor:

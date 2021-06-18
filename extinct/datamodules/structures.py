@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, NamedTuple
+from typing import Any, Literal, NamedTuple
 
 from PIL import Image
 import albumentations as A
@@ -11,7 +11,10 @@ import torch
 from torch import Tensor
 from torch.utils.data import Dataset
 
-__all__ = ["DataBatch", "TiWrapper", "AlbumentationsDataset"]
+__all__ = ["DataBatch", "TiWrapper", "AlbumentationsDataset", "Stage"]
+
+
+Stage = Literal["train", "val", "test"]
 
 
 class DataBatch(NamedTuple):

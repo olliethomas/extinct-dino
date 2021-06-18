@@ -14,7 +14,8 @@ from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
 from extinct.datamodules.utils import extract_labels_from_dataset
-from extinct.models.dino.augmentation import DinoAugmentation
+
+from .dino import DinoAugmentation
 
 __all__ = ["VisionDataModule", "TrainAugMode"]
 
@@ -47,7 +48,7 @@ class VisionDataModule(VisionBaseDataModule):
         global_crops_scale: tuple[float, float] = (0.4, 1.0),
         local_crops_scale: tuple[float, float] = (0.05, 0.4),
         local_crops_number: int = 8,
-    ):
+    ) -> None:
         super().__init__(
             data_dir=data_dir,
             batch_size=batch_size,

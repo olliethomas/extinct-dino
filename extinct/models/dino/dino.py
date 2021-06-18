@@ -1,10 +1,17 @@
 from __future__ import annotations
 from typing import Callable, cast
 
-from fair_bolts.datasets.ethicml_datasets import DataBatch
 from kit import implements
+import numpy as np
 import pytorch_lightning as pl
+import torch
 from torch import Tensor, nn, optim
+from torch.utils.data import TensorDataset
+from torch.utils.data.dataloader import DataLoader
+
+from extinct.datamodules import DataBatch, Stage, VisionDataModule
+from extinct.models.base import ModelBase
+from extinct.utils.callbacks import IterationBasedProgBar
 
 from . import vit
 from .head import DINOHead
@@ -14,10 +21,14 @@ from .utils import MultiCropWrapper, cosine_scheduler, get_params_groups
 __all__ = ["DinoModel"]
 
 
-class DINO(pl.LightningModule):
+class DINO(ModelBase):
     _loss_fn: DINOLoss
     student: MultiCropWrapper
     teacher: MultiCropWrapper
+    linear_clf_trainer: pl.Trainer
+    lr_schedule: np.ndarray
+    wd_schedule: np.ndarray
+    momentum_schedule: np.ndarray
 
     def __init__(
         self,
@@ -35,9 +46,16 @@ class DINO(pl.LightningModule):
         momentum_teacher: float = 0.996,
         teacher_temp: float = 0.04,
         warmup_teacher_temp_iters: int = 30,
+        num_eval_blocks: int = 1,
     ) -> None:
+        """
+        Args:
+            num_eval_blocks: Concatenate [CLS] tokens for the `n` last blocks.
+            We use `n=4` when evaluating ViT-Small and `n=1` with ViT-Base.
+        """
         super().__init__()
         self.learning_rate = lr
+        self.num_eval_blocks = num_eval_blocks
         self.warmup_iters = warmup_iters
         self.weight_decay = weight_decay
         self.weight_decay_end = weight_decay_end
@@ -55,7 +73,8 @@ class DINO(pl.LightningModule):
             Callable[[int], vit.VisionTransformer], getattr(vit, f"vit_{arch.value}")
         )
 
-    def _build(self, train_iters: int, batch_size_per_gpu: int, num_gpus: int) -> None:
+    @implements(ModelBase)
+    def build(self, datamodule: VisionDataModule, trainer: pl.Trainer) -> None:
         for net in ("student", "teacher"):
             backbone = self._arch_fn(self.patch_size)
             embed_dim = backbone.embed_dim
@@ -73,24 +92,30 @@ class DINO(pl.LightningModule):
             warmup_teacher_temp=self.teacher_temp,
             teacher_temp=self.teacher_temp,
             warmup_teacher_temp_iters=self.warmup_teacher_temp_iters,
-            total_iters=train_iters,
+            total_iters=trainer.max_steps,  # type: ignore
         )
 
         self.lr_schedule = cosine_scheduler(
-            base_value=self.lr * (batch_size_per_gpu * num_gpus) / 256.0,  # linear scaling rule
+            base_value=self.learning_rate * datamodule.batch_size / 256.0,  # linear scaling rule
             final_value=self.min_lr,
-            total_iters=train_iters,
+            total_iters=trainer.max_steps,  # type: ignore
             warmup_iters=self.warmup_iters,
         )
         self.wd_schedule = cosine_scheduler(
             base_value=self.weight_decay,
             final_value=self.weight_decay_end,
-            total_iters=train_iters,
+            total_iters=trainer.max_steps,  # type: ignore
         )
         self.momentum_schedule = cosine_scheduler(
             base_value=self.momentum_teacher,
             final_value=1,
-            total_iters=train_iters,
+            total_iters=trainer.max_steps,  # type: ignore
+        )
+        self.linear_clf_trainer = pl.Trainer(
+            gpus=trainer.gpus,
+            max_steps=self.linear_clf_steps,
+            distributed_backend=trainer.distributed_backend,
+            callbacks=[IterationBasedProgBar],
         )
 
     @implements(pl.LightningModule)
@@ -115,6 +140,13 @@ class DINO(pl.LightningModule):
             if "last_layer" in n:
                 p.grad = None
 
+    def _get_loss(self, batch: DataBatch, batch_idx: int) -> Tensor:
+        teacher_output = self.teacher(
+            batch.x[:2]
+        )  # only the 2 global views pass through the teacher
+        student_output = self.student(batch.x)
+        return self._loss_fn(student_output, teacher_output, batch_idx)
+
     @implements(pl.LightningModule)
     def training_step(self, batch: DataBatch, batch_idx: int) -> Tensor:
         for i, param_group in enumerate(self.trainer.optimizers[0].param_groups):
@@ -122,12 +154,9 @@ class DINO(pl.LightningModule):
             if i == 0:  # only the first group is regularized
                 param_group["weight_decay"] = self.wd_schedule[batch_idx]
 
-        teacher_output = self.teacher(
-            batch.x[:2]
-        )  # only the 2 global views pass through the teacher
-        student_output = self.student(batch.x)
-        return self._loss_fn(student_output, teacher_output, batch_idx)
+        return self._get_loss(batch=batch, batch_idx=batch_idx)
 
+    @implements(pl.LightningModule)
     def optimizer_step(
         self,
         epoch: int,
@@ -156,6 +185,25 @@ class DINO(pl.LightningModule):
         # Update the teacher network via EMA of the student's weights
         self._update_momentum_teacher(train_itr=batch_idx)
 
+    def encode(self, x: Tensor) -> Tensor:
+        intermediate_output = self.student.backbone.get_intermediate_layers(
+            x, n=self.num_eval_blocks
+        )
+        output = [x[:, 0] for x in intermediate_output]
+        return torch.cat(output, dim=-1)
+
+    # @implements(ModelBase)
+    # def _inference_step(self, batch: DataBatch, stage: Stage) -> dict[str, Tensor]:
+    #     enc = self.encode(batch.x)
+    #     return {"y": batch.y, "s": batch.s, "enc": enc}
+
+    # @implements(ModelBase)
+    # def _inference_epoch_end(self, output_results: list[dict[str, Tensor]], stage: Stage) -> None:
+    #     all_y = torch.cat([_r["y"] for _r in output_results], 0)
+    #     all_s = torch.cat([_r["s"] for _r in output_results], 0)
+    #     all_enc = torch.cat([_r["enc"] for _r in output_results], 0)
+    #     val_dataset_enc = TensorDataset(all_enc, all_y)
+
     @implements(nn.Module)
     def forward(self, x: Tensor) -> Tensor:
-        return self.student.backbone(x)
+        return self.student(x)

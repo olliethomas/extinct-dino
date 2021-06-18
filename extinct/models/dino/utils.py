@@ -97,7 +97,7 @@ def trunc_normal_(
     return _no_grad_trunc_normal_(tensor, mean, std, a, b)
 
 
-def get_params_groups(model: Tensor) -> list[dict[str, list[Tensor] | float]]:
+def get_params_groups(model: nn.Module) -> list[dict[str, list[Tensor] | float]]:
     regularized: list[Tensor] = []
     not_regularized: list[Tensor] = []
     for name, param in model.named_parameters():
@@ -115,7 +115,7 @@ def cosine_scheduler(
     base_value: float,
     final_value: float,
     total_iters: int,
-    warmup_iters: int,
+    warmup_iters: int = 0,
     start_warmup_value: float = 0,
 ) -> np.ndarray:
     warmup_schedule = np.array([])
