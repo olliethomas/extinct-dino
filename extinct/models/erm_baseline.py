@@ -1,6 +1,5 @@
 from __future__ import annotations
 from typing import List, Optional, Tuple
-from typing_extensions import Literal
 
 import ethicml as em
 from kit import implements
@@ -10,6 +9,7 @@ import torch
 from torch import Tensor, nn, optim
 import torch.nn.functional as F
 import torchmetrics
+from typing_extensions import Literal
 
 from extinct.datamodules.structures import DataBatch
 from extinct.models.predefined import Mp64x64Net
@@ -28,6 +28,8 @@ class ErmBaseline(pl.LightningModule):
         self.weight_decay = weight_decay
         self.enc = Mp64x64Net(batch_norm=batch_norm, in_chans=3, target_dim=10)
         self.clf = nn.Linear(10, 1)
+        self.weights_init(self.enc)
+        self.weights_init(self.clf)
         self.net = nn.Sequential(self.enc, self.clf)
         self._loss_fn = F.binary_cross_entropy_with_logits
 
@@ -36,6 +38,11 @@ class ErmBaseline(pl.LightningModule):
         self.val_acc = torchmetrics.Accuracy()
 
         self._target: Optional[str] = None
+
+    @staticmethod
+    def weights_init(module: nn.Module) -> None:
+        if isinstance(module, (nn.Conv2d, nn.Linear)):
+            torch.nn.init.xavier_uniform(module.weight.data)
 
     @property
     def target(self) -> str:

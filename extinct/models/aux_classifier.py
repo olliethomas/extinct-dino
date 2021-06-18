@@ -22,6 +22,7 @@ class AuxClassifier(ErmBaseline):
         self.enc = enc
         self.enc.eval()
         self.clf = classifier
+        self.weights_init(self.clf)
         self._loss_fn = nn.BCEWithLogitsLoss(reduction="mean")
 
         self.test_acc = torchmetrics.Accuracy()

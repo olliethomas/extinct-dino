@@ -19,11 +19,11 @@ from extinct.hydra.extinct.models.configs import (
     KCBaselineConf,
     LaftrBaselineConf,
 )
-from extinct.utils.callbacks import IterationBasedProgBar
 from extinct.hydra.pytorch_lightning.trainer.configs import (
     TrainerConf,  # type: ignore[import]
 )
 from extinct.models.aux_classifier import AuxClassifier
+from extinct.utils.callbacks import IterationBasedProgBar
 
 
 @dataclass
@@ -106,28 +106,28 @@ def start(cfg: Config, raw_config: Optional[Dict[str, Any]]) -> None:
 
     cfg.model.target = cfg.data.train_data.dataset.dataset.ti.y_label
     cfg.trainer.callbacks = [IterationBasedProgBar()]
-    cfg.trainer.fit(model=cfg.model, datamodule=cfg.data)
-    cfg.trainer.test(model=cfg.model, datamodule=cfg.data)
 
-    cfg.model.target = cfg.data.train_data.dataset.ti.y_label
+    cfg.model.target = cfg.data.train_data.dataset.dataset.ti.y_label
     cfg.trainer.fit(cfg.model, datamodule=cfg.data)
-    fit_and_train(cfg)
+    fit_and_test(cfg)
 
     for additional_target in ("Smiling", "Rosy_Cheeks"):
-        cfg.data.train_data.dataset.ti.new_task(additional_target)  # Amends the underlying dataset
-        cfg.model.target = cfg.data.train_data.dataset.ti.y_label
-        fit_and_train(cfg)
+        cfg.data.train_data.dataset.dataset.ti.new_task(
+            additional_target
+        )  # Amends the underlying dataset
+        cfg.model.target = cfg.data.train_data.dataset.dataset.ti.y_label
+        fit_and_test(cfg)
 
     # Manually invoke finish for multirun-compatibility
     exp_logger.experiment.finish()
 
 
-def fit_and_train(cfg):
+def fit_and_test(cfg):
     _trainer = copy.deepcopy(cfg.aux_trainer)
     clf_model = AuxClassifier(
         enc=cfg.model.enc, classifier=cfg.model.clf, lr=1e-3, weight_decay=1e-8, lr_gamma=0.999
     )
-    clf_model.target = cfg.data.train_data.dataset.ti.y_label
+    clf_model.target = cfg.data.train_data.dataset.dataset.ti.y_label
     _trainer.fit(clf_model, datamodule=cfg.data)
     _trainer.test(clf_model, datamodule=cfg.data)
 
