@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import torch
 from torch import Tensor
 import torch.nn as nn
 import torch.nn.functional as F
@@ -46,7 +47,7 @@ class DINOHead(nn.Module):
     def _init_weights(self, m: nn.Module) -> None:
         if isinstance(m, nn.Linear):
             trunc_normal_(m.weight, std=0.02)
-            if isinstance(m, nn.Linear) and m.bias is not None:
+            if m.bias is not None:
                 nn.init.constant_(m.bias, 0)
 
     def forward(self, x: Tensor) -> Tensor:
@@ -87,10 +88,7 @@ class MultiCropWrapper(nn.Module):
         start_idx = 0
         for end_idx in idx_crops:
             _out = self.backbone(torch.cat(x[start_idx:end_idx]))
-            if start_idx == 0:
-                output = _out
-            else:
-                output = torch.cat((output, _out))  # type: ignore
+            output: Tensor = _out if start_idx == 0 else torch.cat((output, _out))  # type: ignore
             start_idx = end_idx
         # Run the head forward on the concatenated features.
         return self.head(output)  # type: ignore

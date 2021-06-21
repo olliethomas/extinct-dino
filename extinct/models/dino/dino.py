@@ -202,7 +202,7 @@ class DINO(ModelBase):
         self._update_momentum_teacher(train_itr=batch_idx)
 
     @implements(pl.LightningModule)
-    def on_validation_start(self):
+    def on_validation_start(self) -> None:
         self.linear_clf.reset_parameters()
         self.linear_clf_trainer.fit(self.linear_clf, datamodule=self.datamodule)
         super().on_validation_start()

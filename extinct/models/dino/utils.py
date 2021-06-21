@@ -50,8 +50,7 @@ def _no_grad_trunc_normal_(tensor: Tensor, mean: float, std: float, a: float, b:
 
 def trunc_normal_(
     tensor: Tensor, mean: float = 0.0, std: float = 1.0, a: float = -2.0, b: float = 2.0
-):
-    # type: (Tensor, float, float, float, float) -> Tensor
+) -> Tensor:
     return _no_grad_trunc_normal_(tensor, mean, std, a, b)
 
 

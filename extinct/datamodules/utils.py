@@ -6,14 +6,13 @@ import ethicml.vision as emvi
 import torch
 from torch import Tensor
 from torch.utils.data import ConcatDataset, Subset
-from typing_extensions import TypeAlias
 
 from .structures import AlbumentationsDataset, TiWrapper
 
 __all__ = ["extract_labels_from_dataset"]
 
-_Dataset: TypeAlias = Union[emvi.TorchImageDataset, TiWrapper]
-ExtractableDataset: TypeAlias = Union[ConcatDataset[_Dataset], _Dataset, AlbumentationsDataset]
+_Dataset = Union[emvi.TorchImageDataset, TiWrapper]
+ExtractableDataset = Union[ConcatDataset[_Dataset], _Dataset, AlbumentationsDataset]
 
 
 @lru_cache(typed=True)

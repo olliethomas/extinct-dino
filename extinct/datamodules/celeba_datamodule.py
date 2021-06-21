@@ -67,7 +67,7 @@ class CelebaDataModule(VisionDataModule):
             check_integrity=True,
         )
 
-    @property
+    @property  # type: ignore[misc]
     @implements(VisionDataModule)
     def _base_augmentations(self) -> A.Compose:
         return A.Compose(
@@ -77,7 +77,7 @@ class CelebaDataModule(VisionDataModule):
             ]
         )
 
-    @property
+    @property  # type: ignore [misc]
     @implements(VisionDataModule)
     def _train_augmentations(self) -> A.Compose:
         # Train-time data augmentations - should be refined further

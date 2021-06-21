@@ -46,8 +46,8 @@ class DINOLoss(nn.Module):
         teacher_out = ((teacher_output - self.center) / temp).softmax(dim=-1)
         teacher_out = teacher_out.detach().chunk(2)
 
-        total_loss = 0
-        n_loss_terms = 0
+        total_loss = student_out.new_zeros(())
+        n_loss_terms = student_out.new_zeros(())
         for iq, q in enumerate(teacher_out):
             for v in range(len(student_out)):
                 if v == iq:

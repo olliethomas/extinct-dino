@@ -77,7 +77,9 @@ class ErmBaseline(ModelBase):
         return {"y": batch.y, "s": batch.s, "preds": logits.sigmoid().round().squeeze(-1)}
 
     @implements(ModelBase)
-    def _inference_epoch_end(self, output_results: list[dict[str, Tensor]], stage: Stage) -> None:
+    def _inference_epoch_end(
+        self, output_results: list[dict[str, Tensor]], stage: Stage
+    ) -> dict[str, Tensor]:
         all_y = torch.cat([_r["y"] for _r in output_results], 0)
         all_s = torch.cat([_r["s"] for _r in output_results], 0)
         all_preds = torch.cat([_r["preds"] for _r in output_results], 0)
