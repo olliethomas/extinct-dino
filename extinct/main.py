@@ -1,3 +1,4 @@
+import copy
 from dataclasses import dataclass
 import os
 from pathlib import Path
@@ -105,7 +106,7 @@ def start(cfg: Config, raw_config: Optional[Dict[str, Any]]) -> None:
     cfg.trainer.callbacks = callbacks
 
     # Build the model
-    cfg.model.build(datamodule=cfg.data, trainer=cfg.trainer)
+    cfg.model.build(datamodule=copy.deepcopy(cfg.data), trainer=copy.deepcopy(cfg.trainer))
     # Fit the model
     cfg.trainer.fit(model=cfg.model, datamodule=cfg.data)
     # Test the model
