@@ -15,7 +15,7 @@ from torch.utils.data import DataLoader
 
 from extinct.datamodules.utils import extract_labels_from_dataset
 
-from .dino import DinoAugmentation
+from .dino import DINOAugmentation
 
 __all__ = ["VisionDataModule", "TrainAugMode"]
 
@@ -90,13 +90,16 @@ class VisionDataModule(VisionBaseDataModule):
                 augs.append(self._train_augmentations)
             elif self.aug_mode is TrainAugMode.dino:
                 augs.append(
-                    DinoAugmentation(
+                    DINOAugmentation(
                         global_crops_scale=self.global_crops_scale,
                         local_crops_scale=self.local_crops_scale,
                         local_crops_number=self.local_crops_number,
                     )
-                )  # ToTensorV2 should always be the final op in the albumenations pipeline
-        augs.append(self._normalization)
+                )
+        if not train or self.aug_mode is not TrainAugMode.dino:
+            # Normalization is hadnled within DinoAugmentation since it needs to be applied
+            # to each crop separately
+            augs.append(self._normalization)
         return A.Compose(augs)
 
     @implements(LightningDataModule)

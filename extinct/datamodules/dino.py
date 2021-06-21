@@ -4,10 +4,10 @@ import cv2
 import numpy as np
 from torch import Tensor
 
-__all__ = ["DinoAugmentation"]
+__all__ = ["DINOAugmentation"]
 
 
-class DinoAugmentation(A.ImageOnlyTransform):
+class DINOAugmentation(A.ImageOnlyTransform):
     def __init__(
         self,
         global_crops_scale: tuple[float, float],
