@@ -146,7 +146,7 @@ class DINO(ModelBase):
             gpus=trainer.gpus,
             max_steps=self.lin_clf_steps,
             distributed_backend=trainer.distributed_backend,
-            callbacks=[IterationBasedProgBar],
+            callbacks=[IterationBasedProgBar()],
         )
         self.datamodule = datamodule
 
