@@ -50,6 +50,7 @@ class DINO(ModelBase):
         eval_method: EvalMethod = EvalMethod.lin_clf,
         num_eval_blocks: int = 1,
         lr_eval: float = 1.0e-4,
+        lin_clf_steps: int = 1000,
     ) -> None:
         """
         Args:
@@ -73,6 +74,7 @@ class DINO(ModelBase):
         self.warmup_teacher_temp_iters = warmup_teacher_temp_iters
         self.lr_eval = lr_eval
         self.eval_method = eval_method
+        self.lin_clf_steps = lin_clf_steps
 
         self._arch_fn = cast(
             Callable[[int], vit.VisionTransformer], getattr(vit, f"vit_{arch.name}")
@@ -141,7 +143,7 @@ class DINO(ModelBase):
         )
         self.eval_trainer = pl.Trainer(
             gpus=trainer.gpus,
-            max_steps=self.linear_clf_steps,
+            max_steps=self.lin_clf_steps,
             distributed_backend=trainer.distributed_backend,
             callbacks=[IterationBasedProgBar],
         )
