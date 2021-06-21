@@ -38,8 +38,7 @@ def drop_path(x: Tensor, drop_prob: float = 0.0, training: bool = False) -> Tens
     shape = (x.shape[0],) + (1,) * (x.ndim - 1)  # work with diff dim tensors, not just 2D ConvNets
     random_tensor = keep_prob + torch.rand(shape, dtype=x.dtype, device=x.device)
     random_tensor.floor_()  # binarize
-    output = x.div(keep_prob) * random_tensor
-    return output
+    return x.div(keep_prob) * random_tensor
 
 
 class DropPath(nn.Module):
@@ -320,7 +319,7 @@ class VitArch(Enum):
 
 
 def vit_tiny(patch_size: int = 16, **kwargs: Any) -> VisionTransformer:
-    model = VisionTransformer(
+    return VisionTransformer(
         patch_size=patch_size,
         embed_dim=192,
         depth=12,
@@ -330,11 +329,10 @@ def vit_tiny(patch_size: int = 16, **kwargs: Any) -> VisionTransformer:
         norm_layer=partial(nn.LayerNorm, eps=1e-6),
         **kwargs,
     )
-    return model
 
 
 def vit_small(patch_size: int = 16, **kwargs: Any) -> VisionTransformer:
-    model = VisionTransformer(
+    return VisionTransformer(
         patch_size=patch_size,
         embed_dim=384,
         depth=12,
@@ -344,11 +342,10 @@ def vit_small(patch_size: int = 16, **kwargs: Any) -> VisionTransformer:
         norm_layer=partial(nn.LayerNorm, eps=1e-6),
         **kwargs,
     )
-    return model
 
 
 def vit_base(patch_size: int = 16, **kwargs: Any) -> VisionTransformer:
-    model = VisionTransformer(
+    return VisionTransformer(
         patch_size=patch_size,
         embed_dim=768,
         depth=12,
@@ -358,4 +355,3 @@ def vit_base(patch_size: int = 16, **kwargs: Any) -> VisionTransformer:
         norm_layer=partial(nn.LayerNorm, eps=1e-6),
         **kwargs,
     )
-    return model

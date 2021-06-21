@@ -10,7 +10,7 @@ from pytorch_lightning import LightningDataModule
 import torch
 from torch.utils.data.dataset import random_split
 
-from extinct.datamodules.base import VisionDataModule
+from extinct.datamodules.base import TrainAugMode, VisionDataModule
 from extinct.datamodules.structures import AlbumentationsDataset, TiWrapper
 
 __all__ = ["CelebaDataModule"]
@@ -67,7 +67,7 @@ class CelebaDataModule(VisionDataModule):
             check_integrity=True,
         )
 
-    @property
+    @property  # type: ignore [misc]
     @implements(VisionDataModule)
     def _base_augmentations(self) -> A.Compose:
         return A.Compose(
@@ -77,7 +77,7 @@ class CelebaDataModule(VisionDataModule):
             ]
         )
 
-    @property
+    @property  # type: ignore [misc]
     @implements(VisionDataModule)
     def _train_augmentations(self) -> A.Compose:
         # Train-time data augmentations - should be refined further

@@ -7,9 +7,11 @@ import torch
 from torch import Tensor
 import torch.nn as nn
 
-from .vit import DINOHead, VisionTransformer
+from .vit import VisionTransformer
 
 __all__ = ["MultiCropWrapper", "trunc_normal_", "cosine_scheduler", "get_params_groups"]
+
+from .. import DINOHead
 
 
 class MultiCropWrapper(nn.Module):
@@ -43,10 +45,7 @@ class MultiCropWrapper(nn.Module):
         start_idx = 0
         for end_idx in idx_crops:
             _out = self.backbone(torch.cat(x[start_idx:end_idx]))
-            if start_idx == 0:
-                output = _out
-            else:
-                output = torch.cat((output, _out))  # type: ignore
+            output = _out if start_idx == 0 else torch.cat((output, _out))
             start_idx = end_idx
         # Run the head forward on the concatenated features.
         return self.head(output)  # type: ignore
@@ -92,8 +91,7 @@ def _no_grad_trunc_normal_(tensor: Tensor, mean: float, std: float, a: float, b:
 
 def trunc_normal_(
     tensor: Tensor, mean: float = 0.0, std: float = 1.0, a: float = -2.0, b: float = 2.0
-):
-    # type: (Tensor, float, float, float, float) -> Tensor
+) -> Tensor:
     return _no_grad_trunc_normal_(tensor, mean, std, a, b)
 
 
