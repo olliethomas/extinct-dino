@@ -1,12 +1,12 @@
 from __future__ import annotations
 from functools import lru_cache
 from typing import Union, cast
-from typing_extensions import TypeAlias
 
 import ethicml.vision as emvi
 import torch
 from torch import Tensor
 from torch.utils.data import ConcatDataset, Subset
+from typing_extensions import TypeAlias
 
 from .structures import AlbumentationsDataset, TiWrapper
 
