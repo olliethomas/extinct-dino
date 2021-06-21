@@ -126,8 +126,6 @@ class ErmBaseline(ModelBase):
 class CelebaErmBaseline(ErmBaseline):
     def __init__(
         self,
-        enc: nn.Module,
-        clf: nn.Module,
         lr: float,
         weight_decay: float,
         lr_gamma: float,
