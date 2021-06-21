@@ -5,8 +5,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from .utils import trunc_normal_
+from .vit import VisionTransformer
 
-__all__ = ["DINOHead"]
+__all__ = ["DINOHead", "MultiCropWrapper"]
 
 
 class DINOHead(nn.Module):
@@ -53,3 +54,43 @@ class DINOHead(nn.Module):
         x = F.normalize(x, dim=-1, p=2)
         x = self.last_layer(x)
         return x
+
+
+class MultiCropWrapper(nn.Module):
+    """
+    Perform forward pass separately on each resolution input.
+    The inputs corresponding to a single resolution are clubbed and single
+    forward is run on the same resolution inputs. Hence we do several
+    forward passes = number of different resolutions used. We then
+    concatenate all the output features and run the head forward on these
+    concatenated features.
+    """
+
+    def __init__(self, backbone: VisionTransformer, head: DINOHead) -> None:
+        super(MultiCropWrapper, self).__init__()
+        # disable layers dedicated to ImageNet labels classification
+        backbone.fc, backbone.head = nn.Identity(), nn.Identity()
+        self.backbone = backbone
+        self.head = head
+
+    def forward(self, x: list[Tensor] | Tensor) -> Tensor:
+        # convert to list
+        if not isinstance(x, list):
+            x = [x]
+        idx_crops = torch.cumsum(
+            torch.unique_consecutive(
+                torch.tensor([inp.shape[-1] for inp in x]),
+                return_counts=True,
+            )[1],
+            0,
+        )
+        start_idx = 0
+        for end_idx in idx_crops:
+            _out = self.backbone(torch.cat(x[start_idx:end_idx]))
+            if start_idx == 0:
+                output = _out
+            else:
+                output = torch.cat((output, _out))  # type: ignore
+            start_idx = end_idx
+        # Run the head forward on the concatenated features.
+        return self.head(output)  # type: ignore

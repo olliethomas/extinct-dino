@@ -9,7 +9,7 @@ import torch.nn as nn
 
 from .vit import VisionTransformer
 
-__all__ = ["MultiCropWrapper", "trunc_normal_", "cosine_scheduler", "get_params_groups"]
+__all__ = ["trunc_normal_", "cosine_scheduler", "get_params_groups"]
 
 from .. import DINOHead
 

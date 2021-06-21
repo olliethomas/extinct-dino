@@ -14,7 +14,7 @@ from extinct.models.predefined import Mp64x64Net
 
 from .base import ModelBase
 
-__all__ = ["ErmBaseline", "CelebaBaseline"]
+__all__ = ["ErmBaseline", "CelebaErmBaseline"]
 
 
 class ErmBaseline(ModelBase):
@@ -121,7 +121,7 @@ class ErmBaseline(ModelBase):
         return self.net(x)
 
 
-class CelebaBaseline(ErmBaseline):
+class CelebaErmBaseline(ErmBaseline):
     def __init__(
         self,
         enc: nn.Module,
