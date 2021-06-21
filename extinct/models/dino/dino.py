@@ -148,14 +148,6 @@ class DINO(ModelBase):
             distributed_backend=trainer.distributed_backend,
             callbacks=[IterationBasedProgBar()],
         )
-        self.eval_clf = DINOLinearClassifier(
-            enc=self.student.backbone,
-            target_dim=datamodule.y_dim,
-            max_steps=trainer.max_steps,  # type: ignore
-            weight_decay=0,
-            lr=self.lr_eval,
-        )
-        self.eval_clf.target = self.target
         self.datamodule = datamodule
 
     @implements(pl.LightningModule)
