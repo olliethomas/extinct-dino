@@ -14,15 +14,15 @@ from pytorch_lightning.loggers import WandbLogger
 
 from extinct.hydra.extinct.datamodules.configs import CelebaDataModuleConf
 from extinct.hydra.extinct.models.configs import (
-    DINOConf,
     ErmBaselineConf,
     KCBaselineConf,
     LaftrBaselineConf,
 )
+from extinct.hydra.extinct.models.dino.configs import DINOConf
 from extinct.hydra.pytorch_lightning.trainer.configs import (
     TrainerConf,  # type: ignore[import]
 )
-from extinct.models.aux_classifier import AuxClassifier
+from extinct.models.finetuning import FineTuner
 from extinct.utils.callbacks import IterationBasedProgBar
 
 

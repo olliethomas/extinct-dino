@@ -5,7 +5,7 @@ import pytorch_lightning as pl
 from torch import optim
 import torch.nn as nn
 
-from extinct.models.aux_classifier import FineTuner
+from extinct.models.finetuning import FineTuner
 
 from .vit import VisionTransformer
 

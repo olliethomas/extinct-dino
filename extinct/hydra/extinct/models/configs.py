@@ -7,31 +7,26 @@
 from dataclasses import dataclass, field
 from extinct.models.laftr_baseline import FairnessType
 from omegaconf import MISSING
-
-
-@dataclass
-class DinoModelConf:
-    _target_: str = "extinct.models.DinoModel"
-    lr: float = MISSING
-    weight_decay: float = MISSING
-    lr_gamma: float = MISSING
+from typing import Any
 
 
 @dataclass
 class KCBaselineConf:
     _target_: str = "extinct.models.KCBaseline"
+    enc: Any = MISSING  # Module
+    clf: Any = MISSING  # Module
     lr: float = MISSING
     weight_decay: float = MISSING
-    batch_norm: bool = MISSING
     lr_gamma: float = MISSING
 
 
 @dataclass
 class ErmBaselineConf:
     _target_: str = "extinct.models.ErmBaseline"
+    enc: Any = MISSING  # Module
+    clf: Any = MISSING  # Module
     lr: float = MISSING
     weight_decay: float = MISSING
-    batch_norm: bool = MISSING
     lr_gamma: float = MISSING
 
 

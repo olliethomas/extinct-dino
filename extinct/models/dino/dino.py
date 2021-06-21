@@ -13,11 +13,11 @@ from extinct.utils.callbacks import IterationBasedProgBar
 
 from . import vit
 from .eval import DINOLinearClassifier
-from .head import DINOHead
+from .head import DINOHead, MultiCropWrapper
 from .loss import DINOLoss
-from .utils import MultiCropWrapper, cosine_scheduler, get_params_groups
+from .utils import cosine_scheduler, get_params_groups
 
-__all__ = ["DinoModel"]
+__all__ = ["DINO"]
 
 
 class DINO(ModelBase):

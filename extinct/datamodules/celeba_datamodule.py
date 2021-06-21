@@ -10,7 +10,7 @@ from pytorch_lightning import LightningDataModule
 import torch
 from torch.utils.data.dataset import random_split
 
-from extinct.datamodules.base import VisionDataModule
+from extinct.datamodules.base import TrainAugMode, VisionDataModule
 from extinct.datamodules.structures import AlbumentationsDataset, TiWrapper
 
 __all__ = ["CelebaDataModule"]
