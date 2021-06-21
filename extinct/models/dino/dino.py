@@ -238,7 +238,6 @@ class DINO(ModelBase):
             )
             self.eval_clf.target = self.target
             self.eval_trainer.fit(self.eval_clf, datamodule=self.datamodule)
-            super().on_validation_start()
         else:
             train_data_encoded = self._encode_dataset(stage="train")
             self.eval_clf = KNN(
