@@ -11,7 +11,9 @@ import torch
 from torch import Tensor, nn, optim
 import torchmetrics
 
+from extinct.datamodules import VisionDataModule
 from extinct.datamodules.structures import DataBatch
+from extinct.models import ModelBase
 from extinct.models.predefined import Decoder, EmbeddingClf, Encoder
 
 __all__ = ["LaftrBaseline"]
@@ -21,7 +23,7 @@ ModelOut = namedtuple("ModelOut", ["y", "z", "s", "x"])
 FairnessType = Enum("FairnessType", "DP EO EqOp")
 
 
-class LaftrBaseline(pl.LightningModule):
+class LaftrBaseline(ModelBase):
     def __init__(
         self,
         lr: float,
@@ -72,6 +74,9 @@ class LaftrBaseline(pl.LightningModule):
         self.val_acc = torchmetrics.Accuracy()
 
         self._target: Optional[str] = None
+
+    def build(self, datamodule: VisionDataModule, trainer: pl.Trainer) -> None:
+        """DM and Trainer not needed."""
 
     @property
     def target(self) -> str:

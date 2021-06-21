@@ -4,7 +4,7 @@
 # isort:skip_file
 # flake8: noqa
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from extinct.models.dino.eval import EvalMethod
 from extinct.models.dino.vit import VitArch
 
@@ -29,3 +29,4 @@ class DINOConf:
     eval_method: EvalMethod = EvalMethod.lin_clf
     num_eval_blocks: int = 1
     lr_eval: float = 0.0001
+    lin_clf_steps: int = 1000

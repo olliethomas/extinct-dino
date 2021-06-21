@@ -23,7 +23,7 @@ pre-commit = "*"
 pydocstyle = "*"
 pytest = "*"
 python-type-stubs = {git = "https://github.com/predictive-analytics-lab/python-type-stubs.git", branch = "main"}
-pylint = "^2.8.2"
+pylint = "*"
 
 [tool.poetry.scripts]
 rawr = "extinct.main:launcher"
@@ -76,7 +76,7 @@ disallow_any_unimported = false
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
 show_error_codes = true
-exclude = "extinct/hydra"
+exclude = "hydra"
 
 [[tool.mypy.overrides]]
 module = [
@@ -87,6 +87,7 @@ module = [
     "flash.*",
     "git.*",
     "matplotlib.*",
+    "pandas",
     "PIL.*",
     "pl_bolts.*",
     "hydra.*",
