@@ -1,6 +1,5 @@
 defaults:
   - /schema/model: dino
-  - base
 
 lr: 5.e-4
 warmup_iters: 100
