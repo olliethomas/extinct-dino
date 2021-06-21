@@ -14,25 +14,39 @@ from extinct.models.predefined import Mp64x64Net
 
 from .base import ModelBase
 
-__all__ = ["ErmBaseline"]
+__all__ = ["ErmBaseline", "CelebaBaseline"]
 
 
 class ErmBaseline(ModelBase):
-    net: Mp64x64Net
-
-    def __init__(self, lr: float, weight_decay: float, batch_norm: bool, lr_gamma: float) -> None:
+    def __init__(
+        self,
+        enc: nn.Module,
+        clf: nn.Module,
+        lr: float,
+        weight_decay: float,
+        lr_gamma: float,
+    ) -> None:
         super().__init__()
         self.learning_rate = lr
         self.lr_gamma = lr_gamma
         self.weight_decay = weight_decay
-        self.batch_norm = batch_norm
+        self.enc = enc
+        self.clf = clf
+        self.net = nn.Sequential(self.enc, self.clf)
         self._loss_fn = F.binary_cross_entropy_with_logits
 
         self.test_acc = torchmetrics.Accuracy()
         self.train_acc = torchmetrics.Accuracy()
         self.val_acc = torchmetrics.Accuracy()
 
-        self._target: str | None = None
+    @staticmethod
+    def _maybe_reset_parameters(module: nn.Module) -> None:
+        if hasattr(module, 'reset_parameters'):
+            module.reset_parameters()  # type: ignore
+
+    def reset_parameters(self) -> None:
+        self.enc.apply(self._maybe_reset_parameters)
+        self.clf.apply(self._maybe_reset_parameters)
 
     def build(self, datamodule: VisionDataModule, trainer: pl.Trainer) -> None:
         self.net = Mp64x64Net(batch_norm=self.batch_norm, in_chans=3, target_dim=1)
@@ -50,7 +64,7 @@ class ErmBaseline(ModelBase):
 
     @implements(ModelBase)
     def _inference_step(self, batch: DataBatch, stage: Stage) -> dict[str, Tensor]:
-        logits = self(batch.x)
+        logits = self.forward(batch.x)
         loss = self._get_loss(logits, batch)
         tm_acc = self.val_acc if stage == "val" else self.test_acc
         acc = tm_acc(logits >= 0, batch.y.long())
@@ -87,12 +101,11 @@ class ErmBaseline(ModelBase):
         acc = tm_acc.compute().item()
         results_dict = {f"{stage}/acc": acc}
         results_dict.update({f"{stage}/{self.target}_{k}": v for k, v in results.items()})
-
-        self.log_dict(results_dict)
+        return results_dict
 
     @implements(pl.LightningModule)
     def training_step(self, batch: DataBatch, batch_idx: int) -> Tensor:
-        logits = self(batch.x)
+        logits = self.forward(batch.x)
         loss = self._get_loss(logits, batch)
         acc = self.train_acc(logits >= 0, batch.y.long())
         self.log_dict(
@@ -106,3 +119,24 @@ class ErmBaseline(ModelBase):
     @implements(nn.Module)
     def forward(self, x: Tensor) -> Tensor:
         return self.net(x)
+
+
+class CelebaBaseline(ErmBaseline):
+    def __init__(
+        self,
+        enc: nn.Module,
+        clf: nn.Module,
+        lr: float,
+        weight_decay: float,
+        lr_gamma: float,
+        batch_norm: bool = True,
+    ) -> None:
+        enc = Mp64x64Net(batch_norm=batch_norm, in_chans=3, target_dim=10)
+        clf = nn.Linear(10, 1)
+        super().__init__(
+            enc=enc,
+            clf=clf,
+            lr=lr,
+            weight_decay=weight_decay,
+            lr_gamma=lr_gamma,
+        )

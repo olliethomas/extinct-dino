@@ -14,6 +14,7 @@ class DinoModelConf:
     _target_: str = "extinct.models.DinoModel"
     lr: float = MISSING
     weight_decay: float = MISSING
+    lr_gamma: float = MISSING
 
 
 @dataclass
@@ -42,3 +43,6 @@ class LaftrBaselineConf:
     lr_gamma: float = MISSING
     disc_steps: int = MISSING
     fairness: FairnessType = MISSING
+    recon_weight: float = MISSING
+    clf_weight: float = MISSING
+    adv_weight: float = MISSING

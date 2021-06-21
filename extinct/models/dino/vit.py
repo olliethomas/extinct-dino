@@ -307,6 +307,11 @@ class VisionTransformer(nn.Module):
                 output.append(self.norm(x))
         return output
 
+    def encode(self, x: Tensor, num_eval_blocks: int) -> Tensor:
+        intermediate_output = self.get_intermediate_layers(x, n=num_eval_blocks)
+        output = [x[:, 0] for x in intermediate_output]
+        return torch.cat(output, dim=-1)
+
 
 class VitArch(Enum):
     base = auto()

@@ -1,3 +1,4 @@
+import copy
 from dataclasses import dataclass
 import os
 from pathlib import Path
@@ -18,7 +19,10 @@ from extinct.hydra.extinct.models.configs import (
     KCBaselineConf,
     LaftrBaselineConf,
 )
-from extinct.hydra.pytorch_lightning.trainer.configs import TrainerConf
+from extinct.hydra.pytorch_lightning.trainer.configs import (
+    TrainerConf,  # type: ignore[import]
+)
+from extinct.models.aux_classifier import AuxClassifier
 from extinct.utils.callbacks import IterationBasedProgBar
 
 
@@ -44,12 +48,14 @@ class Config:
     exp_group: str = "Testing"
     model: Any = MISSING
     trainer: Any = MISSING
+    aux_trainer: Any = MISSING
 
 
 # ConfigStore enables type validation
 cs = ConfigStore.instance()
 cs.store(name="main_schema", node=Config)
 cs.store(name="trainer_schema", node=TrainerConf, package="trainer")
+cs.store(name="aux_trainer_schema", node=TrainerConf, package="aux_trainer")
 
 DATA: Final[str] = "data"
 cs.store(group=f"schema/{DATA}", name="celeba", node=CelebaDataModuleConf, package=DATA)
@@ -115,8 +121,26 @@ def start(cfg: Config, raw_config: Optional[Dict[str, Any]]) -> None:
     cfg.data.train_data.dataset.ti.new_task("Rosy_Cheeks")  # Amends the underlying dataset
     cfg.model.target = cfg.data.train_data.dataset.dataset.ti.y_label
     cfg.trainer.test(model=cfg.model, datamodule=cfg.data)
+    fit_and_test(cfg)
+
+    for additional_target in ("Smiling", "Rosy_Cheeks"):
+        cfg.data.train_data.dataset.dataset.ti.new_task(
+            additional_target
+        )  # Amends the underlying dataset
+        cfg.model.target = cfg.data.train_data.dataset.dataset.ti.y_label
+        fit_and_test(cfg)
     # Manually invoke finish for multirun-compatibility
     exp_logger.experiment.finish()
+
+
+def fit_and_test(cfg):
+    _trainer = copy.deepcopy(cfg.aux_trainer)
+    clf_model = AuxClassifier(
+        enc=cfg.model.enc, classifier=cfg.model.clf, lr=1e-3, weight_decay=1e-8, lr_gamma=0.999
+    )
+    clf_model.target = cfg.data.train_data.dataset.dataset.ti.y_label
+    _trainer.fit(clf_model, datamodule=cfg.data)
+    _trainer.test(clf_model, datamodule=cfg.data)
 
 
 if __name__ == "__main__":

@@ -6,14 +6,13 @@ import numpy as np
 import pytorch_lightning as pl
 import torch
 from torch import Tensor, nn, optim
-from torch.utils.data import TensorDataset
-from torch.utils.data.dataloader import DataLoader
 
 from extinct.datamodules import DataBatch, Stage, VisionDataModule
 from extinct.models.base import ModelBase
 from extinct.utils.callbacks import IterationBasedProgBar
 
 from . import vit
+from .eval import DINOLinearClassifier
 from .head import DINOHead
 from .loss import DINOLoss
 from .utils import MultiCropWrapper, cosine_scheduler, get_params_groups
@@ -29,6 +28,7 @@ class DINO(ModelBase):
     lr_schedule: np.ndarray
     wd_schedule: np.ndarray
     momentum_schedule: np.ndarray
+    datamodule: VisionDataModule
 
     def __init__(
         self,
@@ -47,6 +47,7 @@ class DINO(ModelBase):
         teacher_temp: float = 0.04,
         warmup_teacher_temp_iters: int = 30,
         num_eval_blocks: int = 1,
+        lr_eval: float = 1.0e-4,
     ) -> None:
         """
         Args:
@@ -68,10 +69,17 @@ class DINO(ModelBase):
         self.momentum_teacher = momentum_teacher
         self.teacher_temp = teacher_temp
         self.warmup_teacher_temp_iters = warmup_teacher_temp_iters
+        self.lr_eval = lr_eval
 
         self._arch_fn = cast(
             Callable[[int], vit.VisionTransformer], getattr(vit, f"vit_{arch.value}")
         )
+
+    @property
+    def enc(self) -> vit.VisionTransformer:
+        # We define an encoder-extracting method for consistency with the other models -
+        # fit_and_test, for instance, expects a model to comprise of two parts: enc and clf.
+        return self.student.backbone
 
     @implements(ModelBase)
     def build(self, datamodule: VisionDataModule, trainer: pl.Trainer) -> None:
@@ -111,12 +119,20 @@ class DINO(ModelBase):
             final_value=1,
             total_iters=trainer.max_steps,  # type: ignore
         )
-        self.linear_clf_trainer = pl.Trainer(
+        self.linear_clf_fitter = pl.Trainer(
             gpus=trainer.gpus,
             max_steps=self.linear_clf_steps,
             distributed_backend=trainer.distributed_backend,
             callbacks=[IterationBasedProgBar],
         )
+        self.linear_clf = DINOLinearClassifier(
+            enc=self.student.backbone,
+            target_dim=datamodule.y_dim,
+            max_steps=trainer.max_steps,  # type: ignore
+            weight_decay=0,
+            lr=self.lr_eval,
+        )
+        self.datamodule = datamodule
 
     @implements(pl.LightningModule)
     def configure_optimizers(self) -> optim.Optimizer:
@@ -185,24 +201,19 @@ class DINO(ModelBase):
         # Update the teacher network via EMA of the student's weights
         self._update_momentum_teacher(train_itr=batch_idx)
 
-    def encode(self, x: Tensor) -> Tensor:
-        intermediate_output = self.student.backbone.get_intermediate_layers(
-            x, n=self.num_eval_blocks
-        )
-        output = [x[:, 0] for x in intermediate_output]
-        return torch.cat(output, dim=-1)
+    @implements(pl.LightningModule)
+    def on_validation_start(self):
+        self.linear_clf.reset_parameters()
+        self.linear_clf_trainer.fit(self.linear_clf, datamodule=self.datamodule)
+        super().on_validation_start()
 
-    # @implements(ModelBase)
-    # def _inference_step(self, batch: DataBatch, stage: Stage) -> dict[str, Tensor]:
-    #     enc = self.encode(batch.x)
-    #     return {"y": batch.y, "s": batch.s, "enc": enc}
+    @implements(ModelBase)
+    def _inference_step(self, batch: DataBatch, stage: Stage) -> dict[str, Tensor]:
+        return self.linear_clf._inference_step(batch=batch, stage=stage)
 
-    # @implements(ModelBase)
-    # def _inference_epoch_end(self, output_results: list[dict[str, Tensor]], stage: Stage) -> None:
-    #     all_y = torch.cat([_r["y"] for _r in output_results], 0)
-    #     all_s = torch.cat([_r["s"] for _r in output_results], 0)
-    #     all_enc = torch.cat([_r["enc"] for _r in output_results], 0)
-    #     val_dataset_enc = TensorDataset(all_enc, all_y)
+    @implements(ModelBase)
+    def _inference_epoch_end(self, output_results: list[dict[str, Tensor]], stage: Stage) -> None:
+        return self.linear_clf._inference_epoch_end(output_results=output_results, stage=stage)
 
     @implements(nn.Module)
     def forward(self, x: Tensor) -> Tensor:
