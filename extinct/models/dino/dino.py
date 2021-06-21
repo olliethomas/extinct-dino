@@ -232,7 +232,7 @@ class DINO(ModelBase):
             self.eval_clf = DINOLinearClassifier(
                 enc=self.student.backbone,
                 target_dim=self.datamodule.y_dim,
-                max_steps=trainer.max_steps,  # type: ignore
+                max_steps=self.lin_clf_steps,
                 weight_decay=0,
                 lr=self.lr_eval,
             )
