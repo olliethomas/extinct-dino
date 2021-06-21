@@ -59,7 +59,7 @@ class AlbumentationsDataset(Dataset):
 
     def __len__(self) -> int | None:
         if hasattr(self.dataset, "__len__"):
-            return len(self.dataset)
+            return len(self.dataset)  # type: ignore
         return None
 
     def __getitem__(self, index: int) -> Any:

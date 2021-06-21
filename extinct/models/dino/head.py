@@ -39,7 +39,7 @@ class DINOHead(nn.Module):
             layers.append(nn.Linear(hidden_dim, bottleneck_dim))
             self.mlp = nn.Sequential(*layers)
         self.apply(self._init_weights)
-        self.last_layer = nn.utils.weight_norm(nn.Linear(bottleneck_dim, out_dim, bias=False))
+        self.last_layer = nn.utils.weight_norm(nn.Linear(bottleneck_dim, out_dim, bias=False))  # type: ignore
         self.last_layer.weight_g.data.fill_(1)
         if norm_last_layer:
             self.last_layer.weight_g.requires_grad = False
@@ -88,7 +88,7 @@ class MultiCropWrapper(nn.Module):
         start_idx = 0
         for end_idx in idx_crops:
             _out = self.backbone(torch.cat(x[start_idx:end_idx]))
-            output: Tensor = _out if start_idx == 0 else torch.cat((output, _out))
+            output: Tensor = _out if start_idx == 0 else torch.cat((output, _out))  # type: ignore
             start_idx = end_idx
         # Run the head forward on the concatenated features.
-        return self.head(output)
+        return self.head(output)  # type: ignore

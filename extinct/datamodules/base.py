@@ -117,7 +117,7 @@ class VisionDataModule(VisionBaseDataModule):
             )
         else:
             batch_sampler = InfSequentialBatchSampler(
-                data_source=self._train_data, batch_size=self.batch_size, shuffle=shuffle
+                data_source=self._train_data, batch_size=self.batch_size, shuffle=shuffle  # type: ignore
             )
         return DataLoader(
             self._train_data,

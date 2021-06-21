@@ -100,24 +100,24 @@ class DINO(ModelBase):
             warmup_teacher_temp=self.teacher_temp,
             teacher_temp=self.teacher_temp,
             warmup_teacher_temp_iters=self.warmup_teacher_temp_iters,
-            total_iters=trainer.max_steps,
+            total_iters=trainer.max_steps,  # type: ignore
         )
 
         self.lr_schedule = cosine_scheduler(
             base_value=self.learning_rate * datamodule.batch_size / 256.0,  # linear scaling rule
             final_value=self.min_lr,
-            total_iters=trainer.max_steps,
+            total_iters=trainer.max_steps,  # type: ignore
             warmup_iters=self.warmup_iters,
         )
         self.wd_schedule = cosine_scheduler(
             base_value=self.weight_decay,
             final_value=self.weight_decay_end,
-            total_iters=trainer.max_steps,
+            total_iters=trainer.max_steps,  # type: ignore
         )
         self.momentum_schedule = cosine_scheduler(
             base_value=self.momentum_teacher,
             final_value=1,
-            total_iters=trainer.max_steps,
+            total_iters=trainer.max_steps,  # type: ignore
         )
         self.linear_clf_fitter = pl.Trainer(
             gpus=trainer.gpus,
@@ -128,7 +128,7 @@ class DINO(ModelBase):
         self.linear_clf = DINOLinearClassifier(
             enc=self.student.backbone,
             target_dim=datamodule.y_dim,
-            max_steps=trainer.max_steps,
+            max_steps=trainer.max_steps,  # type: ignore
             weight_decay=0,
             lr=self.lr_eval,
         )

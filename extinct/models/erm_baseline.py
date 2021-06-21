@@ -42,7 +42,7 @@ class ErmBaseline(ModelBase):
     @staticmethod
     def _maybe_reset_parameters(module: nn.Module) -> None:
         if hasattr(module, 'reset_parameters'):
-            module.reset_parameters()
+            module.reset_parameters()  # type: ignore
 
     def reset_parameters(self) -> None:
         self.enc.apply(self._maybe_reset_parameters)

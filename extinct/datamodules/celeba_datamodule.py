@@ -67,7 +67,7 @@ class CelebaDataModule(VisionDataModule):
             check_integrity=True,
         )
 
-    @property  # type: ignore [misc]
+    @property  # type: ignore[misc]
     @implements(VisionDataModule)
     def _base_augmentations(self) -> A.Compose:
         return A.Compose(

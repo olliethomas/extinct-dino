@@ -76,8 +76,7 @@ disallow_any_unimported = false
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
 show_error_codes = true
-warn_unused_ignores = true
-exclude = "extinct/hydra/"
+exclude = "extinct/hydra"
 
 [[tool.mypy.overrides]]
 module = [
