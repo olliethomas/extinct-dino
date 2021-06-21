@@ -75,6 +75,7 @@ def cosine_scheduler(
     warmup_iters: int = 0,
     start_warmup_value: float = 0,
 ) -> np.ndarray:
+    assert warmup_iters < total_iters
     warmup_schedule = np.array([])
     if warmup_iters > 0:
         warmup_schedule = np.linspace(start_warmup_value, base_value, warmup_iters)

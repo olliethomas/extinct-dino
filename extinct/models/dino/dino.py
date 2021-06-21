@@ -30,6 +30,7 @@ class DINO(ModelBase):
     wd_schedule: np.ndarray
     momentum_schedule: np.ndarray
     datamodule: VisionDataModule
+    eval_clf: DINOLinearClassifier | KNN
 
     def __init__(
         self,
@@ -147,13 +148,6 @@ class DINO(ModelBase):
             distributed_backend=trainer.distributed_backend,
             callbacks=[IterationBasedProgBar],
         )
-        self.eval_clf = DINOLinearClassifier(
-            enc=self.student.backbone,
-            target_dim=datamodule.y_dim,
-            max_steps=trainer.max_steps,  # type: ignore
-            weight_decay=0,
-            lr=self.lr_eval,
-        )
         self.datamodule = datamodule
 
     @implements(pl.LightningModule)
@@ -224,10 +218,24 @@ class DINO(ModelBase):
         self._update_momentum_teacher(train_itr=batch_idx)
 
     @implements(pl.LightningModule)
-    def on_validation_start(self) -> None:
+    def on_validation_start(self):
+        self._on_inference_start()
+        super().on_validation_start()
+
+    @implements(pl.LightningModule)
+    def on_test_start(self):
+        self._on_inference_start()
+        super().on_test_start()
+
+    def _on_inference_start(self) -> None:
         if self.eval_method is EvalMethod.lin_clf:
-            assert isinstance(self.eval_clf, DINOLinearClassifier)
-            self.eval_clf.reset_parameters()
+            self.eval_clf = DINOLinearClassifier(
+                enc=self.student.backbone,
+                target_dim=self.datamodule.y_dim,
+                max_steps=trainer.max_steps,  # type: ignore
+                weight_decay=0,
+                lr=self.lr_eval,
+            )
             self.eval_trainer.fit(self.eval_clf, datamodule=self.datamodule)
             super().on_validation_start()
         else:
@@ -235,6 +243,7 @@ class DINO(ModelBase):
             self.eval_clf = KNN(
                 train_features=train_data_encoded.x, train_labels=train_data_encoded.y
             )
+        self.eval_clf.target = self.target
 
     @implements(ModelBase)
     def _inference_step(self, batch: DataBatch, stage: Stage) -> dict[str, Any]:
