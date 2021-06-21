@@ -22,8 +22,8 @@ configen:
     - name: extinct.models
       classes:
         - KCBaseline
-        - ErmBaseline
         - LaftrBaseline
+        - CelebaErmBaseline
     - name: extinct.models.dino
       classes:
         - DINO

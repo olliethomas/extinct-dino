@@ -12,10 +12,10 @@ from torch import Tensor, nn, optim
 import torchmetrics
 
 from extinct.datamodules.structures import DataBatch
+from extinct.models.predefined import Decoder, EmbeddingClf, Encoder
 
 __all__ = ["LaftrBaseline"]
 
-from extinct.models.predefined import Decoder, EmbeddingClf, Encoder
 
 ModelOut = namedtuple("ModelOut", ["y", "z", "s", "x"])
 FairnessType = Enum("FairnessType", "DP EO EqOp")

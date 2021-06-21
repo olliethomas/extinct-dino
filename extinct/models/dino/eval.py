@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from kit import implements
 import pytorch_lightning as pl
-from torch import optim
+from torch import Tensor, optim
 import torch.nn as nn
 
 from extinct.models.finetuning import FineTuner
@@ -13,6 +13,8 @@ __all__ = ["DINOLinearClassifier"]
 
 
 class DINOLinearClassifier(FineTuner):
+    enc: VisionTransformer
+
     def __init__(
         self,
         enc: VisionTransformer,
@@ -36,3 +38,7 @@ class DINOLinearClassifier(FineTuner):
         )
         sched = optim.lr_scheduler.CosineAnnealingLR(optimizer=opt, T_max=self.max_steps, eta_min=0)
         return [opt], [sched]
+
+    @implements(nn.Module)
+    def forward(self, x: Tensor) -> Tensor:
+        return self.clf(self.enc.encode(x, num_eval_blocks=self.num_eval_blocks))
