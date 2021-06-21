@@ -75,7 +75,7 @@ class DINO(ModelBase):
         self.eval_method = eval_method
 
         self._arch_fn = cast(
-            Callable[[int], vit.VisionTransformer], getattr(vit, f"vit_{arch.value}")
+            Callable[[int], vit.VisionTransformer], getattr(vit, f"vit_{arch.name}")
         )
 
     @property
