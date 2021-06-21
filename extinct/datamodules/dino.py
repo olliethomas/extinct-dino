@@ -66,8 +66,8 @@ class DinoAugmentation(A.ImageOnlyTransform):
 
     def __call__(self, image: np.ndarray) -> list[Tensor]:
         crops = []
-        crops.append(self.global_transfo1(image))
-        crops.append(self.global_transfo2(image))
+        crops.append(self.global_transfo1(image=image)["image"])
+        crops.append(self.global_transfo2(image=image)["image"])
         for _ in range(self.local_crops_number):
-            crops.append(self.local_transfo(image))
+            crops.append(self.local_transfo(image=image)["image"])
         return crops
