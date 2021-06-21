@@ -4,20 +4,18 @@
 # isort:skip_file
 # flake8: noqa
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from extinct.models.laftr_baseline import FairnessType
 from omegaconf import MISSING
-from typing import Any
 
 
 @dataclass
-class KCBaselineConf:
-    _target_: str = "extinct.models.KCBaseline"
-    enc: Any = MISSING  # Module
-    clf: Any = MISSING  # Module
+class CelebaKCBaselineConf:
+    _target_: str = "extinct.models.CelebaKCBaseline"
     lr: float = MISSING
     weight_decay: float = MISSING
     lr_gamma: float = MISSING
+    batch_norm: bool = True
 
 
 @dataclass
@@ -36,8 +34,6 @@ class LaftrBaselineConf:
 @dataclass
 class CelebaErmBaselineConf:
     _target_: str = "extinct.models.CelebaErmBaseline"
-    enc: Any = MISSING  # Module
-    clf: Any = MISSING  # Module
     lr: float = MISSING
     weight_decay: float = MISSING
     lr_gamma: float = MISSING

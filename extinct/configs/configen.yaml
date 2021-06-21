@@ -21,7 +21,7 @@ configen:
         - CelebaDataModule
     - name: extinct.models
       classes:
-        - KCBaseline
+        - CelebaKCBaseline
         - LaftrBaseline
         - CelebaErmBaseline
     - name: extinct.models.dino

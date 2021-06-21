@@ -2,12 +2,12 @@ from kit import implements
 from torch import Tensor
 
 from extinct.datamodules.structures import DataBatch
-from extinct.models.erm_baseline import ErmBaseline
+from extinct.models.erm_baseline import CelebaErmBaseline, ErmBaseline
 
-__all__ = ["KCBaseline"]
+__all__ = ["CelebaKCBaseline"]
 
 
-class KCBaseline(ErmBaseline):
+class CelebaKCBaseline(CelebaErmBaseline):
     @implements(ErmBaseline)
     def _get_loss(self, logits: Tensor, batch: DataBatch) -> Tensor:
         return self._loss_fn(input=logits, target=batch.y.float(), weight=batch.iw)

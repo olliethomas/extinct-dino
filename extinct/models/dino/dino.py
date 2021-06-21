@@ -122,7 +122,7 @@ class DINO(ModelBase):
             out_dim=self.out_dim,
             warmup_teacher_temp=self.teacher_temp,
             teacher_temp=self.teacher_temp,
-            warmup_teacher_temp_iters=self.warmup_teacher_temp_iters,
+            warmup_teacher_temp_iters=min(trainer.max_steps - 1, self.warmup_teacher_temp_iters),  # type: ignore
             total_iters=trainer.max_steps,  # type: ignore
         )
 
@@ -130,7 +130,7 @@ class DINO(ModelBase):
             base_value=self.learning_rate * datamodule.batch_size / 256.0,  # linear scaling rule
             final_value=self.min_lr,
             total_iters=trainer.max_steps,  # type: ignore
-            warmup_iters=self.warmup_iters,
+            warmup_iters=min(trainer.max_steps - 1, self.warmup_iters),  # type: ignore
         )
         self.wd_schedule = cosine_scheduler(
             base_value=self.weight_decay,
@@ -236,6 +236,7 @@ class DINO(ModelBase):
                 weight_decay=0,
                 lr=self.lr_eval,
             )
+            self.eval_clf.target = self.target
             self.eval_trainer.fit(self.eval_clf, datamodule=self.datamodule)
             super().on_validation_start()
         else:

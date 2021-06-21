@@ -3,7 +3,6 @@ from __future__ import annotations
 import numpy as np
 import torch
 from torch import Tensor
-import torch.distributed as dist
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -22,6 +21,7 @@ class DINOLoss(nn.Module):
         center_momentum: float = 0.9,
     ):
         super().__init__()
+        self.out_dim = out_dim
         self.student_temp = student_temp
         self.center_momentum = center_momentum
         self.register_buffer("center", torch.zeros(1, out_dim))
@@ -46,8 +46,8 @@ class DINOLoss(nn.Module):
         teacher_out = ((teacher_output - self.center) / temp).softmax(dim=-1)
         teacher_out = teacher_out.detach().chunk(2)
 
-        total_loss = student_out.new_zeros(())
-        n_loss_terms = student_out.new_zeros(())
+        total_loss = student_out[-1].new_zeros(())
+        n_loss_terms = student_out[-1].new_zeros(())
         for iq, q in enumerate(teacher_out):
             for v in range(len(student_out)):
                 if v == iq:
@@ -66,8 +66,7 @@ class DINOLoss(nn.Module):
         Update center used for teacher output.
         """
         batch_center = torch.sum(teacher_output, dim=0, keepdim=True)
-        dist.all_reduce(batch_center)
-        batch_center = batch_center / (len(teacher_output) * dist.get_world_size())
+        batch_center = batch_center / (len(teacher_output))
 
         # ema update
         self.center = self.center * self.center_momentum + batch_center * (1 - self.center_momentum)

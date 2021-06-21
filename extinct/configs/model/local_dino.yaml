@@ -1,0 +1,19 @@
+defaults:
+  - /schema/model: dino
+
+# TODO: Find a way to speed this up for running locally
+lr: 5.e-4
+warmup_iters: 10
+min_lr: 1.e-6
+freeze_last_layer: 100
+patch_size: 16
+out_dim: 65636
+norm_last_layer: True
+use_bn_in_head: False
+momentum_teacher: 0.996
+teacher_temp: 0.04
+warmup_teacher_temp_iters: 3
+eval_method: lin_clf
+num_eval_blocks: 1
+lr_eval: 1.e-4
+lin_clf_steps: 1

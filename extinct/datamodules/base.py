@@ -85,16 +85,17 @@ class VisionDataModule(VisionBaseDataModule):
         # Base augmentations (augmentations that are applied to all splits of the data)
         augs: list[A.ImageOnlyTransform | A.Compose] = [self._base_augmentations]
         # Add training augmentations on top of base augmentations
-        if train and self.aug_mode is TrainAugMode.basic:
-            augs.append(self._train_augmentations)
-        elif train and self.aug_mode is TrainAugMode.dino:
-            augs.append(
-                DinoAugmentation(
-                    global_crops_scale=self.global_crops_scale,
-                    local_crops_scale=self.local_crops_scale,
-                    local_crops_number=self.local_crops_number,
-                )
-            )  # ToTensorV2 should always be the final op in the albumenations pipeline
+        if train:
+            if self.aug_mode is TrainAugMode.basic:
+                augs.append(self._train_augmentations)
+            elif self.aug_mode is TrainAugMode.dino:
+                augs.append(
+                    DinoAugmentation(
+                        global_crops_scale=self.global_crops_scale,
+                        local_crops_scale=self.local_crops_scale,
+                        local_crops_number=self.local_crops_number,
+                    )
+                )  # ToTensorV2 should always be the final op in the albumenations pipeline
         augs.append(self._normalization)
         return A.Compose(augs)
 
