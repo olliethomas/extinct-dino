@@ -19,10 +19,7 @@ from extinct.hydra.extinct.models.configs import (
     LaftrBaselineConf,
 )
 from extinct.hydra.extinct.models.dino.configs import DINOConf
-from extinct.hydra.pytorch_lightning.trainer.configs import (
-    TrainerConf,  # type: ignore[import]
-)
-from extinct.models.finetuning import FineTuner
+from extinct.hydra.pytorch_lightning.trainer.configs import TrainerConf
 from extinct.utils.callbacks import IterationBasedProgBar
 
 
@@ -133,7 +130,7 @@ def start(cfg: Config, raw_config: Optional[Dict[str, Any]]) -> None:
     exp_logger.experiment.finish()
 
 
-def fit_and_test(cfg):
+def fit_and_test(cfg: Config) -> None:
     _trainer = copy.deepcopy(cfg.aux_trainer)
     clf_model = AuxClassifier(
         enc=cfg.model.enc, classifier=cfg.model.clf, lr=1e-3, weight_decay=1e-8, lr_gamma=0.999

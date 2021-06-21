@@ -48,7 +48,7 @@ class DropPath(nn.Module):
         super().__init__()
         self.drop_prob = drop_prob
 
-    def forward(self, x) -> Tensor:
+    def forward(self, x: Tensor) -> Tensor:
         return drop_path(x, self.drop_prob, self.training)
 
 
@@ -177,20 +177,20 @@ class VisionTransformer(nn.Module):
 
     def __init__(
         self,
-        img_size=[224],
-        patch_size=16,
-        in_chans=3,
-        num_classes=0,
-        embed_dim=768,
-        depth=12,
-        num_heads=12,
-        mlp_ratio=4.0,
-        qkv_bias=False,
-        qk_scale=None,
-        drop_rate=0.0,
-        attn_drop_rate=0.0,
-        drop_path_rate=0.0,
-        norm_layer=nn.LayerNorm,
+        img_size: list[int] = [224],
+        patch_size: int = 16,
+        in_chans: int = 3,
+        num_classes: int = 0,
+        embed_dim: int = 768,
+        depth: int = 12,
+        num_heads: int = 12,
+        mlp_ratio: float = 4.0,
+        qkv_bias: bool = False,
+        qk_scale: float | None = None,
+        drop_rate: float = 0.0,
+        attn_drop_rate: float = 0.0,
+        drop_path_rate: float = 0.0,
+        norm_layer: nn.Module = nn.LayerNorm,
         **kwargs: Any,
     ) -> None:
         super().__init__()
@@ -286,7 +286,7 @@ class VisionTransformer(nn.Module):
         x = self.norm(x)
         return x[:, 0]
 
-    def get_last_selfattention(self, x) -> Tensor:
+    def get_last_selfattention(self, x: Tensor) -> Tensor:
         x = self.prepare_tokens(x)
         for i, blk in enumerate(self.blocks):
             if i < len(self.blocks) - 1:

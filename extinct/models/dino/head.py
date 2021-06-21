@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import torch
 from torch import Tensor
 import torch.nn as nn
 import torch.nn.functional as F
@@ -39,7 +40,7 @@ class DINOHead(nn.Module):
             self.mlp = nn.Sequential(*layers)
         self.apply(self._init_weights)
         self.last_layer = nn.utils.weight_norm(nn.Linear(bottleneck_dim, out_dim, bias=False))
-        self.last_layer.weight_g.data.fill_(1)  # type: ignore
+        self.last_layer.weight_g.data.fill_(1)
         if norm_last_layer:
             self.last_layer.weight_g.requires_grad = False
 
@@ -90,7 +91,7 @@ class MultiCropWrapper(nn.Module):
             if start_idx == 0:
                 output = _out
             else:
-                output = torch.cat((output, _out))  # type: ignore
+                output = torch.cat((output, _out))
             start_idx = end_idx
         # Run the head forward on the concatenated features.
-        return self.head(output)  # type: ignore
+        return self.head(output)

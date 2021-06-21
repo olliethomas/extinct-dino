@@ -33,7 +33,7 @@ class DinoAugmentation(A.ImageOnlyTransform):
         self.global_transfo1 = A.Compose(
             [
                 A.RandomResizedCrop(
-                    height=224, width=224, scale=global_crops_scale, interpolation=cv2.INTER_CUBIC  # type: ignore
+                    height=224, width=224, scale=global_crops_scale, interpolation=cv2.INTER_CUBIC
                 ),
                 flip_and_color_jitter,
                 A.GaussianBlur(p=1.0, sigma_limit=(0.1, 2)),
@@ -43,7 +43,7 @@ class DinoAugmentation(A.ImageOnlyTransform):
         self.global_transfo2 = A.Compose(
             [
                 A.RandomResizedCrop(
-                    height=224, width=224, scale=global_crops_scale, interpolation=cv2.INTER_CUBIC  # type: ignore
+                    height=224, width=224, scale=global_crops_scale, interpolation=cv2.INTER_CUBIC
                 ),
                 flip_and_color_jitter,
                 A.GaussianBlur(p=1.0, sigma_limit=(0.1, 2)),
@@ -56,7 +56,7 @@ class DinoAugmentation(A.ImageOnlyTransform):
         self.local_transfo = A.Compose(
             [
                 A.RandomResizedCrop(
-                    height=96, width=96, scale=local_crops_scale, interpolation=cv2.INTER_CUBIC  # type: ignore
+                    height=96, width=96, scale=local_crops_scale, interpolation=cv2.INTER_CUBIC
                 ),
                 flip_and_color_jitter,
                 A.GaussianBlur(p=1.0, sigma_limit=(0.1, 2)),
