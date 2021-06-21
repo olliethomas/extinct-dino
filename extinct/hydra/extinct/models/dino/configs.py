@@ -5,6 +5,7 @@
 # flake8: noqa
 
 from dataclasses import dataclass, field
+from extinct.models.dino.eval import EvalMethod
 from extinct.models.dino.vit import VitArch
 
 
@@ -25,5 +26,6 @@ class DINOConf:
     momentum_teacher: float = 0.996
     teacher_temp: float = 0.04
     warmup_teacher_temp_iters: int = 30
+    eval_method: EvalMethod = EvalMethod.lin_clf
     num_eval_blocks: int = 1
     lr_eval: float = 0.0001

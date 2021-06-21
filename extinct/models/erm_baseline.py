@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Any
 
 import ethicml as em
 from kit import implements
@@ -49,7 +50,7 @@ class ErmBaseline(ModelBase):
         self.clf.apply(self._maybe_reset_parameters)
 
     def build(self, datamodule: VisionDataModule, trainer: pl.Trainer) -> None:
-        self.net = Mp64x64Net(batch_norm=self.batch_norm, in_chans=3, target_dim=1)
+        return None
 
     @implements(pl.LightningModule)
     def configure_optimizers(
@@ -79,14 +80,14 @@ class ErmBaseline(ModelBase):
     @implements(ModelBase)
     def _inference_epoch_end(
         self, output_results: list[dict[str, Tensor]], stage: Stage
-    ) -> dict[str, Tensor]:
+    ) -> dict[str, Any]:
         all_y = torch.cat([_r["y"] for _r in output_results], 0)
         all_s = torch.cat([_r["s"] for _r in output_results], 0)
         all_preds = torch.cat([_r["preds"] for _r in output_results], 0)
 
         dt = em.DataTuple(
             x=pd.DataFrame(
-                torch.rand_like(all_s, dtype=float).detach().cpu().numpy(), columns=["x0"]
+                torch.rand_like(all_s, dtype=torch.float).detach().cpu().numpy(), columns=["x0"]
             ),
             s=pd.DataFrame(all_s.detach().cpu().numpy(), columns=["s"]),
             y=pd.DataFrame(all_y.detach().cpu().numpy(), columns=["y"]),
