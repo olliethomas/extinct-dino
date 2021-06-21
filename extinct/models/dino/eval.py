@@ -90,6 +90,10 @@ class KNN:
         assert self._target is not None
         return self._target
 
+    @target.setter
+    def target(self, target: str) -> None:
+        self._target = target
+
     def __init__(self, train_features: Tensor, train_labels: Tensor, k: int = 5) -> None:
         self.train_features = nn.Parameter(
             F.normalize(train_features.detach(), dim=1, p=2), requires_grad=False
