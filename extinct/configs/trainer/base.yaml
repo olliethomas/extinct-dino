@@ -8,4 +8,5 @@ auto_scale_batch_size: False
 accelerator: null
 terminate_on_nan: True
 val_check_interval: 150
+max_steps: 5000
 distributed_backend: null
