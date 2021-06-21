@@ -12,7 +12,7 @@ __all__ = ["IterationBasedProgBar"]
 class IterationBasedProgBar(ProgressBar):
     def init_train_tqdm(self) -> tqdm:
         """Override this to customize the tqdm bar for training."""
-        bar = tqdm(
+        return tqdm(
             desc='Training',
             initial=self.train_batch_idx,
             position=(2 * self.process_position),
@@ -22,7 +22,6 @@ class IterationBasedProgBar(ProgressBar):
             file=sys.stdout,
             smoothing=0,
         )
-        return bar
 
     def on_train_start(self, trainer: pl.Trainer, pl_module: pl.LightningModule) -> None:
         self._train_batch_idx = trainer.batch_idx
@@ -49,14 +48,13 @@ class IterationBasedProgBar(ProgressBar):
     def init_validation_tqdm(self) -> tqdm:
         """Override this to customize the tqdm bar for validation."""
         # The main progress bar doesn't exist in `trainer.validate()`
-        bar = tqdm(
+        return tqdm(
             desc='Validating',
             disable=self.is_disabled,
             leave=True,
             dynamic_ncols=True,
             file=sys.stdout,
         )
-        return bar
 
     def on_validation_start(self, trainer: pl.Trainer, pl_module: pl.LightningModule) -> None:
         self._val_batch_idx = 0

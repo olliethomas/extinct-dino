@@ -88,10 +88,7 @@ class MultiCropWrapper(nn.Module):
         start_idx = 0
         for end_idx in idx_crops:
             _out = self.backbone(torch.cat(x[start_idx:end_idx]))
-            if start_idx == 0:
-                output = _out
-            else:
-                output = torch.cat((output, _out))
+            output: Tensor = _out if start_idx == 0 else torch.cat((output, _out))
             start_idx = end_idx
         # Run the head forward on the concatenated features.
         return self.head(output)
