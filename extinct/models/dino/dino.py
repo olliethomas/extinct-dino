@@ -169,8 +169,8 @@ class DINO(ModelBase):
         for param_q, param_k in zip(self.student.parameters(), self.teacher.parameters()):
             param_k.data = param_k.data * em + param_q.data * (1.0 - em)
 
-    def _cancel_gradients_last_layer(self, epoch: int) -> None:
-        if epoch >= self.freeze_last_layer:
+    def _cancel_gradients_last_layer(self, train_itr: int) -> None:
+        if train_itr >= self.freeze_last_layer:
             return
         for n, p in self.student.named_parameters():
             if "last_layer" in n:
@@ -206,7 +206,7 @@ class DINO(ModelBase):
     ) -> None:
         # Keep the output layer fixed until the epoch-threshold has been reached
         # Typicacally doing so during the first epoch helps training.
-        self._cancel_gradients_last_layer(epoch=epoch)
+        self._cancel_gradients_last_layer(train_itr=batch_idx)
         # Update the student's parameters using the DINO loss
         super().optimizer_step(
             epoch=epoch,
