@@ -1,18 +1,19 @@
 from __future__ import annotations
-from typing import Callable, cast
+from typing import Any, Callable, cast
 
 from kit import implements
 import numpy as np
 import pytorch_lightning as pl
 import torch
 from torch import Tensor, nn, optim
+from torch.utils.data import DataLoader
 
 from extinct.datamodules import DataBatch, Stage, VisionDataModule
 from extinct.models.base import ModelBase
 from extinct.utils.callbacks import IterationBasedProgBar
 
 from . import vit
-from .eval import DINOLinearClassifier
+from .eval import KNN, DatasetEncoderRunner, DINOLinearClassifier, EvalMethod
 from .head import DINOHead, MultiCropWrapper
 from .loss import DINOLoss
 from .utils import cosine_scheduler, get_params_groups
@@ -24,7 +25,7 @@ class DINO(ModelBase):
     _loss_fn: DINOLoss
     student: MultiCropWrapper
     teacher: MultiCropWrapper
-    linear_clf_trainer: pl.Trainer
+    eval_trainer: pl.Trainer
     lr_schedule: np.ndarray
     wd_schedule: np.ndarray
     momentum_schedule: np.ndarray
@@ -46,6 +47,7 @@ class DINO(ModelBase):
         momentum_teacher: float = 0.996,
         teacher_temp: float = 0.04,
         warmup_teacher_temp_iters: int = 30,
+        eval_method: EvalMethod = EvalMethod.lin_clf,
         num_eval_blocks: int = 1,
         lr_eval: float = 1.0e-4,
     ) -> None:
@@ -70,6 +72,7 @@ class DINO(ModelBase):
         self.teacher_temp = teacher_temp
         self.warmup_teacher_temp_iters = warmup_teacher_temp_iters
         self.lr_eval = lr_eval
+        self.eval_method = eval_method
 
         self._arch_fn = cast(
             Callable[[int], vit.VisionTransformer], getattr(vit, f"vit_{arch.value}")
@@ -80,6 +83,23 @@ class DINO(ModelBase):
         # We define an encoder-extracting method for consistency with the other models -
         # fit_and_test, for instance, expects a model to comprise of two parts: enc and clf.
         return self.student.backbone
+
+    def _encode_dataset(self, stage: Stage) -> DataBatch:
+        # It's not strictly necessary to disable shuffling but pytorch-lightning complains if its
+        # enabled during 'testing'
+        dl_kwargs = dict(eval=True) if stage == "train" else {}
+        # Sampler needs to be set to None, meaning the default sequential/batch sampler combination
+        # is used, so that the full dataset is encoded (with no duplicates)
+        dataloader = cast(DataLoader, getattr(self.datamodule, f"{stage}_dataloader")(**dl_kwargs))
+        # Encode the dataset
+        dataset_encoder = DatasetEncoderRunner(model=self.student.backbone)
+        self.eval_trainer.test(
+            dataset_encoder,
+            test_dataloaders=dataloader,
+            verbose=False,
+        )
+        # Extract the encodings/associated labels from the dataset encoder
+        return dataset_encoder.encoded_dataset
 
     @implements(ModelBase)
     def build(self, datamodule: VisionDataModule, trainer: pl.Trainer) -> None:
@@ -119,13 +139,13 @@ class DINO(ModelBase):
             final_value=1,
             total_iters=trainer.max_steps,  # type: ignore
         )
-        self.linear_clf_fitter = pl.Trainer(
+        self.eval_trainer = pl.Trainer(
             gpus=trainer.gpus,
             max_steps=self.linear_clf_steps,
             distributed_backend=trainer.distributed_backend,
             callbacks=[IterationBasedProgBar],
         )
-        self.linear_clf = DINOLinearClassifier(
+        self.eval_clf = DINOLinearClassifier(
             enc=self.student.backbone,
             target_dim=datamodule.y_dim,
             max_steps=trainer.max_steps,  # type: ignore
@@ -203,17 +223,26 @@ class DINO(ModelBase):
 
     @implements(pl.LightningModule)
     def on_validation_start(self) -> None:
-        self.linear_clf.reset_parameters()
-        self.linear_clf_trainer.fit(self.linear_clf, datamodule=self.datamodule)
-        super().on_validation_start()
+        if self.eval_method is EvalMethod.lin_clf:
+            assert isinstance(self.eval_clf, DINOLinearClassifier)
+            self.eval_clf.reset_parameters()
+            self.eval_trainer.fit(self.eval_clf, datamodule=self.datamodule)
+            super().on_validation_start()
+        else:
+            train_data_encoded = self._encode_dataset(stage="train")
+            self.eval_clf = KNN(
+                train_features=train_data_encoded.x, train_labels=train_data_encoded.y
+            )
 
     @implements(ModelBase)
-    def _inference_step(self, batch: DataBatch, stage: Stage) -> dict[str, Tensor]:
-        return self.linear_clf._inference_step(batch=batch, stage=stage)
+    def _inference_step(self, batch: DataBatch, stage: Stage) -> dict[str, Any]:
+        return self.eval_clf._inference_step(batch=batch, stage=stage)
 
     @implements(ModelBase)
-    def _inference_epoch_end(self, output_results: list[dict[str, Tensor]], stage: Stage) -> None:
-        return self.linear_clf._inference_epoch_end(output_results=output_results, stage=stage)
+    def _inference_epoch_end(
+        self, output_results: list[dict[str, Tensor]], stage: Stage
+    ) -> dict[str, Any]:
+        return self.eval_clf._inference_epoch_end(output_results=output_results, stage=stage)
 
     @implements(nn.Module)
     def forward(self, x: Tensor) -> Tensor:

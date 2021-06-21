@@ -21,16 +21,6 @@ class KCBaselineConf:
 
 
 @dataclass
-class ErmBaselineConf:
-    _target_: str = "extinct.models.ErmBaseline"
-    enc: Any = MISSING  # Module
-    clf: Any = MISSING  # Module
-    lr: float = MISSING
-    weight_decay: float = MISSING
-    lr_gamma: float = MISSING
-
-
-@dataclass
 class LaftrBaselineConf:
     _target_: str = "extinct.models.LaftrBaseline"
     lr: float = MISSING
@@ -41,3 +31,14 @@ class LaftrBaselineConf:
     recon_weight: float = MISSING
     clf_weight: float = MISSING
     adv_weight: float = MISSING
+
+
+@dataclass
+class CelebaErmBaselineConf:
+    _target_: str = "extinct.models.CelebaErmBaseline"
+    enc: Any = MISSING  # Module
+    clf: Any = MISSING  # Module
+    lr: float = MISSING
+    weight_decay: float = MISSING
+    lr_gamma: float = MISSING
+    batch_norm: bool = True
