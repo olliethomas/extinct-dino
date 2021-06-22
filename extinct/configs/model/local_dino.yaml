@@ -16,4 +16,4 @@ warmup_teacher_temp_iters: 3
 eval_method: lin_clf
 num_eval_blocks: 1
 lr_eval: 1.e-4
-lin_clf_steps: 1
+lin_clf_epochs: 1

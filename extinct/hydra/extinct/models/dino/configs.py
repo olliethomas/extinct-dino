@@ -29,4 +29,4 @@ class DINOConf:
     eval_method: EvalMethod = EvalMethod.lin_clf
     num_eval_blocks: int = 1
     lr_eval: float = 0.0001
-    lin_clf_steps: int = 1000
+    lin_clf_epochs: int = 100
