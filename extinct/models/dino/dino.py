@@ -253,6 +253,7 @@ class DINO(ModelBase):
 
     @implements(ModelBase)
     def _inference_step(self, batch: DataBatch, stage: Stage) -> dict[str, Any]:
+        self.eval_clf.to(batch.x.device)
         return self.eval_clf._inference_step(batch=batch, stage=stage)
 
     @implements(ModelBase)
