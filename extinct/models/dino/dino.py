@@ -159,6 +159,14 @@ class DINO(ModelBase):
         )
         self.eval_clf.target = self.target
 
+        print(
+            f"8: {self.eval_clf.__class__.__name__=}, {self.eval_clf.on_gpu=}, {self.eval_clf.device=}"
+        )
+        self.eval_clf.to(self.trainer.device)
+        print(
+            f"9: {self.eval_clf.__class__.__name__=}, {self.eval_clf.on_gpu=}, {self.eval_clf.device=}"
+        )
+
     @implements(pl.LightningModule)
     def configure_optimizers(self) -> optim.Optimizer:
         return optim.AdamW(
@@ -256,7 +264,9 @@ class DINO(ModelBase):
     @implements(ModelBase)
     def _inference_step(self, batch: DataBatch, stage: Stage) -> dict[str, Any]:
         print(f"5: {self.__class__.__name__=}, {self.on_gpu=}, {self.device=}")
-        print(f"7: {self.eval_clf.__class__.__name__=}, {self.on_gpu=}, {self.device=}")
+        print(
+            f"7: {self.eval_clf.__class__.__name__=}, {self.eval_clf.on_gpu=}, {self.eval_clf.device=}"
+        )
         return self.eval_clf._inference_step(batch=batch, stage=stage)
 
     @implements(ModelBase)
