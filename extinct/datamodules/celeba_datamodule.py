@@ -4,8 +4,8 @@ from typing import Any, ClassVar, Optional
 
 import albumentations as A
 import ethicml as em
-from ethicml import implements
 import ethicml.vision as emvi
+from kit import implements
 from pytorch_lightning import LightningDataModule
 import torch
 from torch.utils.data.dataset import random_split
