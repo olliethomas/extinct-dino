@@ -256,6 +256,7 @@ class DINO(ModelBase):
     @implements(ModelBase)
     def _inference_step(self, batch: DataBatch, stage: Stage) -> dict[str, Any]:
         print(f"5: {self.__class__.__name__=}, {self.on_gpu=}, {self.device=}")
+        print(f"7: {self.eval_clf.__class__.__name__=}, {self.on_gpu=}, {self.device=}")
         return self.eval_clf._inference_step(batch=batch, stage=stage)
 
     @implements(ModelBase)
