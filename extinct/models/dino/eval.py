@@ -72,7 +72,9 @@ class DatasetEncoderRunner(pl.LightningModule):
 
     @implements(pl.LightningModule)
     def test_step(self, batch: DataBatch, batch_idx: int) -> DataBatch:
-        return DataBatch(self(batch.x), *batch[1:])
+        return DataBatch(
+            x=self(batch.x).detach().cpu(), s=batch.s.cpu(), y=batch.y.cpu(), iw=batch.iw.cpu()
+        )
 
     @implements(pl.LightningModule)
     def test_epoch_end(self, outputs: list[DataBatch]) -> None:
@@ -107,7 +109,7 @@ class KNN:
 
     def forward(self, test_features: Tensor) -> Tensor:
         test_features = F.normalize(test_features, dim=1, p=2)
-        similarity = test_features @ self.train_features.t()
+        similarity = test_features.detach().cpu() @ self.train_features.t()
         # distances, indices = similarity.topk(k, largest=True, sorted=True)
         return self.train_labels[similarity.argmax()]
 
