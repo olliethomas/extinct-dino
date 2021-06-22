@@ -284,7 +284,7 @@ torchvision = "^0.9"
 type = "git"
 url = "https://github.com/predictive-analytics-lab/fair-bolts.git"
 reference = "main"
-resolved_reference = "8262333adb13e76f61642957d7ccbed7d8bf2a53"
+resolved_reference = "f5ef664a5505fe72dba0f706815bd43408b78aea"
 
 [[package]]
 name = "filelock"
