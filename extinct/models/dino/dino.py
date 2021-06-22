@@ -150,6 +150,14 @@ class DINO(ModelBase):
             callbacks=[IterationBasedProgBar()],
         )
         self.datamodule = datamodule
+        self.eval_clf = DINOLinearClassifier(
+            enc=self.student.backbone,
+            target_dim=self.datamodule.y_dim,
+            max_steps=self.lin_clf_steps,
+            weight_decay=0,
+            lr=self.lr_eval,
+        )
+        self.eval_clf.target = self.target
 
     @implements(pl.LightningModule)
     def configure_optimizers(self) -> optim.Optimizer:
@@ -231,14 +239,7 @@ class DINO(ModelBase):
 
     def _on_inference_start(self) -> None:
         if self.eval_method is EvalMethod.lin_clf:
-            self.eval_clf = DINOLinearClassifier(
-                enc=self.student.backbone,
-                target_dim=self.datamodule.y_dim,
-                max_steps=self.lin_clf_steps,
-                weight_decay=0,
-                lr=self.lr_eval,
-            )
-            self.eval_clf.target = self.target
+
             print(
                 f"{self.eval_clf.device=}, {self.eval_trainer.gpus=}, {self.eval_trainer.on_gpu=}, {self.eval_trainer.num_gpus=}"
             )
