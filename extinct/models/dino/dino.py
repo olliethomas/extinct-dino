@@ -144,7 +144,7 @@ class DINO(ModelBase):
             total_iters=trainer.max_steps,  # type: ignore
         )
         self.eval_trainer = pl.Trainer(
-            gpus=trainer.gpus,
+            gpus=trainer.num_gpus,
             max_steps=self.lin_clf_steps,
             distributed_backend=trainer.distributed_backend,
             callbacks=[IterationBasedProgBar()],
@@ -247,6 +247,7 @@ class DINO(ModelBase):
                 train_features=train_data_encoded.x, train_labels=train_data_encoded.y
             )
         self.eval_clf.target = self.target
+        self.eval_clf.to(self.device)
 
     @implements(ModelBase)
     def _inference_step(self, batch: DataBatch, stage: Stage) -> dict[str, Any]:
