@@ -238,6 +238,7 @@ class DINO(ModelBase):
                 lr=self.lr_eval,
             )
             self.eval_clf.target = self.target
+            assert self.eval_trainer.gpus > 0
             self.eval_trainer.fit(
                 self.eval_clf, train_dataloader=self.datamodule.train_dataloader(eval=True)
             )
