@@ -5,13 +5,13 @@ from typing import Any, Callable, cast
 from kit import implements
 import numpy as np
 import pytorch_lightning as pl
+from pytorch_lightning.callbacks.progress import ProgressBar
 import torch
 from torch import Tensor, nn, optim
 from torch.utils.data import DataLoader
 
 from extinct.datamodules import DataBatch, Stage, VisionDataModule
 from extinct.models.base import ModelBase
-from extinct.utils.callbacks import IterationBasedProgBar
 
 from . import vit
 from .eval import KNN, DatasetEncoderRunner, DINOLinearClassifier, EvalMethod
@@ -52,7 +52,7 @@ class DINO(ModelBase):
         eval_method: EvalMethod = EvalMethod.lin_clf,
         num_eval_blocks: int = 1,
         lr_eval: float = 1.0e-4,
-        lin_clf_steps: int = 1000,
+        lin_clf_epochs: int = 100,
     ) -> None:
         """
         Args:
@@ -76,7 +76,7 @@ class DINO(ModelBase):
         self.warmup_teacher_temp_iters = warmup_teacher_temp_iters
         self.lr_eval = lr_eval
         self.eval_method = eval_method
-        self.lin_clf_steps = lin_clf_steps
+        self.lin_clf_epochs = lin_clf_epochs
 
         self._arch_fn = cast(
             Callable[[int], vit.VisionTransformer], getattr(vit, f"vit_{arch.name}")
@@ -146,8 +146,9 @@ class DINO(ModelBase):
         )
         self.datamodule = datamodule
         self.eval_trainer = copy.deepcopy(trainer)
-        self.eval_trainer.max_steps = self.lin_clf_steps
-        self.eval_trainer.callbacks = [IterationBasedProgBar()]
+        self.eval_trainer.max_epochs = self.lin_clf_epochs
+        self.eval_trainer.max_steps = None
+        self.eval_trainer.callbacks = [ProgressBar()]
 
     @implements(pl.LightningModule)
     def configure_optimizers(self) -> optim.Optimizer:
@@ -231,7 +232,7 @@ class DINO(ModelBase):
             self.eval_clf = DINOLinearClassifier(
                 enc=self.student.backbone,
                 target_dim=self.datamodule.y_dim,
-                max_steps=self.lin_clf_steps,
+                epochs=self.lin_clf_epochs,
                 weight_decay=0,
                 lr=self.lr_eval,
             )
