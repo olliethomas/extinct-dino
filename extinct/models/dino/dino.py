@@ -238,7 +238,6 @@ class DINO(ModelBase):
                 lr=self.lr_eval,
             )
             self.eval_clf.target = self.target
-            self.print(f"{self.eval_clf.device=}")
             self.eval_trainer.fit(
                 self.eval_clf, train_dataloader=self.datamodule.train_dataloader(eval=True)
             )
