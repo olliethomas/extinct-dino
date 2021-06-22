@@ -300,6 +300,7 @@ class VisionTransformer(nn.Module):
         return x
 
     def get_intermediate_layers(self, x: Tensor, n: int = 1) -> list[Tensor]:
+        self.norm.to(x.device)
         x = self.prepare_tokens(x)
         # we return the output tokens from the `n` last blocks
         output = []
