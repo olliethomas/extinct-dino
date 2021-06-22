@@ -238,7 +238,6 @@ class DINO(ModelBase):
                 weight_decay=0,
                 lr=self.lr_eval,
             )
-            self.eval_clf.to(self.device)
             self.eval_clf.target = self.target
             print(
                 f"{self.eval_clf.device=}, {self.eval_trainer.gpus=}, {self.eval_trainer.on_gpu=}, {self.eval_trainer.num_gpus=}"
