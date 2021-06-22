@@ -16,6 +16,7 @@ class FineTuner(ErmBaseline):
 
     @implements(nn.Module)
     def forward(self, x: Tensor) -> Tensor:
+        print(f"13: {self.__class__.__name__=}, {self.on_gpu=}, {self.device=}")
         with torch.no_grad():
             z = self.enc(x)
         return self.clf(z)

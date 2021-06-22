@@ -238,11 +238,13 @@ class DINO(ModelBase):
 
     @implements(pl.LightningModule)
     def on_validation_start(self):
+        print(f"11: {self.__class__.__name__=}, {self.on_gpu=}, {self.device=}")
         self._on_inference_start()
         super().on_validation_start()
 
     @implements(pl.LightningModule)
     def on_test_start(self):
+        print(f"12: {self.__class__.__name__=}, {self.on_gpu=}, {self.device=}")
         self._on_inference_start()
         super().on_test_start()
 
@@ -250,7 +252,7 @@ class DINO(ModelBase):
         if self.eval_method is EvalMethod.lin_clf:
 
             print(
-                f"{self.eval_clf.device=}, {self.eval_trainer.gpus=}, {self.eval_trainer.on_gpu=}, {self.eval_trainer.num_gpus=}"
+                f"10: {self.eval_clf.device=}, {self.eval_trainer.gpus=}, {self.eval_trainer.on_gpu=}, {self.eval_trainer.num_gpus=}"
             )
             self.eval_trainer.fit(
                 self.eval_clf, train_dataloader=self.datamodule.train_dataloader(eval=True)

@@ -62,6 +62,7 @@ class ErmBaseline(ModelBase):
         return [opt], [sched]
 
     def _get_loss(self, logits: Tensor, batch: DataBatch) -> Tensor:
+        print(f"14: {self.__class__.__name__=}, {self.on_gpu=}, {self.device=}")
         return self._loss_fn(input=logits, target=batch.y.float())
 
     @implements(ModelBase)
@@ -83,6 +84,7 @@ class ErmBaseline(ModelBase):
     def _inference_epoch_end(
         self, output_results: list[dict[str, Tensor]], stage: Stage
     ) -> dict[str, Tensor]:
+        print(f"15: {self.__class__.__name__=}, {self.on_gpu=}, {self.device=}")
         all_y = torch.cat([_r["y"] for _r in output_results], 0)
         all_s = torch.cat([_r["s"] for _r in output_results], 0)
         all_preds = torch.cat([_r["preds"] for _r in output_results], 0)
@@ -124,6 +126,7 @@ class ErmBaseline(ModelBase):
 
     @implements(nn.Module)
     def forward(self, x: Tensor) -> Tensor:
+        print(f"16: {self.__class__.__name__=}, {self.on_gpu=}, {self.device=}")
         return self.net(x)
 
 
