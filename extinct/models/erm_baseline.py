@@ -66,7 +66,7 @@ class ErmBaseline(ModelBase):
 
     @implements(ModelBase)
     def _inference_step(self, batch: DataBatch, stage: Stage) -> dict[str, Tensor]:
-        print(f"{self.on_gpu=}, {self.device=}")
+        print(f"{self.__class__.__name__=}, {self.on_gpu=}, {self.device=}")
         logits = self.forward(batch.x)
         loss = self._get_loss(logits, batch)
         tm_acc = self.val_acc if stage == "val" else self.test_acc
@@ -110,7 +110,7 @@ class ErmBaseline(ModelBase):
 
     @implements(pl.LightningModule)
     def training_step(self, batch: DataBatch, batch_idx: int) -> Tensor:
-        print(f"{self.on_gpu=}, {self.device=}")
+        print(f"{self.__class__.__name__=}, {self.on_gpu=}, {self.device=}")
         logits = self.forward(batch.x)
         loss = self._get_loss(logits, batch)
         acc = self.train_acc(logits >= 0, batch.y.long())
