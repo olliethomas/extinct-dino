@@ -54,6 +54,7 @@ class DINOLinearClassifier(FineTuner):
 
     @implements(nn.Module)
     def forward(self, x: Tensor) -> Tensor:
+        self.clf.to(x.device)
         return self.clf(self.enc.encode(x, num_eval_blocks=self.num_eval_blocks))
 
 
