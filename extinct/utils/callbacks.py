@@ -57,6 +57,7 @@ class IterationBasedProgBar(ProgressBar):
         )
 
     def on_validation_start(self, trainer: pl.Trainer, pl_module: pl.LightningModule) -> None:
+        print(f"22: {self.__class__.__name__=}, {self.on_gpu=}, {self.eval_clf.device=}")
         self._val_batch_idx = 0
         if trainer.sanity_checking:
             reset(self.val_progress_bar, sum(trainer.num_sanity_val_batches))
