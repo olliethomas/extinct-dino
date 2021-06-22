@@ -182,7 +182,7 @@ class DINO(ModelBase):
 
     @implements(pl.LightningModule)
     def training_step(self, batch: DataBatch, batch_idx: int) -> Tensor:
-        print(f"{self.__class__.__name__=}, {self.on_gpu=}, {self.device=}")
+        print(f"4: {self.__class__.__name__=}, {self.on_gpu=}, {self.device=}")
         for i, param_group in enumerate(self.trainer.optimizers[0].param_groups):
             param_group["lr"] = self.lr_schedule[batch_idx]
             if i == 0:  # only the first group is regularized
@@ -255,7 +255,7 @@ class DINO(ModelBase):
 
     @implements(ModelBase)
     def _inference_step(self, batch: DataBatch, stage: Stage) -> dict[str, Any]:
-        print(f"{self.__class__.__name__=}, {self.on_gpu=}, {self.device=}")
+        print(f"5: {self.__class__.__name__=}, {self.on_gpu=}, {self.device=}")
         return self.eval_clf._inference_step(batch=batch, stage=stage)
 
     @implements(ModelBase)
