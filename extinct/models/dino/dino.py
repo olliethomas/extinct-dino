@@ -270,6 +270,10 @@ class DINO(ModelBase):
         print(
             f"7: {self.eval_clf.__class__.__name__=}, {self.eval_clf.on_gpu=}, {self.eval_clf.device=}"
         )
+        self.eval_clf.to(self.device)
+        print(
+            f"21: {self.eval_clf.__class__.__name__=}, {self.eval_clf.on_gpu=}, {self.eval_clf.device=}"
+        )
         return self.eval_clf._inference_step(batch=batch, stage=stage)
 
     @implements(ModelBase)
