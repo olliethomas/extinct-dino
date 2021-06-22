@@ -167,7 +167,7 @@ class PatchEmbed(nn.Module):
 
     def forward(self, x: Tensor) -> Tensor:
         print(f"{x.device=}")
-        print(f"{self.proj.device=}")
+        print(f"{self.proj.weight.device=}")
         return self.proj(x).flatten(2).transpose(1, 2)
 
 
