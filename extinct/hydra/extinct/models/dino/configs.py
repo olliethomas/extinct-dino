@@ -7,6 +7,7 @@
 from dataclasses import dataclass, field
 from extinct.models.dino.eval import EvalMethod
 from extinct.models.dino.vit import VitArch
+from typing import Optional
 
 
 @dataclass
@@ -30,3 +31,4 @@ class DINOConf:
     num_eval_blocks: int = 1
     lr_eval: float = 0.0001
     lin_clf_epochs: int = 100
+    batch_size_eval: Optional[int] = None

@@ -12,7 +12,8 @@ from kit import implements
 from kit.torch import InfSequentialBatchSampler as InfSequentialBatchSampler
 from kit.torch import StratifiedSampler
 from pytorch_lightning import LightningDataModule
-from torch.utils.data import DataLoader
+from torch.utils.data import BatchSampler, DataLoader, SequentialSampler
+from torch.utils.data.sampler import BatchSampler
 
 from extinct.datamodules.utils import extract_labels_from_dataset
 
@@ -104,10 +105,18 @@ class VisionDataModule(VisionBaseDataModule):
         return A.Compose(augs)
 
     @implements(LightningDataModule)
-    def train_dataloader(self, shuffle: bool = True, eval: bool = False) -> DataLoader:
+    def train_dataloader(
+        self, shuffle: bool = True, eval: bool = False, batch_size: int | None = None
+    ) -> DataLoader:
         train_data = self._train_data
+        batch_size: int = self.batch_size if batch_size is None else batch_size
+
         if eval:
-            batch_sampler = None
+            batch_sampler = BatchSampler(
+                sampler=SequentialSampler(data_source=train_data),
+                batch_size=batch_size,
+                drop_last=False,
+            )
             if self.aug_mode is TrainAugMode.dino:
                 train_data = copy.deepcopy(train_data)
                 train_data.transform = A.Compose(
@@ -122,7 +131,7 @@ class VisionDataModule(VisionBaseDataModule):
             if self.stratified_sampling:
                 s_all, y_all = extract_labels_from_dataset(self._train_data)
                 group_ids = (y_all * len(s_all.unique()) + s_all).squeeze()
-                num_samples_per_group = self.batch_size // (num_groups := len(group_ids.unique()))
+                num_samples_per_group = batch_size // (num_groups := len(group_ids.unique()))
                 if self.batch_size % num_groups:
                     LOGGER.info(
                         f"For stratified sampling, the batch size must be a multiple of the number of groups."
@@ -136,7 +145,7 @@ class VisionDataModule(VisionBaseDataModule):
                 )
             else:
                 batch_sampler = InfSequentialBatchSampler(
-                    data_source=self._train_data, batch_size=self.batch_size, shuffle=shuffle  # type: ignore
+                    data_source=self._train_data, batch_size=batch_size, shuffle=shuffle  # type: ignore
                 )
         return DataLoader(
             train_data,

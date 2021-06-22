@@ -1,6 +1,6 @@
 from __future__ import annotations
 import copy
-from typing import Any, Callable, cast
+from typing import Any, Callable, Optional, cast
 
 from kit import implements
 import numpy as np
@@ -53,6 +53,7 @@ class DINO(ModelBase):
         num_eval_blocks: int = 1,
         lr_eval: float = 1.0e-4,
         lin_clf_epochs: int = 100,
+        batch_size_eval: Optional[int] = None,
     ) -> None:
         """
         Args:
@@ -77,6 +78,7 @@ class DINO(ModelBase):
         self.lr_eval = lr_eval
         self.eval_method = eval_method
         self.lin_clf_epochs = lin_clf_epochs
+        self.batch_size_eval = batch_size_eval
 
         self._arch_fn = cast(
             Callable[[int], vit.VisionTransformer], getattr(vit, f"vit_{arch.name}")
@@ -148,7 +150,9 @@ class DINO(ModelBase):
         self.eval_trainer = copy.deepcopy(trainer)
         self.eval_trainer.max_epochs = self.lin_clf_epochs
         self.eval_trainer.max_steps = None
-        self.eval_trainer.callbacks = [ProgressBar()]
+        bar = ProgressBar()
+        bar._trainer = self.eval_trainer
+        self.eval_trainer.callbacks = [bar]
 
     @implements(pl.LightningModule)
     def configure_optimizers(self) -> optim.Optimizer:
@@ -238,7 +242,10 @@ class DINO(ModelBase):
             )
             self.eval_clf.target = self.target
             self.eval_trainer.fit(
-                self.eval_clf, train_dataloader=self.datamodule.train_dataloader(eval=True)
+                self.eval_clf,
+                train_dataloader=self.datamodule.train_dataloader(
+                    eval=True, batch_size=self.batch_size_eval
+                ),
             )
         else:
             train_data_encoded = self._encode_dataset(stage="train")
