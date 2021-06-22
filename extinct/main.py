@@ -9,7 +9,6 @@ from hydra.core.config_store import ConfigStore
 from hydra.utils import instantiate
 from omegaconf import DictConfig, MISSING, OmegaConf
 import pytorch_lightning as pl
-from pytorch_lightning.callbacks import EarlyStopping
 from pytorch_lightning.loggers import WandbLogger
 
 from extinct.hydra.extinct.datamodules.configs import CelebaDataModuleConf
@@ -25,7 +24,6 @@ from extinct.utils.callbacks import IterationBasedProgBar
 
 @dataclass
 class ExpConfig:
-    early_stopping: bool = True
     es_patience: int = 3
     log_offline: bool = False
     save_dir: Optional[str] = None
@@ -95,14 +93,6 @@ def start(cfg: Config, raw_config: Optional[Dict[str, Any]]) -> None:
 
     cfg.model.target = cfg.data.train_data.dataset.dataset.ti.y_label
     callbacks: list[pl.Callback] = [IterationBasedProgBar()]
-    if cfg.exp.early_stopping:
-        early_stop_callback = EarlyStopping(
-            monitor='val/loss',
-            min_delta=0.00,
-            patience=cfg.exp.es_patience,
-            verbose=False,
-        )
-        callbacks.append(early_stop_callback)
     cfg.trainer.callbacks = callbacks
 
     # Build the model

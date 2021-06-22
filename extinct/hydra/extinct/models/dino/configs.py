@@ -4,7 +4,7 @@
 # isort:skip_file
 # flake8: noqa
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from extinct.models.dino.eval import EvalMethod
 from extinct.models.dino.vit import VitArch
 
