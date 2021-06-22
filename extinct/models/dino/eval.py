@@ -114,6 +114,7 @@ class KNN:
         return self.train_labels[similarity.argmax()]
 
     def _inference_step(self, batch: DataBatch, stage: Stage) -> dict[str, Tensor]:
+        print(f"{self.on_gpu=}, {self.device=}")
         preds = self.forward(batch.x)
         tm_acc = self.val_acc if stage == "val" else self.test_acc
         tm_acc(preds, batch.y.long())

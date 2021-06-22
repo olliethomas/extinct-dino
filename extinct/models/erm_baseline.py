@@ -66,6 +66,7 @@ class ErmBaseline(ModelBase):
 
     @implements(ModelBase)
     def _inference_step(self, batch: DataBatch, stage: Stage) -> dict[str, Tensor]:
+        print(f"{self.on_gpu=}, {self.device=}")
         logits = self.forward(batch.x)
         loss = self._get_loss(logits, batch)
         tm_acc = self.val_acc if stage == "val" else self.test_acc
