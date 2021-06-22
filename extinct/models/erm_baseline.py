@@ -109,6 +109,7 @@ class ErmBaseline(ModelBase):
 
     @implements(pl.LightningModule)
     def training_step(self, batch: DataBatch, batch_idx: int) -> Tensor:
+        print(f"{self.on_gpu=}, {self.device=}")
         logits = self.forward(batch.x)
         loss = self._get_loss(logits, batch)
         acc = self.train_acc(logits >= 0, batch.y.long())
