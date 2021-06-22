@@ -1,5 +1,4 @@
 import albumentations as A
-from albumentations.pytorch import ToTensorV2
 import cv2
 import numpy as np
 from torch import Tensor
@@ -21,7 +20,7 @@ class DINOAugmentation(A.ImageOnlyTransform):
             A.ToGray(p=0.2),
         ]
         normalize = [
-            ToTensorV2(),
+            # ToTensorV2(),
             # The default per-mean/std values for albumentations.Normalize
             # match the ImageNet ones prescribed by DINO
             A.Normalize(),
@@ -62,8 +61,7 @@ class DINOAugmentation(A.ImageOnlyTransform):
         )
 
     def __call__(self, force_apply: bool, image: np.ndarray) -> list[Tensor]:
-        crops = []
-        crops.append(self.global_transfo1(image=image)["image"])
+        crops = [self.global_transfo1(image=image)["image"]]
         crops.append(self.global_transfo2(image=image)["image"])
         for _ in range(self.local_crops_number):
             crops.append(self.local_transfo(image=image)["image"])
