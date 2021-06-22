@@ -144,7 +144,7 @@ class DINO(ModelBase):
             total_iters=trainer.max_steps,  # type: ignore
         )
         self.eval_trainer = pl.Trainer(
-            gpus=[trainer.gpus],
+            gpus=list(trainer.gpus),
             max_steps=self.lin_clf_steps,
             distributed_backend=trainer.distributed_backend,
             callbacks=[IterationBasedProgBar()],
