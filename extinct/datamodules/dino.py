@@ -14,6 +14,7 @@ class DINOAugmentation(A.ImageOnlyTransform):
         local_crops_scale: tuple[float, float],
         local_crops_number: int,
     ) -> None:
+        super().__init__()
         flip_and_color_jitter = [
             A.HorizontalFlip(p=0.5),
             A.ColorJitter(p=0.8, brightness=0.4, contrast=0.4, saturation=0.2, hue=0.1),
@@ -60,7 +61,7 @@ class DINOAugmentation(A.ImageOnlyTransform):
             ]
         )
 
-    def __call__(self, image: np.ndarray) -> list[Tensor]:
+    def __call__(self, force_apply: bool, image: np.ndarray) -> list[Tensor]:
         crops = []
         crops.append(self.global_transfo1(image=image)["image"])
         crops.append(self.global_transfo2(image=image)["image"])

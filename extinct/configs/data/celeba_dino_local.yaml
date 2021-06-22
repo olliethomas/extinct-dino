@@ -1,0 +1,8 @@
+
+defaults:
+  - celeba_base
+
+data_dir: "~/Data"
+batch_size: 12
+num_workers: 0
+aug_mode: dino
