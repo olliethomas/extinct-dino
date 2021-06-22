@@ -34,12 +34,12 @@ class DINOLinearClassifier(FineTuner):
         target_dim: int,
         weight_decay: float,
         lr: float,
-        max_steps: int,
+        epochs: int,
         num_eval_blocks: int = 1,
     ) -> None:
         clf = nn.Linear(enc.embed_dim * num_eval_blocks, target_dim)
         super().__init__(enc=enc, clf=clf, lr=lr, weight_decay=weight_decay, lr_gamma=1)
-        self.max_steps = max_steps
+        self.epochs = epochs
         self.num_eval_blocks = num_eval_blocks
 
     @implements(pl.LightningModule)
@@ -49,7 +49,7 @@ class DINOLinearClassifier(FineTuner):
         opt = optim.SGD(
             self.clf.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay
         )
-        sched = optim.lr_scheduler.CosineAnnealingLR(optimizer=opt, T_max=self.max_steps, eta_min=0)
+        sched = optim.lr_scheduler.CosineAnnealingLR(optimizer=opt, T_max=self.epochs, eta_min=0)
         return [opt], [sched]
 
     @implements(nn.Module)
