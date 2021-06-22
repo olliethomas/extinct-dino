@@ -26,11 +26,11 @@ class DINOAugmentation(A.ImageOnlyTransform):
         )
         normalize = A.Compose(
             [
-                ToTensorV2(),
                 # The default per-mean/std values for albumentations.Normalize
                 # match the ImageNet ones prescribed by DINO
                 A.Normalize(),
                 A.ToFloat(),
+                ToTensorV2(),
             ]
         )
         self.global_transfo1 = A.Compose(
@@ -40,7 +40,7 @@ class DINOAugmentation(A.ImageOnlyTransform):
                 ),
                 flip_and_color_jitter,
                 A.GaussianBlur(p=1.0, sigma_limit=(0.1, 2)),
-                *normalize,
+                normalize,
             ]
         )
         self.global_transfo2 = A.Compose(
@@ -51,7 +51,7 @@ class DINOAugmentation(A.ImageOnlyTransform):
                 flip_and_color_jitter,
                 A.GaussianBlur(p=1.0, sigma_limit=(0.1, 2)),
                 A.Solarize(p=0.2),
-                *normalize,
+                normalize,
             ]
         )
         # transformation for the local small crops
@@ -67,10 +67,11 @@ class DINOAugmentation(A.ImageOnlyTransform):
             ]
         )
 
-    def __call__(self, image: np.ndarray, **kwargs: Any) -> list[Tensor]:
-        crops = []
-        crops.append(self.global_transfo1(image=image)["image"])
-        crops.append(self.global_transfo2(image=image)["image"])
+    def __call__(self, image: np.ndarray, **kwargs: Any) -> dict[str, list[Tensor]]:
+        crops = [
+            self.global_transfo1(image=image)["image"],
+            self.global_transfo2(image=image)["image"],
+        ]
         for _ in range(self.local_crops_number):
             crops.append(self.local_transfo(image=image)["image"])
-        return crops
+        return {"image": crops}

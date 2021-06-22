@@ -17,10 +17,12 @@ class DINOLoss(nn.Module):
         teacher_temp: float,
         warmup_teacher_temp_iters: int,
         total_iters: int,
+        num_crops: int,
         student_temp: float = 0.1,
         center_momentum: float = 0.9,
     ):
         super().__init__()
+        self.num_crops = num_crops
         self.out_dim = out_dim
         self.student_temp = student_temp
         self.center_momentum = center_momentum
@@ -39,7 +41,7 @@ class DINOLoss(nn.Module):
         Cross-entropy between softmax outputs of the teacher and student networks.
         """
         student_out = student_output / self.student_temp
-        student_out = student_out.split(self.out_dim)
+        student_out = student_out.chunk(self.num_crops)
 
         # teacher centering and sharpening
         temp = self.teacher_temp_schedule[epoch]

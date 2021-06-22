@@ -124,6 +124,7 @@ class DINO(ModelBase):
             teacher_temp=self.teacher_temp,
             warmup_teacher_temp_iters=min(trainer.max_steps - 1, self.warmup_teacher_temp_iters),  # type: ignore
             total_iters=trainer.max_steps,  # type: ignore
+            num_crops=datamodule.local_crops_number + 2,
         )
 
         self.lr_schedule = cosine_scheduler(
@@ -237,7 +238,9 @@ class DINO(ModelBase):
                 lr=self.lr_eval,
             )
             self.eval_clf.target = self.target
-            self.eval_trainer.fit(self.eval_clf, datamodule=self.datamodule)
+            self.eval_trainer.fit(
+                self.eval_clf, train_dataloader=self.datamodule.train_dataloader(eval=True)
+            )
         else:
             train_data_encoded = self._encode_dataset(stage="train")
             self.eval_clf = KNN(

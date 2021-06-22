@@ -70,6 +70,6 @@ class AlbumentationsDataset(Dataset):
             if isinstance(image, Image.Image):
                 image = np.array(image)
             # Apply transformations
-            augmented = self.transform(image=image)
-            data = data_type(*((augmented,) + data[1:]))
+            augmented = self.transform(image=image)["image"]
+            data = data_type(augmented, *data[1:])
         return data
