@@ -96,6 +96,7 @@ class DINO(ModelBase):
         dataloader = cast(DataLoader, getattr(self.datamodule, f"{stage}_dataloader")(**dl_kwargs))
         # Encode the dataset
         dataset_encoder = DatasetEncoderRunner(model=self.student.backbone)
+        print(f"{list(dataset_encoder.parameters())[0].device=}")
         self.eval_trainer.test(
             dataset_encoder,
             test_dataloaders=dataloader,
