@@ -1,4 +1,5 @@
 from __future__ import annotations
+import copy
 from typing import Any, Callable, cast
 
 from kit import implements
@@ -143,13 +144,10 @@ class DINO(ModelBase):
             final_value=1,
             total_iters=trainer.max_steps,  # type: ignore
         )
-        self.eval_trainer = pl.Trainer(
-            gpus=trainer.num_gpus,
-            max_steps=self.lin_clf_steps,
-            distributed_backend=trainer.distributed_backend,
-            callbacks=[IterationBasedProgBar()],
-        )
         self.datamodule = datamodule
+        self.eval_trainer = copy.deepcopy(trainer)
+        self.eval_trainer.max_steps = self.lin_clf_steps
+        self.eval_trainer.callbacks = [IterationBasedProgBar()]
 
     @implements(pl.LightningModule)
     def configure_optimizers(self) -> optim.Optimizer:

@@ -82,19 +82,10 @@ class DatasetEncoderRunner(pl.LightningModule):
         self.encoded_dataset = DataBatch(*(torch.cat(el, dim=0) for el in outputs_t))
 
 
-class KNN:
+class KNN(nn.Module):
     # This implementation is pretty hacky in that it involves duplication of components from
     # ModelBase and ErmBaseline and implements methods defined by the former's interface without inheriting from it
     _target: str | None
-
-    @property
-    def target(self) -> str:
-        assert self._target is not None
-        return self._target
-
-    @target.setter
-    def target(self, target: str) -> None:
-        self._target = target
 
     def __init__(self, train_features: Tensor, train_labels: Tensor, k: int = 5) -> None:
         self.train_features = nn.Parameter(
@@ -106,6 +97,15 @@ class KNN:
         self.test_acc = torchmetrics.Accuracy()
         self.train_acc = torchmetrics.Accuracy()
         self.val_acc = torchmetrics.Accuracy()
+
+    @property
+    def target(self) -> str:
+        assert self._target is not None
+        return self._target
+
+    @target.setter
+    def target(self, target: str) -> None:
+        self._target = target
 
     def forward(self, test_features: Tensor) -> Tensor:
         test_features = F.normalize(test_features, dim=1, p=2)
