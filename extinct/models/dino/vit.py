@@ -147,6 +147,7 @@ class Block(nn.Module):
 
     def forward(self, x: Tensor, return_attention: bool = False) -> Tensor:
         self.attn.to(x.device)
+        self.norm1.to(x.device)
         y, attn = self.attn(self.norm1(x))
         if return_attention:
             return attn
