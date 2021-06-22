@@ -162,7 +162,7 @@ class DINO(ModelBase):
         print(
             f"8: {self.eval_clf.__class__.__name__=}, {self.eval_clf.on_gpu=}, {self.eval_clf.device=}"
         )
-        self.eval_clf.to(self.trainer.device)
+        self.eval_clf.to(trainer.device)
         print(
             f"9: {self.eval_clf.__class__.__name__=}, {self.eval_clf.on_gpu=}, {self.eval_clf.device=}"
         )
