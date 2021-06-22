@@ -149,6 +149,7 @@ class DINO(ModelBase):
             max_steps=self.lin_clf_steps,
             distributed_backend=trainer.distributed_backend,
             callbacks=[IterationBasedProgBar()],
+            num_sanity_val_steps=0,
         )
         self.datamodule = datamodule
 
