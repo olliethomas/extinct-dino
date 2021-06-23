@@ -1,9 +1,9 @@
 from __future__ import annotations
-from typing import NamedTuple, Any
+from typing import Any, Literal, NamedTuple
 
+from PIL import Image
 import albumentations as A
 import ethicml as em
-from PIL import Image
 import ethicml.vision as emvi
 import numpy as np
 import pandas as pd
@@ -11,7 +11,10 @@ import torch
 from torch import Tensor
 from torch.utils.data import Dataset
 
-__all__ = ["DataBatch", "TiWrapper", "AlbumentationsDataset"]
+__all__ = ["DataBatch", "TiWrapper", "AlbumentationsDataset", "Stage"]
+
+
+Stage = Literal["train", "val", "test"]
 
 
 class DataBatch(NamedTuple):
@@ -67,6 +70,6 @@ class AlbumentationsDataset(Dataset):
             if isinstance(image, Image.Image):
                 image = np.array(image)
             # Apply transformations
-            augmented = self.transform(image=image)
-            data = data_type(*((augmented["image"],) + data[1:]))
+            augmented = self.transform(image=image)["image"]
+            data = data_type(augmented, *data[1:])
         return data

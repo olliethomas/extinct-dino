@@ -16,7 +16,7 @@ SCHEMAS: Final[List[str]] = [
 ]
 
 
-@pytest.mark.parametrize("model_schema", ["erm", "kc", "laftr"])
+@pytest.mark.parametrize("model_schema", ["erm", "kc", "laftr", "local_dino"])
 def test_entrypoint(model_schema: str) -> None:
     """Quick run on models to check nothing's broken.
 
@@ -27,6 +27,28 @@ def test_entrypoint(model_schema: str) -> None:
         hydra_cfg = compose(
             config_name="main",
             overrides=[f"model={model_schema}"] + SCHEMAS,
+        )
+        if hasattr(hydra_cfg.data, "data_dir"):
+            hydra_cfg.data.data_dir = Path(hydra_cfg.data.data_dir).expanduser()
+        cfg: Config = instantiate(hydra_cfg, _recursive_=True, _convert_="partial")
+        start(cfg, raw_config=OmegaConf.to_container(hydra_cfg, resolve=True, enum_to_str=True))
+
+
+def test_dino() -> None:
+    """Quick run on models to check nothing's broken.
+
+    Use this if you need an entrypoint.
+    """
+    with initialize(config_path=CFG_PTH):
+        # config is relative to a module
+        hydra_cfg = compose(
+            config_name="main",
+            overrides=[
+                f"model=dino",
+                "data=celeba_dino_local",
+                "exp=unit_test",
+                "trainer=unit_test",
+            ],
         )
         if hasattr(hydra_cfg.data, "data_dir"):
             hydra_cfg.data.data_dir = Path(hydra_cfg.data.data_dir).expanduser()

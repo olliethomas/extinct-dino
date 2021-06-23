@@ -10,28 +10,12 @@ from omegaconf import MISSING
 
 
 @dataclass
-class DinoModelConf:
-    _target_: str = "extinct.models.DinoModel"
+class CelebaKCBaselineConf:
+    _target_: str = "extinct.models.CelebaKCBaseline"
     lr: float = MISSING
     weight_decay: float = MISSING
-
-
-@dataclass
-class KCBaselineConf:
-    _target_: str = "extinct.models.KCBaseline"
-    lr: float = MISSING
-    weight_decay: float = MISSING
-    batch_norm: bool = MISSING
     lr_gamma: float = MISSING
-
-
-@dataclass
-class ErmBaselineConf:
-    _target_: str = "extinct.models.ErmBaseline"
-    lr: float = MISSING
-    weight_decay: float = MISSING
-    batch_norm: bool = MISSING
-    lr_gamma: float = MISSING
+    batch_norm: bool = True
 
 
 @dataclass
@@ -45,3 +29,12 @@ class LaftrBaselineConf:
     recon_weight: float = MISSING
     clf_weight: float = MISSING
     adv_weight: float = MISSING
+
+
+@dataclass
+class CelebaErmBaselineConf:
+    _target_: str = "extinct.models.CelebaErmBaseline"
+    lr: float = MISSING
+    weight_decay: float = MISSING
+    lr_gamma: float = MISSING
+    batch_norm: bool = True

@@ -17,7 +17,7 @@ class _DummyModel(pl.LightningModule):
     def __init__(self, in_channels: int) -> None:
         super().__init__()
         self.linear_proj = nn.Linear(in_channels, 1)
-        self.val_losses = []
+        self.val_losses: list[Tensor] = []
 
     @implements(pl.LightningModule)
     def configure_optimizers(
@@ -51,22 +51,22 @@ class _DummyModel(pl.LightningModule):
 
 class _DummyDM(BaseDataModule):
     @staticmethod
-    def _generate_data(num_samples) -> TensorDataset:
+    def _generate_data(num_samples: int) -> TensorDataset:
         x = torch.randn(num_samples, 1)
         y = x.squeeze() * 0.7 + 0.4
         return TensorDataset(x, y)
 
-    @property
+    @property  # type: ignore[misc]
     @implements(BaseDataModule)
     def train_data(self) -> Dataset:
         return self._generate_data(25)
 
-    @property
+    @property  # type: ignore[misc]
     @implements(BaseDataModule)
     def val_data(self) -> Dataset:
         return self._generate_data(10)
 
-    @property
+    @property  # type: ignore[misc]
     @implements(BaseDataModule)
     def test_data(self) -> Dataset:
         return self._generate_data(10)

@@ -21,10 +21,12 @@ configen:
         - CelebaDataModule
     - name: extinct.models
       classes:
-        - DinoModel
-        - KCBaseline
-        - ErmBaseline
+        - CelebaKCBaseline
         - LaftrBaseline
+        - CelebaErmBaseline
+    - name: extinct.models.dino
+      classes:
+        - DINO
     - name: pytorch_lightning.trainer
       classes:
         - Trainer

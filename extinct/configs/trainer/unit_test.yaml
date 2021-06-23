@@ -1,7 +1,11 @@
 defaults:
   - base
 
-max_epochs: 50
+max_epochs: 1
+max_steps: 1
 gpus: 0
-deterministic: True
+deterministic: False
+limit_train_batches: 0.01
+limit_val_batches: 0.01
+limit_test_batches: 0.01
 fast_dev_run: True

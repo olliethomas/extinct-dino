@@ -4,14 +4,14 @@ from typing import Any, ClassVar, Optional
 
 import albumentations as A
 import ethicml as em
-from ethicml import implements
 import ethicml.vision as emvi
+from kit import implements
 from pytorch_lightning import LightningDataModule
 import torch
 from torch.utils.data.dataset import random_split
 
-from extinct.datamodules.base import VisionDataModule
-from extinct.datamodules.structures import TiWrapper, AlbumentationsDataset
+from extinct.datamodules.base import TrainAugMode, VisionDataModule
+from extinct.datamodules.structures import AlbumentationsDataset, TiWrapper
 
 __all__ = ["CelebaDataModule"]
 
@@ -36,7 +36,7 @@ class CelebaDataModule(VisionDataModule):
         persist_workers: bool = False,
         stratified_sampling: bool = False,
         sample_with_replacement: bool = True,
-        data_aug: bool = False,
+        aug_mode: TrainAugMode = TrainAugMode.none,
     ):
         super().__init__(
             data_dir=data_dir,
@@ -50,7 +50,7 @@ class CelebaDataModule(VisionDataModule):
             persist_workers=persist_workers,
             stratified_sampling=stratified_sampling,
             sample_with_replacement=sample_with_replacement,
-            data_aug=data_aug,
+            aug_mode=aug_mode,
         )
         self.image_size = image_size
         self.dims = (3, self.image_size, self.image_size)
@@ -67,29 +67,29 @@ class CelebaDataModule(VisionDataModule):
             check_integrity=True,
         )
 
-    @property
+    @property  # type: ignore[misc]
     @implements(VisionDataModule)
-    def _base_augmentations(self) -> list[A.BasicTransform]:
-        tform_ls = [
-            A.Resize(self.image_size, self.image_size),
-            A.CenterCrop(self.image_size, self.image_size),
-            A.ToFloat(max_value=1),
-            A.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)),
-        ]
-        return tform_ls
+    def _base_augmentations(self) -> A.Compose:
+        return A.Compose(
+            [
+                A.Resize(self.image_size, self.image_size),
+                A.CenterCrop(self.image_size, self.image_size),
+            ]
+        )
 
-    @property
+    @property  # type: ignore[misc]
     @implements(VisionDataModule)
-    def _train_augmentations(self) -> list[A.BasicTransform]:
+    def _train_augmentations(self) -> A.Compose:
         # Train-time data augmentations - should be refined further
-        tform_ls = [
-            A.RandomResizedCrop(height=64, width=64),
-            A.HorizontalFlip(p=0.5),
-            A.ColorJitter(p=0.5),
-            A.GaussNoise(var_limit=(0.01, 0.05), p=0.5),
-            A.ToGray(p=0.1),
-        ]
-        return tform_ls
+        return A.Compose(
+            [
+                A.RandomResizedCrop(height=self.image_size, width=self.image_size),
+                A.HorizontalFlip(p=0.5),
+                A.ColorJitter(p=0.5),
+                A.GaussianBlur(p=0.8),
+                A.ToGray(p=0.2),
+            ]
+        )
 
     @implements(LightningDataModule)
     def setup(self, stage: str | None = None) -> None:
