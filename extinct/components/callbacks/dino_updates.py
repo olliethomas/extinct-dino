@@ -23,7 +23,7 @@ class MeanTeacherWeightUpdate(pl.Callback):
         trainer = Trainer(callbacks=[DINOMAWeightUpdate()])
     """
 
-    def __init__(self, max_steps: int, initial_tau: float = 0.996):
+    def __init__(self, max_steps: int, initial_tau: float = 0.996) -> None:
         """
         Args:
             initial_tau: starting tau. Auto-updates with every training step

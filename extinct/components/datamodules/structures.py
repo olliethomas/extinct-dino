@@ -27,7 +27,7 @@ class DataBatch(NamedTuple):
 class TiWrapper(Dataset):
     """Wrapper for a Torch Image Datasets."""
 
-    def __init__(self, ti: emvi.TorchImageDataset):
+    def __init__(self, ti: emvi.TorchImageDataset) -> None:
         self.ti = ti
         # Pull out the data components for compatibility with the extract_labels function
         self.x = ti.x

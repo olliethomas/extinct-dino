@@ -34,7 +34,7 @@ class LaftrBaseline(ModelBase):
         recon_weight: float,
         clf_weight: float,
         adv_weight: float,
-    ):
+    ) -> None:
         super().__init__()
         self.enc = Encoder(
             input_shape=(3, 64, 64), initial_hidden_channels=64, levels=3, encoding_dim=128

@@ -23,7 +23,7 @@ class DINOLoss(nn.Module):
         num_crops: int,
         student_temp: float = 0.1,
         center_momentum: float = 0.9,
-    ):
+    ) -> None:
         super().__init__()
         self.num_crops = num_crops
         self.out_dim = out_dim

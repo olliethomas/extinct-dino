@@ -5,7 +5,7 @@ from torch import Tensor, nn
 
 
 class Mp64x64Net(nn.Module):
-    def __init__(self, batch_norm: bool, in_chans: int, target_dim: int):
+    def __init__(self, batch_norm: bool, in_chans: int, target_dim: int) -> None:
         super().__init__()
         self.batch_norm = batch_norm
         self.net = self._build(in_chans=in_chans, target_dim=target_dim)
@@ -49,7 +49,7 @@ class Mp64x64Net(nn.Module):
 
 
 class View(nn.Module):
-    def __init__(self, shape: Tuple[int, ...]):
+    def __init__(self, shape: Tuple[int, ...]) -> None:
         super().__init__()
         self.shape = shape
 
@@ -98,7 +98,7 @@ class Encoder(nn.Module):
         initial_hidden_channels: int,
         levels: int,
         encoding_dim: int,
-    ):
+    ) -> None:
         super().__init__()
         layers = nn.ModuleList()
         c_in, height, width = input_shape
@@ -136,7 +136,7 @@ class Decoder(nn.Module):
         encoding_dim: int,
         decoding_dim: int,
         decoder_out_act: Optional[nn.Module] = None,
-    ):
+    ) -> None:
         super().__init__()
         layers = nn.ModuleList()
         c_in, height, width = input_shape
@@ -179,7 +179,7 @@ class EmbeddingClf(nn.Module):
     def __init__(
         self,
         encoding_dim: int,
-    ):
+    ) -> None:
         super().__init__()
         self.classifier = nn.Sequential(nn.Flatten(), nn.Linear(encoding_dim, 1))
 
