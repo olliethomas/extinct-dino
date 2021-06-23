@@ -22,7 +22,28 @@ from .utils import cosine_scheduler, get_params_groups
 __all__ = ["DINO"]
 
 
-class DINO(ModelBase):
+class InnerEval(ModelBase):
+    @implements(pl.LightningModule)
+    def on_validation_start(self) -> None:
+        self._on_inference_start()
+        super().on_validation_start()
+
+    @implements(pl.LightningModule)
+    def on_test_start(self) -> None:
+        self._on_inference_start()
+        super().on_test_start()
+
+    def _on_inference_start(self) -> None:
+        self.eval_clf.to(self.device)
+        self.eval_trainer.fit(
+            self.eval_clf,
+            train_dataloader=self.datamodule.train_dataloader(
+                eval=True, batch_size=self.batch_size_eval
+            ),
+        )
+
+
+class DINO(InnerEval):
     _loss_fn: DINOLoss
     student: MultiCropWrapper
     teacher: MultiCropWrapper
@@ -154,6 +175,21 @@ class DINO(ModelBase):
         bar._trainer = self.eval_trainer
         self.eval_trainer.callbacks = [bar]
 
+        if self.eval_method is EvalMethod.lin_clf:
+            self.eval_clf = DINOLinearClassifier(
+                enc=self.student.backbone,
+                target_dim=self.datamodule.y_dim,
+                epochs=self.lin_clf_epochs,
+                weight_decay=0,
+                lr=self.lr_eval,
+            )
+        else:
+            train_data_encoded = self._encode_dataset(stage="train")
+            self.eval_clf = KNN(
+                train_features=train_data_encoded.x, train_labels=train_data_encoded.y
+            )
+        self.eval_clf.target = self.target
+
     @implements(pl.LightningModule)
     def configure_optimizers(self) -> optim.Optimizer:
         return optim.AdamW(
@@ -220,40 +256,6 @@ class DINO(ModelBase):
         )
         # Update the teacher network via EMA of the student's weights
         self._update_momentum_teacher(train_itr=batch_idx)
-
-    @implements(pl.LightningModule)
-    def on_validation_start(self) -> None:
-        self._on_inference_start()
-        super().on_validation_start()
-
-    @implements(pl.LightningModule)
-    def on_test_start(self) -> None:
-        self._on_inference_start()
-        super().on_test_start()
-
-    def _on_inference_start(self) -> None:
-        if self.eval_method is EvalMethod.lin_clf:
-            self.eval_clf = DINOLinearClassifier(
-                enc=self.student.backbone,
-                target_dim=self.datamodule.y_dim,
-                epochs=self.lin_clf_epochs,
-                weight_decay=0,
-                lr=self.lr_eval,
-            )
-            self.eval_clf.target = self.target
-            self.eval_trainer.fit(
-                self.eval_clf,
-                train_dataloader=self.datamodule.train_dataloader(
-                    eval=True, batch_size=self.batch_size_eval
-                ),
-            )
-        else:
-            train_data_encoded = self._encode_dataset(stage="train")
-            self.eval_clf = KNN(
-                train_features=train_data_encoded.x, train_labels=train_data_encoded.y
-            )
-        self.eval_clf.target = self.target
-        self.eval_clf.to(self.device)
 
     @implements(ModelBase)
     def _inference_step(self, batch: DataBatch, stage: Stage) -> dict[str, Any]:
