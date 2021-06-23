@@ -10,6 +10,8 @@ __all__ = ["IterationBasedProgBar"]
 
 
 class IterationBasedProgBar(ProgressBar):
+    val_progress_bar: tqdm
+
     def init_train_tqdm(self) -> tqdm:
         """Override this to customize the tqdm bar for training."""
         return tqdm(

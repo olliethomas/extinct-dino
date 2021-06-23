@@ -10,6 +10,9 @@ __all__ = ["DINOLoss"]
 
 
 class DINOLoss(nn.Module):
+
+    center: Tensor
+
     def __init__(
         self,
         out_dim: int,

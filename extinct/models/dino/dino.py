@@ -222,12 +222,12 @@ class DINO(ModelBase):
         self._update_momentum_teacher(train_itr=batch_idx)
 
     @implements(pl.LightningModule)
-    def on_validation_start(self):
+    def on_validation_start(self) -> None:
         self._on_inference_start()
         super().on_validation_start()
 
     @implements(pl.LightningModule)
-    def on_test_start(self):
+    def on_test_start(self) -> None:
         self._on_inference_start()
         super().on_test_start()
 

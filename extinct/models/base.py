@@ -1,6 +1,5 @@
 from __future__ import annotations
 from abc import abstractmethod
-from typing import Any
 
 from kit import implements
 import pytorch_lightning as pl
@@ -33,9 +32,7 @@ class ModelBase(pl.LightningModule):
         ...
 
     @abstractmethod
-    def _inference_epoch_end(
-        self, output_results: list[dict[str, Tensor]], stage: Stage
-    ) -> dict[str, Any]:
+    def _inference_epoch_end(self, output_results: list[dict[str, Tensor]], stage: Stage) -> None:
         ...
 
     @implements(pl.LightningModule)
