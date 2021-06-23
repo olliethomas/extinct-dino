@@ -6,3 +6,4 @@ data_dir: "/srv/galene0/shared/data/"
 batch_size: 64
 num_workers: 8
 aug_mode: dino
+local_crops_number: 8

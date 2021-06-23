@@ -4,7 +4,7 @@
 # isort:skip_file
 # flake8: noqa
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from extinct.models.dino.eval import EvalMethod
 from extinct.models.dino.vit import VitArch
 from typing import Optional
@@ -32,3 +32,6 @@ class DINOConf:
     lr_eval: float = 0.0001
     lin_clf_epochs: int = 100
     batch_size_eval: Optional[int] = None
+    max_steps: int = -1
+    dm_batch_size: int = -1
+    local_crops_number: int = -1

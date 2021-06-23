@@ -1,6 +1,7 @@
 """CelebA DataModule."""
 from __future__ import annotations
-from typing import Any, ClassVar, Optional
+from typing import Any, ClassVar, Optional, Tuple
+import warnings
 
 import albumentations as A
 import ethicml as em
@@ -37,7 +38,28 @@ class CelebaDataModule(VisionDataModule):
         stratified_sampling: bool = False,
         sample_with_replacement: bool = True,
         aug_mode: TrainAugMode = TrainAugMode.none,
+        local_crops_number: int = -1,
+        global_crops_scale: Tuple[float, float] = (0.4, 1.0),
+        local_crops_scale: Tuple[float, float] = (0.05, 0.4),
     ):
+
+        if aug_mode is TrainAugMode.none:
+            if local_crops_number > 0:
+                warnings.warn(
+                    f"Local Crops set to {local_crops_number}, but Augmentation mode "
+                    f"is inactive. These values will be ignored."
+                )
+            if global_crops_scale is not None:
+                warnings.warn(
+                    f"Global Crops Scale set to {global_crops_scale}, but Augmentation mode "
+                    f"is inactive. These values will be ignored."
+                )
+            if local_crops_scale is not None:
+                warnings.warn(
+                    f"Global Crops Scale set to {global_crops_scale}, but Augmentation mode "
+                    f"is inactive. These values will be ignored."
+                )
+
         super().__init__(
             data_dir=data_dir,
             batch_size=batch_size,
