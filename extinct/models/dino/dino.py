@@ -154,6 +154,21 @@ class DINO(ModelBase):
         bar._trainer = self.eval_trainer
         self.eval_trainer.callbacks = [bar]
 
+        if self.eval_method is EvalMethod.lin_clf:
+            self.eval_clf = DINOLinearClassifier(
+                enc=self.student.backbone,
+                target_dim=self.datamodule.y_dim,
+                epochs=self.lin_clf_epochs,
+                weight_decay=0,
+                lr=self.lr_eval,
+            )
+            self.eval_clf.target = self.target
+        else:
+            train_data_encoded = self._encode_dataset(stage="train")
+            self.eval_clf = KNN(
+                train_features=train_data_encoded.x, train_labels=train_data_encoded.y
+            )
+
     @implements(pl.LightningModule)
     def configure_optimizers(self) -> optim.Optimizer:
         return optim.AdamW(
@@ -277,13 +292,15 @@ class DINO(ModelBase):
             trainer=self.eval_trainer,
             bs_eval=self.batch_size_eval,
             datamodule=self.datamodule,
+            clf=self.eval_clf,
         )
 
 
 class LinClfEval(pl.callbacks.Callback):
-    def __init__(self, lin_clf_epochs, lr_eval, target, datamodule, trainer, bs_eval):
+    def __init__(self, lin_clf_epochs, lr_eval, target, datamodule, trainer, bs_eval, clf):
         self.lin_clf_epochs = lin_clf_epochs
         self.batch_size_eval = bs_eval
+        self.eval_clf = clf
         self.lr_eval = lr_eval
         self.target = target
         self.eval_train = trainer
@@ -296,16 +313,8 @@ class LinClfEval(pl.callbacks.Callback):
         self.task(trainer, model)
 
     def task(self, trainer: pl.Trainer, model: pl.LightningModule):
-        eval_clf = DINOLinearClassifier(
-            enc=model.student.backbone,
-            target_dim=self.datamodule.y_dim,
-            epochs=self.lin_clf_epochs,
-            weight_decay=0,
-            lr=self.lr_eval,
-        )
-        eval_clf.target = self.target
         self.eval_train.fit(
-            eval_clf,
+            self.eval_clf,
             train_dataloader=self.datamodule.train_dataloader(
                 eval=True, batch_size=self.batch_size_eval
             ),
