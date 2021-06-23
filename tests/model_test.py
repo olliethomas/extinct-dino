@@ -13,7 +13,6 @@ SCHEMAS: Final[List[str]] = [
     "data=celeba_local",
     "exp=unit_test",
     "trainer=unit_test",
-    "aux_trainer=unit_test",
 ]
 
 
@@ -49,7 +48,6 @@ def test_dino() -> None:
                 "data=celeba_dino_local",
                 "exp=unit_test",
                 "trainer=unit_test",
-                "aux_trainer=unit_test",
             ],
         )
         if hasattr(hydra_cfg.data, "data_dir"):

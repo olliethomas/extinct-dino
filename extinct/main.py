@@ -11,14 +11,18 @@ from omegaconf import DictConfig, MISSING, OmegaConf
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 
-from extinct.hydra.extinct.datamodules.configs import CelebaDataModuleConf
-from extinct.hydra.extinct.models.configs import (
+from extinct.hydra.extinct.datamodules.configs import (
+    CelebaDataModuleConf,  # type: ignore[import]
+)
+from extinct.hydra.extinct.models.configs import (  # type: ignore[import]
     CelebaErmBaselineConf,
     CelebaKCBaselineConf,
     LaftrBaselineConf,
 )
-from extinct.hydra.extinct.models.dino.configs import DINOConf
-from extinct.hydra.pytorch_lightning.trainer.configs import TrainerConf
+from extinct.hydra.extinct.models.dino.configs import DINOConf  # type: ignore[import]
+from extinct.hydra.pytorch_lightning.trainer.configs import (
+    TrainerConf,  # type: ignore[import]
+)
 from extinct.utils.callbacks import IterationBasedProgBar
 
 
@@ -43,14 +47,12 @@ class Config:
     exp_group: str = "Testing"
     model: Any = MISSING
     trainer: Any = MISSING
-    aux_trainer: Any = MISSING
 
 
 # ConfigStore enables type validation
 cs = ConfigStore.instance()
 cs.store(name="main_schema", node=Config)
 cs.store(name="trainer_schema", node=TrainerConf, package="trainer")
-cs.store(name="aux_trainer_schema", node=TrainerConf, package="aux_trainer")
 
 DATA: Final[str] = "data"
 cs.store(group=f"schema/{DATA}", name="celeba", node=CelebaDataModuleConf, package=DATA)

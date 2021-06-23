@@ -1,4 +1,0 @@
-defaults:
-  - base
-
-max_epochs: 100

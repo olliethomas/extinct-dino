@@ -72,12 +72,12 @@ class VisionDataModule(VisionBaseDataModule):
     @property
     @abstractmethod
     def _base_augmentations(self) -> A.Compose:
-        return A.Compose([])
+        ...
 
     @property
     @abstractmethod
     def _train_augmentations(self) -> A.Compose:
-        return A.Compose([])
+        ...
 
     @property
     def _normalization(self) -> A.Compose:

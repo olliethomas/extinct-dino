@@ -77,7 +77,7 @@ class CelebaDataModule(VisionDataModule):
             ]
         )
 
-    @property  # type: ignore [misc]
+    @property  # type: ignore[misc]
     @implements(VisionDataModule)
     def _train_augmentations(self) -> A.Compose:
         # Train-time data augmentations - should be refined further
