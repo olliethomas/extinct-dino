@@ -12,7 +12,7 @@ import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 
 from extinct.components.callbacks.iter_prog_bar import IterationBasedProgBar
-from extinct.components.callbacks.ssl_eval import SSLOnlineEvaluator
+from extinct.components.callbacks.ssl_eval import DINOEvaluator
 from extinct.components.models.dino import DINO
 from extinct.hydra.extinct.components.datamodules.configs import (  # type: ignore[import]
     CelebaDataModuleConf,
@@ -99,7 +99,7 @@ def start(cfg: Config, raw_config: Optional[Dict[str, Any]]) -> None:
 
     cfg.model.target = cfg.data.train_data.dataset.dataset.ti.y_label
     callbacks: list[pl.Callback] = (
-        [IterationBasedProgBar()] + [SSLOnlineEvaluator()] if isinstance(cfg.model, DINO) else []
+        [IterationBasedProgBar()] + [DINOEvaluator()] if isinstance(cfg.model, DINO) else []
     )
     cfg.trainer.callbacks = callbacks
 

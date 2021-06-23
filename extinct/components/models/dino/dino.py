@@ -21,7 +21,7 @@ from .loss import DINOLoss
 
 __all__ = ["DINO"]
 
-from ...callbacks.dino_updates import DINOMAWeightUpdate
+from extinct.components.callbacks.dino_updates import MeanTeacherWeightUpdate
 
 
 class DINO(ModelBase):
@@ -85,7 +85,7 @@ class DINO(ModelBase):
         self.lin_clf_epochs = lin_clf_epochs
         self.batch_size_eval = batch_size_eval
 
-        self.weight_callback = DINOMAWeightUpdate(
+        self.weight_callback = MeanTeacherWeightUpdate(
             max_steps=max_steps, initial_tau=self.momentum_teacher
         )
 

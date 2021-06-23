@@ -1,14 +1,14 @@
 from typing import Sequence
 
-from pytorch_lightning import Callback, LightningModule, Trainer
-from torch.nn import Module
+import pytorch_lightning as pl
+from torch import nn
 
 from extinct.utils import cosine_scheduler
 
 
-class DINOMAWeightUpdate(Callback):
+class MeanTeacherWeightUpdate(pl.Callback):
     """
-    Weight update rule from BYOL.
+    Weight update rule from Mean Teacher.
     Your model should have:
         - ``self.student_network``
         - ``self.teacher_network``
@@ -38,8 +38,8 @@ class DINOMAWeightUpdate(Callback):
 
     def on_train_batch_end(
         self,
-        trainer: Trainer,
-        pl_module: LightningModule,
+        trainer: pl.Trainer,
+        pl_module: pl.LightningModule,
         outputs: Sequence,
         batch: Sequence,
         batch_idx: int,
@@ -52,7 +52,7 @@ class DINOMAWeightUpdate(Callback):
         # update weights
         self.update_weights(pl_module.global_step, student_net, teacher_net)
 
-    def update_weights(self, train_itrs: int, student: Module, teacher: Module) -> None:
+    def update_weights(self, train_itrs: int, student: nn.Module, teacher: nn.Module) -> None:
         # apply MA weight update
         em = self.momentum_schedule[train_itrs]  # momentum parameter
         for param_q, param_k in zip(student.parameters(), teacher.parameters()):
