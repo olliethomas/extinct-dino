@@ -99,6 +99,8 @@ def start(cfg: Config, raw_config: Optional[Dict[str, Any]]) -> None:
 
     # Build the model
     cfg.model.build(datamodule=copy.deepcopy(cfg.data), trainer=copy.deepcopy(cfg.trainer))
+    val_cb = cfg.model.validation_callback()
+    cfg.trainer.callbacks += [val_cb] if val_cb is not None else []
     # Fit the model
     cfg.trainer.fit(model=cfg.model, datamodule=cfg.data)
     # Test the model

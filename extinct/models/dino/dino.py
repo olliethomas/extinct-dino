@@ -221,39 +221,39 @@ class DINO(ModelBase):
         # Update the teacher network via EMA of the student's weights
         self._update_momentum_teacher(train_itr=batch_idx)
 
-    @implements(pl.LightningModule)
-    def on_validation_start(self) -> None:
-        self._on_inference_start()
-        super().on_validation_start()
+    # @implements(pl.LightningModule)
+    # def on_validation_start(self) -> None:
+    #     self._on_inference_start()
+    #     super().on_validation_start()
 
-    @implements(pl.LightningModule)
-    def on_test_start(self) -> None:
-        self._on_inference_start()
-        super().on_test_start()
+    # @implements(pl.LightningModule)
+    # def on_test_start(self) -> None:
+    #     self._on_inference_start()
+    #     super().on_test_start()
 
-    def _on_inference_start(self) -> None:
-        if self.eval_method is EvalMethod.lin_clf:
-            self.eval_clf = DINOLinearClassifier(
-                enc=self.student.backbone,
-                target_dim=self.datamodule.y_dim,
-                epochs=self.lin_clf_epochs,
-                weight_decay=0,
-                lr=self.lr_eval,
-            )
-            self.eval_clf.target = self.target
-            self.eval_trainer.fit(
-                self.eval_clf,
-                train_dataloader=self.datamodule.train_dataloader(
-                    eval=True, batch_size=self.batch_size_eval
-                ),
-            )
-        else:
-            train_data_encoded = self._encode_dataset(stage="train")
-            self.eval_clf = KNN(
-                train_features=train_data_encoded.x, train_labels=train_data_encoded.y
-            )
-        self.eval_clf.target = self.target
-        self.eval_clf.to(self.device)
+    # def _on_inference_start(self) -> None:
+    #     if self.eval_method is EvalMethod.lin_clf:
+    #         self.eval_clf = DINOLinearClassifier(
+    #             enc=self.student.backbone,
+    #             target_dim=self.datamodule.y_dim,
+    #             epochs=self.lin_clf_epochs,
+    #             weight_decay=0,
+    #             lr=self.lr_eval,
+    #         )
+    #         self.eval_clf.target = self.target
+    #         self.eval_trainer.fit(
+    #             self.eval_clf,
+    #             train_dataloader=self.datamodule.train_dataloader(
+    #                 eval=True, batch_size=self.batch_size_eval
+    #             ),
+    #         )
+    #     else:
+    #         train_data_encoded = self._encode_dataset(stage="train")
+    #         self.eval_clf = KNN(
+    #             train_features=train_data_encoded.x, train_labels=train_data_encoded.y
+    #         )
+    #     self.eval_clf.target = self.target
+    #     self.eval_clf.to(self.device)
 
     @implements(ModelBase)
     def _inference_step(self, batch: DataBatch, stage: Stage) -> dict[str, Any]:
@@ -268,3 +268,45 @@ class DINO(ModelBase):
     @implements(nn.Module)
     def forward(self, x: Tensor) -> Tensor:
         return self.student(x)
+
+    def validation_callback(self):
+        return LinClfEval(
+            lin_clf_epochs=self.lin_clf_epochs,
+            lr_eval=self.lr_eval,
+            target=self.target,
+            trainer=self.eval_trainer,
+            bs_eval=self.batch_size_eval,
+            datamodule=self.datamodule,
+        )
+
+
+class LinClfEval(pl.callbacks.Callback):
+    def __init__(self, lin_clf_epochs, lr_eval, target, datamodule, trainer, bs_eval):
+        self.lin_clf_epochs = lin_clf_epochs
+        self.batch_size_eval = bs_eval
+        self.lr_eval = lr_eval
+        self.target = target
+        self.eval_train = trainer
+        self.datamodule = datamodule
+
+    def on_validation_start(self, trainer: pl.Trainer, model: pl.LightningModule):
+        self.task(trainer, model)
+
+    def on_test_start(self, trainer: pl.Trainer, model: pl.LightningModule):
+        self.task(trainer, model)
+
+    def task(self, trainer: pl.Trainer, model: pl.LightningModule):
+        eval_clf = DINOLinearClassifier(
+            enc=model.student.backbone,
+            target_dim=self.datamodule.y_dim,
+            epochs=self.lin_clf_epochs,
+            weight_decay=0,
+            lr=self.lr_eval,
+        )
+        eval_clf.target = self.target
+        self.eval_train.fit(
+            eval_clf,
+            train_dataloader=self.datamodule.train_dataloader(
+                eval=True, batch_size=self.batch_size_eval
+            ),
+        )

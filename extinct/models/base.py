@@ -52,3 +52,6 @@ class ModelBase(pl.LightningModule):
     def test_epoch_end(self, output_results: list[dict[str, Tensor]]) -> None:
         results_dict = self._inference_epoch_end(output_results=output_results, stage="test")
         self.log_dict(results_dict)
+
+    def validation_callback(self):
+        return None
