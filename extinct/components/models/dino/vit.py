@@ -26,7 +26,7 @@ from torch import Tensor
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .utils import trunc_normal_
+from extinct.utils import trunc_normal_
 
 __all__ = ["VisionTransformer", "vit_small", "vit_tiny", "vit_base", "VitArch"]
 

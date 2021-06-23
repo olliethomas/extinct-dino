@@ -5,7 +5,7 @@ import pytorch_lightning as pl
 import torch
 from torch import Tensor, nn, optim
 
-from extinct.models import ErmBaseline
+from extinct.components.models import ErmBaseline
 
 __all__ = ["FineTuner"]
 

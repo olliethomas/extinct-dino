@@ -12,10 +12,10 @@ from kit import implements
 from kit.torch import InfSequentialBatchSampler as InfSequentialBatchSampler
 from kit.torch import StratifiedSampler
 from pytorch_lightning import LightningDataModule
-from torch.utils.data import BatchSampler, DataLoader, SequentialSampler
+from torch.utils.data import DataLoader, SequentialSampler
 from torch.utils.data.sampler import BatchSampler
 
-from extinct.datamodules.utils import extract_labels_from_dataset
+from extinct.components.datamodules.utils import extract_labels_from_dataset
 
 from .dino import DINOAugmentation
 

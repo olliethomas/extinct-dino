@@ -11,10 +11,10 @@ import torch
 from torch import Tensor, nn, optim
 import torchmetrics
 
-from extinct.datamodules import VisionDataModule
-from extinct.datamodules.structures import DataBatch
-from extinct.models import ModelBase
-from extinct.models.predefined import Decoder, EmbeddingClf, Encoder
+from extinct.components.datamodules import VisionDataModule
+from extinct.components.datamodules.structures import DataBatch
+from extinct.components.models import ModelBase
+from extinct.components.models.predefined import Decoder, EmbeddingClf, Encoder
 
 __all__ = ["LaftrBaseline"]
 

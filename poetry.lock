@@ -284,7 +284,7 @@ torchvision = "^0.9"
 type = "git"
 url = "https://github.com/predictive-analytics-lab/fair-bolts.git"
 reference = "main"
-resolved_reference = "f5ef664a5505fe72dba0f706815bd43408b78aea"
+resolved_reference = "496ed45eca0200dd8e86c0f1c5ba57f052aa64a1"
 
 [[package]]
 name = "filelock"
@@ -1001,7 +1001,7 @@ resolved_reference = "306b657debe8b29d516dcbe249eaa0b5eeab641f"
 
 [[package]]
 name = "pytorch-lightning"
-version = "1.3.7"
+version = "1.3.7.post0"
 description = "PyTorch Lightning is the lightweight PyTorch wrapper for ML researchers. Scale your models. Write less boilerplate."
 category = "main"
 optional = false
@@ -2241,8 +2241,8 @@ python-dateutil = [
 ]
 python-type-stubs = []
 pytorch-lightning = [
-    {file = "pytorch-lightning-1.3.7.tar.gz", hash = "sha256:b2fa865bfc5d3187bdc8ff15119ac2bf5fe6f08ed96f09781e98af2352a79f69"},
-    {file = "pytorch_lightning-1.3.7-py3-none-any.whl", hash = "sha256:905b0d4e91ac07508c66a1b3d01ea136cab6a24eda854b629883768ea3a67393"},
+    {file = "pytorch-lightning-1.3.7.post0.tar.gz", hash = "sha256:7790f9d7b0286571f7176074c52062760e8e8994c1875a53e75045319f28ecc2"},
+    {file = "pytorch_lightning-1.3.7.post0-py3-none-any.whl", hash = "sha256:fd6da3ec36e57eb65c8a9c5e063409306bd35c7be4e6b06358cbbfeaa75b23fa"},
 ]
 pytz = [
     {file = "pytz-2021.1-py2.py3-none-any.whl", hash = "sha256:eb10ce3e7736052ed3623d49975ce333bcd712c7bb19a58b9e2089d4057d0798"},

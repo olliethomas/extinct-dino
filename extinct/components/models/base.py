@@ -5,7 +5,7 @@ from kit import implements
 import pytorch_lightning as pl
 from torch import Tensor
 
-from extinct.datamodules import DataBatch, Stage, VisionDataModule
+from extinct.components.datamodules import DataBatch, Stage, VisionDataModule
 
 __all__ = ["ModelBase"]
 

@@ -1,8 +1,8 @@
 from kit import implements
 from torch import Tensor
 
-from extinct.datamodules.structures import DataBatch
-from extinct.models.erm_baseline import CelebaErmBaseline, ErmBaseline
+from extinct.components.datamodules.structures import DataBatch
+from extinct.components.models.erm_baseline import CelebaErmBaseline, ErmBaseline
 
 __all__ = ["CelebaKCBaseline"]
 
