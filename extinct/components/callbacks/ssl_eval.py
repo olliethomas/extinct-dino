@@ -1,4 +1,4 @@
-from typing import Optional, Sequence, Tuple, Union
+from typing import Sequence, Tuple, Union
 
 from pytorch_lightning import Callback, LightningModule, Trainer
 import torch
@@ -9,43 +9,33 @@ from torch.optim import Optimizer
 class SSLOnlineEvaluator(Callback):
     """
     Attaches a MLP for fine-tuning using the standard self-supervised protocol.
+
+    Your model should have:
+        - ``self.student_network``
+        - ``self.teacher_network``
+        - ``self.datamodule``
+        - ``self.lin_clf_epochs``
+        - ``self.lr_eval``
+        - ``self.target``
+
     Example::
-        # your model must have 2 attributes
+        # your model must have 6 attributes
         model = Model()
-        model.z_dim = ... # the representation dim
-        model.num_classes = ... # the num of classes in the model
-        online_eval = SSLOnlineEvaluator(
-            z_dim=model.z_dim,
-            num_classes=model.num_classes,
-            dataset='imagenet'
-        )
+        model.student = ... #
+        model.datamodule = ... #
+        model.lin_clf_epochs = ... #
+        model.lr_eval = ... #
+        model.target = ... #
+
+        and, if using KNN classifier:
+        model._encode_dataset = ... #
+
+        online_eval = SSLOnlineEvaluator()
     """
 
-    def __init__(
-        self,
-        dataset: str = 'akdsfh',
-        drop_p: float = 0.2,
-        hidden_dim: Optional[int] = None,
-        z_dim: int = None,
-        num_classes: int = None,
-    ):
-        """
-        Args:
-            dataset: if stl10, need to get the labeled batch
-            drop_p: Dropout probability
-            hidden_dim: Hidden dimension for the fine-tune MLP
-            z_dim: Representation dimension
-            num_classes: Number of classes
-        """
+    def __init__(self):
         super().__init__()
-
-        self.hidden_dim = hidden_dim
-        self.drop_p = drop_p
         self.optimizer: Optimizer
-
-        self.z_dim = z_dim
-        self.num_classes = num_classes
-        self.dataset = dataset
 
     def on_pretrain_routine_start(self, trainer: Trainer, pl_module: LightningModule) -> None:
         from extinct.components.models.dino import DINOLinearClassifier
