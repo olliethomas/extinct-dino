@@ -54,6 +54,9 @@ class DINO(ModelBase):
         lr_eval: float = 1.0e-4,
         lin_clf_epochs: int = 100,
         batch_size_eval: Optional[int] = None,
+        max_steps: int = -1,
+        dm_batch_size: int = -1,
+        local_crops_number: int = -1,
     ) -> None:
         """
         Args:
@@ -82,6 +85,32 @@ class DINO(ModelBase):
 
         self._arch_fn = cast(
             Callable[[int], vit.VisionTransformer], getattr(vit, f"vit_{arch.name}")
+        )
+
+        self._loss_fn = DINOLoss(
+            out_dim=self.out_dim,
+            warmup_teacher_temp=self.teacher_temp,
+            teacher_temp=self.teacher_temp,
+            warmup_teacher_temp_iters=min(max_steps - 1, self.warmup_teacher_temp_iters),
+            total_iters=max_steps,  # type: ignore
+            num_crops=local_crops_number + 2,
+        )
+
+        self.lr_schedule = cosine_scheduler(
+            base_value=self.learning_rate * dm_batch_size / 256.0,  # linear scaling rule
+            final_value=self.min_lr,
+            total_iters=max_steps,  # type: ignore
+            warmup_iters=min(max_steps - 1, self.warmup_iters),
+        )
+        self.wd_schedule = cosine_scheduler(
+            base_value=self.weight_decay,
+            final_value=self.weight_decay_end,
+            total_iters=max_steps,
+        )
+        self.momentum_schedule = cosine_scheduler(
+            base_value=self.momentum_teacher,
+            final_value=1,
+            total_iters=max_steps,
         )
 
     @property
@@ -121,31 +150,6 @@ class DINO(ModelBase):
             )
             setattr(self, net, MultiCropWrapper(backbone=backbone, head=head))
 
-        self._loss_fn = DINOLoss(
-            out_dim=self.out_dim,
-            warmup_teacher_temp=self.teacher_temp,
-            teacher_temp=self.teacher_temp,
-            warmup_teacher_temp_iters=min(trainer.max_steps - 1, self.warmup_teacher_temp_iters),  # type: ignore
-            total_iters=trainer.max_steps,  # type: ignore
-            num_crops=datamodule.local_crops_number + 2,
-        )
-
-        self.lr_schedule = cosine_scheduler(
-            base_value=self.learning_rate * datamodule.batch_size / 256.0,  # linear scaling rule
-            final_value=self.min_lr,
-            total_iters=trainer.max_steps,  # type: ignore
-            warmup_iters=min(trainer.max_steps - 1, self.warmup_iters),  # type: ignore
-        )
-        self.wd_schedule = cosine_scheduler(
-            base_value=self.weight_decay,
-            final_value=self.weight_decay_end,
-            total_iters=trainer.max_steps,  # type: ignore
-        )
-        self.momentum_schedule = cosine_scheduler(
-            base_value=self.momentum_teacher,
-            final_value=1,
-            total_iters=trainer.max_steps,  # type: ignore
-        )
         self.datamodule = datamodule
         self.eval_trainer = copy.deepcopy(trainer)
         self.eval_trainer.max_epochs = self.lin_clf_epochs

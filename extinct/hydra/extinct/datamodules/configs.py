@@ -4,9 +4,10 @@
 # isort:skip_file
 # flake8: noqa
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from extinct.datamodules.base import TrainAugMode
 from typing import Optional
+from typing import Tuple
 
 
 @dataclass
@@ -25,3 +26,6 @@ class CelebaDataModuleConf:
     stratified_sampling: bool = False
     sample_with_replacement: bool = True
     aug_mode: TrainAugMode = TrainAugMode.none
+    local_crops_number: int = -1
+    global_crops_scale: Tuple[float, float] = (0.4, 1.0)
+    local_crops_scale: Tuple[float, float] = (0.05, 0.4)

@@ -15,4 +15,6 @@ warmup_teacher_temp_iters: 30
 eval_method: lin_clf
 num_eval_blocks: 1
 lr_eval: 1.e-4
-
+max_steps: ${trainer.max_steps}
+dm_batch_size: ${data.batch_size}
+local_crops_number: ${data.local_crops_number}

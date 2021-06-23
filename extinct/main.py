@@ -11,8 +11,8 @@ from omegaconf import DictConfig, MISSING, OmegaConf
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 
-from extinct.hydra.extinct.datamodules.configs import (
-    CelebaDataModuleConf,  # type: ignore[import]
+from extinct.hydra.extinct.datamodules.configs import (  # type: ignore[import]
+    CelebaDataModuleConf,
 )
 from extinct.hydra.extinct.models.configs import (  # type: ignore[import]
     CelebaErmBaselineConf,
@@ -20,8 +20,8 @@ from extinct.hydra.extinct.models.configs import (  # type: ignore[import]
     LaftrBaselineConf,
 )
 from extinct.hydra.extinct.models.dino.configs import DINOConf  # type: ignore[import]
-from extinct.hydra.pytorch_lightning.trainer.configs import (
-    TrainerConf,  # type: ignore[import]
+from extinct.hydra.pytorch_lightning.trainer.configs import (  # type: ignore[import]
+    TrainerConf,
 )
 from extinct.utils.callbacks import IterationBasedProgBar
 
