@@ -8,4 +8,3 @@ gradient_clip_algorithm: norm
 precision: 16
 plugins: deepspeed_stage_2_offload
 num_sanity_val_steps: 0
-val_check_interval: 5000
