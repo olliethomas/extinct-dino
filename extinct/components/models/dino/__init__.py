@@ -1,5 +1,5 @@
 from .dino import *
 from .eval import *
 from .head import *
-from .utils import *
+from .models import *
 from .vit import *

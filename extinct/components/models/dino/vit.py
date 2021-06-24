@@ -26,7 +26,7 @@ from torch import Tensor
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .utils import trunc_normal_
+from extinct.utils import trunc_normal_
 
 __all__ = ["VisionTransformer", "vit_small", "vit_tiny", "vit_base", "VitArch"]
 
@@ -60,7 +60,7 @@ class Mlp(nn.Module):
         out_features: int | None = None,
         act_layer: type[nn.Module] = nn.GELU,
         drop: float = 0.0,
-    ):
+    ) -> None:
         super().__init__()
         out_features = out_features or in_features
         hidden_features = hidden_features or in_features
@@ -87,7 +87,7 @@ class Attention(nn.Module):
         qk_scale: float | None = None,
         attn_drop: float = 0.0,
         proj_drop: float = 0.0,
-    ):
+    ) -> None:
         super().__init__()
         self.num_heads = num_heads
         head_dim = dim // num_heads
@@ -128,7 +128,7 @@ class Block(nn.Module):
         drop_path: float = 0.0,
         act_layer: type[nn.Module] = nn.GELU,
         norm_layer: type[nn.LayerNorm] = nn.LayerNorm,
-    ):
+    ) -> None:
         super().__init__()
         self.norm1 = norm_layer(dim)
         self.attn = Attention(
@@ -158,7 +158,9 @@ class Block(nn.Module):
 class PatchEmbed(nn.Module):
     """Image to Patch Embedding"""
 
-    def __init__(self, img_size: int, in_chans: int, patch_size: int = 16, embed_dim: int = 768):
+    def __init__(
+        self, img_size: int, in_chans: int, patch_size: int = 16, embed_dim: int = 768
+    ) -> None:
         super().__init__()
         num_patches = (img_size // patch_size) * (img_size // patch_size)
         self.img_size = img_size

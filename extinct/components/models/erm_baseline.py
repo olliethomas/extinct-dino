@@ -9,8 +9,8 @@ from torch import Tensor, nn, optim
 import torch.nn.functional as F
 import torchmetrics
 
-from extinct.datamodules import DataBatch, Stage, VisionDataModule
-from extinct.models.predefined import Mp64x64Net
+from extinct.components.datamodules import DataBatch, Stage, VisionDataModule
+from extinct.components.models.predefined import Mp64x64Net
 
 from .base import ModelBase
 

@@ -7,23 +7,27 @@ from typing import Any, Dict, Final, Optional
 import hydra
 from hydra.core.config_store import ConfigStore
 from hydra.utils import instantiate
+from kit.pl import IterationBasedProgBar
 from omegaconf import DictConfig, MISSING, OmegaConf
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 
-from extinct.hydra.extinct.datamodules.configs import (  # type: ignore[import]
+from extinct.components.callbacks.ssl_eval import DINOEvaluator
+from extinct.components.models.dino import DINO
+from extinct.hydra.extinct.components.datamodules.configs import (  # type: ignore[import]
     CelebaDataModuleConf,
 )
-from extinct.hydra.extinct.models.configs import (  # type: ignore[import]
+from extinct.hydra.extinct.components.models.configs import (  # type: ignore[import]
     CelebaErmBaselineConf,
     CelebaKCBaselineConf,
     LaftrBaselineConf,
 )
-from extinct.hydra.extinct.models.dino.configs import DINOConf  # type: ignore[import]
+from extinct.hydra.extinct.components.models.dino.configs import (  # type: ignore[import]
+    DINOConf,
+)
 from extinct.hydra.pytorch_lightning.trainer.configs import (  # type: ignore[import]
     TrainerConf,
 )
-from extinct.utils.callbacks import IterationBasedProgBar
 
 
 @dataclass
@@ -94,7 +98,9 @@ def start(cfg: Config, raw_config: Optional[Dict[str, Any]]) -> None:
     cfg.data.setup()
 
     cfg.model.target = cfg.data.train_data.dataset.dataset.ti.y_label
-    callbacks: list[pl.Callback] = [IterationBasedProgBar()]
+    callbacks: list[pl.Callback] = (
+        [IterationBasedProgBar()] + [DINOEvaluator()] if isinstance(cfg.model, DINO) else []
+    )
     cfg.trainer.callbacks = callbacks
 
     # Build the model

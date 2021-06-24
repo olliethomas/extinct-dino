@@ -11,10 +11,10 @@ import torch
 from torch import Tensor, nn, optim
 import torchmetrics
 
-from extinct.datamodules import VisionDataModule
-from extinct.datamodules.structures import DataBatch
-from extinct.models import ModelBase
-from extinct.models.predefined import Decoder, EmbeddingClf, Encoder
+from extinct.components.datamodules import VisionDataModule
+from extinct.components.datamodules.structures import DataBatch
+from extinct.components.models import ModelBase
+from extinct.components.models.predefined import Decoder, EmbeddingClf, Encoder
 
 __all__ = ["LaftrBaseline"]
 
@@ -34,7 +34,7 @@ class LaftrBaseline(ModelBase):
         recon_weight: float,
         clf_weight: float,
         adv_weight: float,
-    ):
+    ) -> None:
         super().__init__()
         self.enc = Encoder(
             input_shape=(3, 64, 64), initial_hidden_channels=64, levels=3, encoding_dim=128

@@ -11,8 +11,8 @@ from pytorch_lightning import LightningDataModule
 import torch
 from torch.utils.data.dataset import random_split
 
-from extinct.datamodules.base import TrainAugMode, VisionDataModule
-from extinct.datamodules.structures import AlbumentationsDataset, TiWrapper
+from extinct.components.datamodules.base import TrainAugMode, VisionDataModule
+from extinct.components.datamodules.structures import AlbumentationsDataset, TiWrapper
 
 __all__ = ["CelebaDataModule"]
 
@@ -41,7 +41,7 @@ class CelebaDataModule(VisionDataModule):
         local_crops_number: int = -1,
         global_crops_scale: Tuple[float, float] = (0.4, 1.0),
         local_crops_scale: Tuple[float, float] = (0.05, 0.4),
-    ):
+    ) -> None:
 
         if aug_mode is TrainAugMode.none:
             if local_crops_number > 0:

@@ -16,15 +16,15 @@ configen:
 
   # list of modules to generate configs for
   modules:
-    - name: extinct.datamodules
+    - name: extinct.components.datamodules
       classes:
         - CelebaDataModule
-    - name: extinct.models
+    - name: extinct.components.models
       classes:
         - CelebaKCBaseline
         - LaftrBaseline
         - CelebaErmBaseline
-    - name: extinct.models.dino
+    - name: extinct.components.models.dino
       classes:
         - DINO
     - name: pytorch_lightning.trainer

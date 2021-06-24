@@ -1,31 +1,33 @@
 from __future__ import annotations
-import copy
 from typing import Any, Callable, Optional, cast
 
-from kit import implements
+from kit import gcopy, implements
 import numpy as np
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks.progress import ProgressBar
-import torch
+from pytorch_lightning.utilities.types import STEP_OUTPUT
 from torch import Tensor, nn, optim
 from torch.utils.data import DataLoader
 
-from extinct.datamodules import DataBatch, Stage, VisionDataModule
-from extinct.models.base import ModelBase
+from extinct.components.datamodules import DataBatch, Stage, VisionDataModule
+from extinct.components.models.base import ModelBase
+from extinct.utils import cosine_scheduler, get_params_groups
 
 from . import vit
 from .eval import KNN, DatasetEncoderRunner, DINOLinearClassifier, EvalMethod
-from .head import DINOHead, MultiCropWrapper
 from .loss import DINOLoss
-from .utils import cosine_scheduler, get_params_groups
 
 __all__ = ["DINO"]
+
+from extinct.components.callbacks.dino_updates import MeanTeacherWeightUpdate
+
+from .models import MultiCropNet
 
 
 class DINO(ModelBase):
     _loss_fn: DINOLoss
-    student: MultiCropWrapper
-    teacher: MultiCropWrapper
+    student: nn.Module
+    teacher: nn.Module
     eval_trainer: pl.Trainer
     lr_schedule: np.ndarray
     wd_schedule: np.ndarray
@@ -83,6 +85,10 @@ class DINO(ModelBase):
         self.lin_clf_epochs = lin_clf_epochs
         self.batch_size_eval = batch_size_eval
 
+        self.weight_callback = MeanTeacherWeightUpdate(
+            max_steps=max_steps, initial_tau=self.momentum_teacher
+        )
+
         self._arch_fn = cast(
             Callable[[int], vit.VisionTransformer], getattr(vit, f"vit_{arch.name}")
         )
@@ -107,10 +113,20 @@ class DINO(ModelBase):
             final_value=self.weight_decay_end,
             total_iters=max_steps,
         )
-        self.momentum_schedule = cosine_scheduler(
-            base_value=self.momentum_teacher,
-            final_value=1,
-            total_iters=max_steps,
+
+        self.student = MultiCropNet(
+            arch_fn=self._arch_fn,
+            patch_size=self.patch_size,
+            norm_last_layer=self.norm_last_layer,
+            use_bn_in_head=self.use_bn_in_head,
+            out_dim=self.out_dim,
+        )
+        self.teacher = MultiCropNet(
+            arch_fn=self._arch_fn,
+            patch_size=self.patch_size,
+            norm_last_layer=True,
+            use_bn_in_head=self.use_bn_in_head,
+            out_dim=self.out_dim,
         )
 
     @property
@@ -138,22 +154,13 @@ class DINO(ModelBase):
 
     @implements(ModelBase)
     def build(self, datamodule: VisionDataModule, trainer: pl.Trainer) -> None:
-        for net in ("student", "teacher"):
-            backbone = self._arch_fn(self.patch_size)
-            embed_dim = backbone.embed_dim
-            norm_last_layer = (net == "teacher") or self.norm_last_layer
-            head = DINOHead(
-                embed_dim,
-                self.out_dim,
-                use_bn=self.use_bn_in_head,
-                norm_last_layer=norm_last_layer,
-            )
-            setattr(self, net, MultiCropWrapper(backbone=backbone, head=head))
-
         self.datamodule = datamodule
-        self.eval_trainer = copy.deepcopy(trainer)
-        self.eval_trainer.max_epochs = self.lin_clf_epochs
-        self.eval_trainer.max_steps = None
+        self.eval_trainer = gcopy(
+            trainer,
+            deep=True,
+            max_epochs=self.lin_clf_epochs,
+            max_steps=None,
+        )
         bar = ProgressBar()
         bar._trainer = self.eval_trainer
         self.eval_trainer.callbacks = [bar]
@@ -163,15 +170,6 @@ class DINO(ModelBase):
         return optim.AdamW(
             get_params_groups(self.student), lr=self.learning_rate, weight_decay=self.weight_decay
         )
-
-    @torch.no_grad()
-    def _update_momentum_teacher(self, train_itr: int) -> None:
-        """
-        Momentum update of the teacher network
-        """
-        em = self.momentum_schedule[train_itr]  # momentum parameter
-        for param_q, param_k in zip(self.student.parameters(), self.teacher.parameters()):
-            param_k.data = param_k.data * em + param_q.data * (1.0 - em)
 
     def _cancel_gradients_last_layer(self, train_itr: int) -> None:
         if train_itr >= self.freeze_last_layer:
@@ -196,6 +194,13 @@ class DINO(ModelBase):
 
         return self._get_loss(batch=batch, batch_idx=batch_idx)
 
+    def on_train_batch_end(
+        self, outputs: STEP_OUTPUT, batch: Any, batch_idx: int, dataloader_idx: int
+    ) -> None:
+        self.weight_callback.on_train_batch_end(
+            self.trainer, self, outputs, batch, batch_idx, dataloader_idx
+        )
+
     @implements(pl.LightningModule)
     def optimizer_step(
         self,
@@ -209,7 +214,7 @@ class DINO(ModelBase):
         using_lbfgs: bool,
     ) -> None:
         # Keep the output layer fixed until the epoch-threshold has been reached
-        # Typicacally doing so during the first epoch helps training.
+        # Typically doing so during the first epoch helps training.
         self._cancel_gradients_last_layer(train_itr=batch_idx)
         # Update the student's parameters using the DINO loss
         super().optimizer_step(
@@ -222,42 +227,6 @@ class DINO(ModelBase):
             using_native_amp=using_native_amp,
             using_lbfgs=using_lbfgs,
         )
-        # Update the teacher network via EMA of the student's weights
-        self._update_momentum_teacher(train_itr=batch_idx)
-
-    @implements(pl.LightningModule)
-    def on_validation_start(self) -> None:
-        self._on_inference_start()
-        super().on_validation_start()
-
-    @implements(pl.LightningModule)
-    def on_test_start(self) -> None:
-        self._on_inference_start()
-        super().on_test_start()
-
-    def _on_inference_start(self) -> None:
-        if self.eval_method is EvalMethod.lin_clf:
-            self.eval_clf = DINOLinearClassifier(
-                enc=self.student.backbone,
-                target_dim=self.datamodule.y_dim,
-                epochs=self.lin_clf_epochs,
-                weight_decay=0,
-                lr=self.lr_eval,
-            )
-            self.eval_clf.target = self.target
-            self.eval_trainer.fit(
-                self.eval_clf,
-                train_dataloader=self.datamodule.train_dataloader(
-                    eval=True, batch_size=self.batch_size_eval
-                ),
-            )
-        else:
-            train_data_encoded = self._encode_dataset(stage="train")
-            self.eval_clf = KNN(
-                train_features=train_data_encoded.x, train_labels=train_data_encoded.y
-            )
-        self.eval_clf.target = self.target
-        self.eval_clf.to(self.device)
 
     @implements(ModelBase)
     def _inference_step(self, batch: DataBatch, stage: Stage) -> dict[str, Any]:

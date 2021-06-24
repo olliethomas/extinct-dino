@@ -12,8 +12,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchmetrics
 
-from extinct.datamodules import DataBatch, Stage
-from extinct.models.finetuning import FineTuner
+from extinct.components.datamodules import DataBatch, Stage
+from extinct.components.models.finetuning import FineTuner
 
 from .vit import VisionTransformer
 
