@@ -22,8 +22,8 @@ from extinct.hydra.extinct.components.models.configs import (  # type: ignore[im
     CelebaKCBaselineConf,
     LaftrBaselineConf,
 )
-from extinct.hydra.extinct.components.models.dino.configs import (
-    DINOConf,  # type: ignore[import]
+from extinct.hydra.extinct.components.models.dino.configs import (  # type: ignore[import]
+    DINOConf,
 )
 from extinct.hydra.pytorch_lightning.trainer.configs import (  # type: ignore[import]
     TrainerConf,

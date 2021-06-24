@@ -1,6 +1,7 @@
 from typing import Sequence
 
 import pytorch_lightning as pl
+from pytorch_lightning.utilities.types import STEP_OUTPUT
 from torch import nn
 
 from extinct.utils import cosine_scheduler
@@ -40,7 +41,7 @@ class MeanTeacherWeightUpdate(pl.Callback):
         self,
         trainer: pl.Trainer,
         pl_module: pl.LightningModule,
-        outputs: Sequence,
+        outputs: STEP_OUTPUT,
         batch: Sequence,
         batch_idx: int,
         dataloader_idx: int,

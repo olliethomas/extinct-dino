@@ -1,5 +1,7 @@
 from __future__ import annotations
+import copy
 import math
+from typing import Any, TypeVar
 import warnings
 
 import numpy as np
@@ -8,6 +10,8 @@ from torch import Tensor
 import torch.nn as nn
 
 __all__ = ["trunc_normal_", "cosine_scheduler", "get_params_groups"]
+
+T = TypeVar('T')
 
 
 def _no_grad_trunc_normal_(tensor: Tensor, mean: float, std: float, a: float, b: float) -> Tensor:
@@ -88,3 +92,12 @@ def cosine_scheduler(
     schedule = np.concatenate((warmup_schedule, schedule))
     assert len(schedule) == total_iters
     return schedule
+
+
+def deepcopy_with_kwargs(obj: T, **kwargs: Any) -> T:
+    obj_cp = copy.deepcopy(obj)
+    for attr, value in kwargs.items():
+        if not hasattr(obj_cp, attr):
+            raise AttributeError(...)
+        setattr(obj_cp, attr, value)
+    return obj_cp

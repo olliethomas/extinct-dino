@@ -1,7 +1,7 @@
 from typing import Sequence
 
 import pytorch_lightning as pl
-import torch
+from pytorch_lightning.utilities.types import STEP_OUTPUT
 from torch.optim import Optimizer
 
 
@@ -48,8 +48,6 @@ class DINOEvaluator(pl.Callback):
         ).to(pl_module.device)
         pl_module.eval_clf.target = pl_module.target
 
-        self.optimizer = torch.optim.Adam(pl_module.eval_clf.parameters(), lr=1e-4)
-
     def _eval_loop(self, pl_module: pl.LightningModule) -> None:
         from extinct.components.models.dino import EvalMethod
 
@@ -74,7 +72,7 @@ class DINOEvaluator(pl.Callback):
         self,
         trainer: pl.Trainer,
         pl_module: pl.LightningModule,
-        outputs: Sequence,
+        outputs: STEP_OUTPUT,
         batch: Sequence,
         batch_idx: int,
         dataloader_idx: int,
