@@ -7,11 +7,11 @@ from typing import Any, Dict, Final, Optional
 import hydra
 from hydra.core.config_store import ConfigStore
 from hydra.utils import instantiate
+from kit.pl import IterationBasedProgBar
 from omegaconf import DictConfig, MISSING, OmegaConf
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 
-from extinct.components.callbacks.iter_prog_bar import IterationBasedProgBar
 from extinct.components.callbacks.ssl_eval import DINOEvaluator
 from extinct.components.models.dino import DINO
 from extinct.hydra.extinct.components.datamodules.configs import (  # type: ignore[import]

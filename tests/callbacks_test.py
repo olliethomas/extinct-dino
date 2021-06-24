@@ -3,14 +3,13 @@ from typing import Any
 
 from fair_bolts.datamodules.base_datamodule import BaseDataModule
 from kit import implements
+from kit.pl import IterationBasedProgBar
 from kit.torch import InfSequentialBatchSampler
 import pytorch_lightning as pl
 import torch
 from torch import Tensor, optim
 import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset, TensorDataset
-
-from extinct.components.callbacks.iter_prog_bar import IterationBasedProgBar
 
 
 class _DummyModel(pl.LightningModule):
