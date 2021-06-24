@@ -1,0 +1,9 @@
+defaults:
+  - base
+
+max_steps: 20000
+val_check_interval: 5000
+gradient_clip_val: 3.0
+gradient_clip_algorithm: norm
+precision: 16
+plugins: deepspeed_stage_2_offload
