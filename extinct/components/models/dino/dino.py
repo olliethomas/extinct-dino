@@ -16,18 +16,19 @@ from extinct.utils import cosine_scheduler, get_params_groups
 
 from . import vit
 from .eval import KNN, DatasetEncoderRunner, DINOLinearClassifier, EvalMethod
-from .head import DINOHead, MultiCropWrapper
 from .loss import DINOLoss
 
 __all__ = ["DINO"]
 
 from extinct.components.callbacks.dino_updates import MeanTeacherWeightUpdate
 
+from .models import MultiCropNet
+
 
 class DINO(ModelBase):
     _loss_fn: DINOLoss
-    student: MultiCropWrapper
-    teacher: MultiCropWrapper
+    student: nn.Module
+    teacher: nn.Module
     eval_trainer: pl.Trainer
     lr_schedule: np.ndarray
     wd_schedule: np.ndarray
@@ -114,17 +115,20 @@ class DINO(ModelBase):
             total_iters=max_steps,
         )
 
-        for net in ("student", "teacher"):
-            backbone = self._arch_fn(self.patch_size)
-            embed_dim = backbone.embed_dim
-            norm_last_layer = (net == "teacher") or self.norm_last_layer
-            head = DINOHead(
-                embed_dim,
-                self.out_dim,
-                use_bn=self.use_bn_in_head,
-                norm_last_layer=norm_last_layer,
-            )
-            setattr(self, net, MultiCropWrapper(backbone=backbone, head=head))
+        self.student = MultiCropNet(
+            arch_fn=self._arch_fn,
+            patch_size=self.patch_size,
+            norm_last_layer=self.norm_last_layer,
+            use_bn_in_head=self.use_bn_in_head,
+            out_dim=self.out_dim,
+        )
+        self.teacher = MultiCropNet(
+            arch_fn=self._arch_fn,
+            patch_size=self.patch_size,
+            norm_last_layer=True,
+            use_bn_in_head=self.use_bn_in_head,
+            out_dim=self.out_dim,
+        )
 
     @property
     def enc(self) -> vit.VisionTransformer:
