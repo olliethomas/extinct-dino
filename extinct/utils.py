@@ -92,12 +92,3 @@ def cosine_scheduler(
     schedule = np.concatenate((warmup_schedule, schedule))
     assert len(schedule) == total_iters
     return schedule
-
-
-def deepcopy_with_kwargs(obj: T, **kwargs: Any) -> T:
-    obj_cp = copy.deepcopy(obj)
-    for attr, value in kwargs.items():
-        if not hasattr(obj_cp, attr):
-            raise AttributeError(...)
-        setattr(obj_cp, attr, value)
-    return obj_cp

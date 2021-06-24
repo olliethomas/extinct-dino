@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Any, Callable, Optional, cast
 
-from kit import implements
+from kit import gcopy, implements
 import numpy as np
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks.progress import ProgressBar
@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader
 
 from extinct.components.datamodules import DataBatch, Stage, VisionDataModule
 from extinct.components.models.base import ModelBase
-from extinct.utils import cosine_scheduler, deepcopy_with_kwargs, get_params_groups
+from extinct.utils import cosine_scheduler, get_params_groups
 
 from . import vit
 from .eval import KNN, DatasetEncoderRunner, DINOLinearClassifier, EvalMethod
@@ -155,11 +155,12 @@ class DINO(ModelBase):
     @implements(ModelBase)
     def build(self, datamodule: VisionDataModule, trainer: pl.Trainer) -> None:
         self.datamodule = datamodule
-        self.eval_trainer = deepcopy_with_kwargs(
-            trainer, max_epochs=self.lin_clf_epochs, max_steps=None
+        self.eval_trainer = gcopy(
+            trainer,
+            deep=True,
+            max_epochs=self.lin_clf_epochs,
+            max_steps=None,
         )
-        # self.eval_trainer.max_epochs = self.lin_clf_epochs
-        # self.eval_trainer.max_steps = None
         bar = ProgressBar()
         bar._trainer = self.eval_trainer
         self.eval_trainer.callbacks = [bar]
