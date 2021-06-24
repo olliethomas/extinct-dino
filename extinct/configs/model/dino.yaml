@@ -17,4 +17,5 @@ num_eval_blocks: 1
 lr_eval: 1.e-4
 max_steps: ${trainer.max_steps}
 dm_batch_size: ${data.batch_size}
+num_sanity_val_steps: 0
 local_crops_number: ${data.local_crops_number}
