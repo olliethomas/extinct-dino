@@ -26,8 +26,8 @@ from .models import MultiCropNet
 
 class DINO(ModelBase):
     _loss_fn: DINOLoss
-    student: nn.Module
-    teacher: nn.Module
+    student: MultiCropNet
+    teacher: MultiCropNet
     eval_trainer: pl.Trainer
     lr_schedule: np.ndarray
     wd_schedule: np.ndarray
