@@ -15,6 +15,7 @@ from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, SequentialSampler
 from torch.utils.data.sampler import BatchSampler
 
+from extinct.components.datamodules.structures import InputSize
 from extinct.components.datamodules.utils import extract_labels_from_dataset
 
 from .dino import DINOAugmentation
@@ -32,6 +33,8 @@ class TrainAugMode(Enum):
 
 
 class VisionDataModule(VisionBaseDataModule):
+    _input_size: InputSize
+
     def __init__(
         self,
         y_dim: int,
@@ -68,6 +71,15 @@ class VisionDataModule(VisionBaseDataModule):
         self.global_crops_scale = global_crops_scale
         self.local_crops_scale = local_crops_scale
         self.local_crops_number = local_crops_number
+
+    @property
+    def input_size(self) -> InputSize:
+        if hasattr(self, "_input_size"):
+            return self._input_size
+        if self._train_data is not None:
+            self._input_size = self._train_data[0]
+            return self._input_size
+        raise AttributeError("Input size unavailable because setup has not yet been called.")
 
     @property
     @abstractmethod

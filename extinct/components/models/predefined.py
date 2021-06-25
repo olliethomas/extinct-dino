@@ -3,6 +3,8 @@ from typing import List, Optional, Tuple
 import torch
 from torch import Tensor, nn
 
+from extinct.components.datamodules.structures import InputSize
+
 
 class Mp64x64Net(nn.Module):
     def __init__(self, batch_norm: bool, in_chans: int, target_dim: int) -> None:
@@ -130,16 +132,15 @@ class Encoder(nn.Module):
 class Decoder(nn.Module):
     def __init__(
         self,
-        input_shape: Tuple[int, int, int],
+        input_size: InputSize,
         initial_hidden_channels: int,
         levels: int,
         encoding_dim: int,
-        decoding_dim: int,
         decoder_out_act: Optional[nn.Module] = None,
     ) -> None:
         super().__init__()
         layers = nn.ModuleList()
-        c_in, height, width = input_shape
+        c_in, height, width = input_size
         c_out = initial_hidden_channels
 
         for level in range(levels):
@@ -163,7 +164,7 @@ class Decoder(nn.Module):
         layers += [View((c_out, height, width))]
         layers += [nn.Linear(encoding_dim, flattened_size)]
         layers = layers[::-1]
-        layers += [nn.Conv2d(input_shape[0], decoding_dim, kernel_size=1, stride=1, padding=0)]
+        layers += [nn.Conv2d(input_size.C, input_size.C, kernel_size=1, stride=1, padding=0)]
 
         if decoder_out_act is not None:
             layers += [decoder_out_act]

@@ -6,6 +6,8 @@ from torch import nn
 
 from extinct.utils import cosine_scheduler
 
+__all__ = ["MeanTeacherWeightUpdate"]
+
 
 class MeanTeacherWeightUpdate(pl.Callback):
     """
@@ -21,13 +23,13 @@ class MeanTeacherWeightUpdate(pl.Callback):
         model = Model()
         model.student_network = ...
         model.teacher_network = ...
-        trainer = Trainer(callbacks=[DINOMAWeightUpdate()])
+        trainer = Trainer(callbacks=[MeanTeacherWeightUpdate])
     """
 
     def __init__(self, max_steps: int, initial_tau: float = 0.996) -> None:
         """
         Args:
-            initial_tau: starting tau. Auto-updates with every training step
+            initial_tau: starting tau. Auto-updates with every training step.
         """
         super().__init__()
 
@@ -51,7 +53,7 @@ class MeanTeacherWeightUpdate(pl.Callback):
         teacher_net = pl_module.teacher
 
         # update weights
-        self.update_weights(pl_module.global_step, student_net, teacher_net)
+        self.update_weights(pl_module.global_step, student_net, teacher_net)  # type: ignore
 
     def update_weights(self, train_itrs: int, student: nn.Module, teacher: nn.Module) -> None:
         # apply MA weight update

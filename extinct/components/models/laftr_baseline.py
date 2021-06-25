@@ -1,7 +1,7 @@
-from collections import namedtuple
-from enum import Enum
+from __future__ import annotations
+from enum import Enum, auto
 import itertools
-from typing import Any, List, Optional, Tuple, Union
+from typing import Any, NamedTuple
 
 import ethicml as em
 from kit import implements
@@ -19,8 +19,22 @@ from extinct.components.models.predefined import Decoder, EmbeddingClf, Encoder
 __all__ = ["LaftrBaseline"]
 
 
-ModelOut = namedtuple("ModelOut", ["y", "z", "s", "x"])
-FairnessType = Enum("FairnessType", "DP EO EqOp")
+class ModelOut(NamedTuple):
+    y: Tensor
+    z: Tensor
+    s: Tensor
+    x: Tensor
+
+
+class DecoderOutAct(Enum):
+    none = auto()
+    tanh = auto()
+
+
+class FairnessType(Enum):
+    DP = auto()
+    EO = auto()
+    EqOp = auto()
 
 
 class LaftrBaseline(ModelBase):
@@ -34,30 +48,20 @@ class LaftrBaseline(ModelBase):
         recon_weight: float,
         clf_weight: float,
         adv_weight: float,
+        encoding_dim: int = 128,
+        init_hidden_channels: int = 64,
+        levels: int = 3,
+        decoder_out_act: DecoderOutAct = DecoderOutAct.none,
     ) -> None:
         super().__init__()
-        self.enc = Encoder(
-            input_shape=(3, 64, 64), initial_hidden_channels=64, levels=3, encoding_dim=128
-        )
-        self.dec = Decoder(
-            input_shape=(3, 64, 64),
-            initial_hidden_channels=64,
-            levels=3,
-            encoding_dim=128 + 1,
-            decoding_dim=3,
-            decoder_out_act=nn.Tanh(),
-        )
-        self.adv = EmbeddingClf(encoding_dim=128)
-        self.clf = EmbeddingClf(encoding_dim=128)
-
-        self.laftr_params = itertools.chain(
-            [*self.enc.parameters(), *self.dec.parameters(), *self.clf.parameters()]
-        )
-        self.adv_params = self.adv.parameters()
 
         self._clf_loss = nn.BCEWithLogitsLoss(reduction="mean")
         self._recon_loss = nn.L1Loss(reduction="mean")
         self._adv_clf_loss = nn.L1Loss(reduction="mean")
+        self.encoding_dim = encoding_dim
+        self.decoder_out_act = decoder_out_act
+        self.init_hidden_channels = init_hidden_channels
+        self.levels = levels
 
         self.disc_steps = disc_steps
         self.fairness = fairness
@@ -73,19 +77,31 @@ class LaftrBaseline(ModelBase):
         self.train_acc = torchmetrics.Accuracy()
         self.val_acc = torchmetrics.Accuracy()
 
-        self._target: Optional[str] = None
-
     def build(self, datamodule: VisionDataModule, trainer: pl.Trainer) -> None:
-        """DM and Trainer not needed."""
+        input_shape = datamodule.input_size
+        self.enc = Encoder(
+            input_shape=input_shape,
+            initial_hidden_channels=self.init_hidden_channels,
+            levels=self.levels,
+            encoding_dim=self.encoding_dim,
+        )
+        decoder_out_act_fn = (
+            nn.Identity() if self.decoder_out_act is DecoderOutAct.none else nn.Tanh()
+        )
+        self.dec = Decoder(
+            input_size=input_shape,
+            initial_hidden_channels=self.init_hidden_channels,
+            levels=self.levels,
+            encoding_dim=self.encoding_dim + 1,
+            decoder_out_act=decoder_out_act_fn,
+        )
+        self.adv = EmbeddingClf(encoding_dim=self.encoding_dim)
+        self.clf = EmbeddingClf(encoding_dim=self.encoding_dim)
 
-    @property
-    def target(self) -> str:
-        assert self._target is not None
-        return self._target
-
-    @target.setter
-    def target(self, target: str) -> None:
-        self._target = target
+        self.laftr_params = itertools.chain(
+            [*self.enc.parameters(), *self.dec.parameters(), *self.clf.parameters()]
+        )
+        self.adv_params = self.adv.parameters()
 
     def _adv_loss(self, s_pred: Tensor, batch: DataBatch) -> Tensor:
         # For Demographic Parity, for EqOpp is a different loss term.
@@ -139,7 +155,7 @@ class LaftrBaseline(ModelBase):
 
         dt = em.DataTuple(
             x=pd.DataFrame(
-                torch.rand_like(all_s, dtype=float).detach().cpu().numpy(), columns=["x0"]
+                torch.rand_like(all_s, dtype=torch.float32).detach().cpu().numpy(), columns=["x0"]
             ),
             s=pd.DataFrame(all_s.detach().cpu().numpy(), columns=["s"]),
             y=pd.DataFrame(all_y.detach().cpu().numpy(), columns=["y"]),
@@ -167,7 +183,7 @@ class LaftrBaseline(ModelBase):
     @implements(pl.LightningModule)
     def configure_optimizers(
         self,
-    ) -> Tuple[List[optim.Optimizer], List[optim.lr_scheduler.ExponentialLR]]:
+    ) -> tuple[list[optim.Optimizer], list[optim.lr_scheduler.ExponentialLR]]:
         opt_laftr = optim.AdamW(self.laftr_params, lr=self.lr, weight_decay=self.weight_decay)
         opt_adv = optim.AdamW(self.adv_params, lr=self.lr, weight_decay=self.weight_decay)
 
@@ -255,7 +271,7 @@ class LaftrBaseline(ModelBase):
         return ModelOut(y=y_pred, z=embedding, x=recon, s=s_pred)
 
     @staticmethod
-    def set_requires_grad(nets: Union[nn.Module, List[nn.Module]], requires_grad: bool) -> None:
+    def set_requires_grad(nets: nn.Module | list[nn.Module], requires_grad: bool) -> None:
         if not isinstance(nets, list):
             nets = [nets]
         for net in nets:

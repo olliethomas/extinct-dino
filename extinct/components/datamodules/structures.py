@@ -11,7 +11,7 @@ import torch
 from torch import Tensor
 from torch.utils.data import Dataset
 
-__all__ = ["DataBatch", "TiWrapper", "AlbumentationsDataset", "Stage"]
+__all__ = ["DataBatch", "TiWrapper", "AlbumentationsDataset", "Stage", "InputSize"]
 
 
 Stage = Literal["train", "val", "test"]
@@ -22,6 +22,12 @@ class DataBatch(NamedTuple):
     s: Tensor
     y: Tensor
     iw: Tensor
+
+
+class InputSize(NamedTuple):
+    h: int
+    w: int
+    c: int
 
 
 class TiWrapper(Dataset):

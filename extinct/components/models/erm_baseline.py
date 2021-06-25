@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Any
 
 import ethicml as em
 from kit import implements
@@ -8,6 +9,7 @@ import torch
 from torch import Tensor, nn, optim
 import torch.nn.functional as F
 import torchmetrics
+from torchvision.models import resnet50
 
 from extinct.components.datamodules import DataBatch, Stage, VisionDataModule
 from extinct.components.models.predefined import Mp64x64Net
@@ -81,14 +83,14 @@ class ErmBaseline(ModelBase):
     @implements(ModelBase)
     def _inference_epoch_end(
         self, output_results: list[dict[str, Tensor]], stage: Stage
-    ) -> dict[str, Tensor]:
+    ) -> dict[str, Any]:
         all_y = torch.cat([_r["y"] for _r in output_results], 0)
         all_s = torch.cat([_r["s"] for _r in output_results], 0)
         all_preds = torch.cat([_r["preds"] for _r in output_results], 0)
 
         dt = em.DataTuple(
             x=pd.DataFrame(
-                torch.rand_like(all_s, dtype=float).detach().cpu().numpy(), columns=["x0"]
+                torch.rand_like(all_s, dtype=torch.float32).detach().cpu().numpy(), columns=["x0"]
             ),
             s=pd.DataFrame(all_s.detach().cpu().numpy(), columns=["s"]),
             y=pd.DataFrame(all_y.detach().cpu().numpy(), columns=["y"]),
@@ -131,12 +133,12 @@ class CelebaErmBaseline(ErmBaseline):
         lr: float,
         weight_decay: float,
         lr_gamma: float,
-        batch_norm: bool = True,
     ) -> None:
-        enc = Mp64x64Net(batch_norm=batch_norm, in_chans=3, target_dim=10)
-        clf = nn.Linear(10, 1)
+        resnet = resnet50(pretrained=True)
+        clf = nn.Linear(in_features=resnet.fc.in_features, out_features=1)
+        resnet.fc = nn.Identity()  # type: ignore
         super().__init__(
-            enc=enc,
+            enc=resnet,
             clf=clf,
             lr=lr,
             weight_decay=weight_decay,
