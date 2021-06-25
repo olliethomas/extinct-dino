@@ -1,7 +1,7 @@
 from __future__ import annotations
 from enum import Enum, auto
 import itertools
-from typing import Any, NamedTuple
+from typing import Any, NamedTuple, Union
 
 import ethicml as em
 from kit import implements
@@ -52,7 +52,7 @@ class LaftrBaseline(ModelBase):
         encoding_dim: int = 128,
         init_hidden_channels: int = 64,
         levels: int = 3,
-        image_logging_freq: int | float = 0.1,
+        image_logging_freq: Union[int, float] = 0.1,
         decoder_out_act: DecoderOutAct = DecoderOutAct.none,
     ) -> None:
         super().__init__()
