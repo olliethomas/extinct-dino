@@ -2,8 +2,14 @@ defaults:
   - /schema/model: laftr
   - base
 
-disc_steps: 3
+disc_steps: 1
 fairness: "DP"
 recon_weight: 1.0
 adv_weight: 1.0
 clf_weight: 0.0
+init_hidden_channels: 64
+levels: 5
+encoding_dim: 256
+lr: 4.e-4
+lr_gamma: 0
+weight_decay: 0
