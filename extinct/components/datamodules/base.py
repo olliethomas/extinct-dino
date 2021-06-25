@@ -80,7 +80,7 @@ class VisionDataModule(VisionBaseDataModule):
         if hasattr(self, "_input_size"):
             return self._input_size
         if self._train_data is not None:
-            self._input_size = self._train_data[0]
+            self._input_size = InputSize(*self._train_data[0].x.shape)
             return self._input_size
         raise AttributeError("Input size unavailable because setup has not yet been called.")
 
