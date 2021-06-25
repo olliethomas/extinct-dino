@@ -5,6 +5,7 @@
 # flake8: noqa
 
 from dataclasses import dataclass, field
+from extinct.components.models.laftr_baseline import DecoderOutAct
 from extinct.components.models.laftr_baseline import FairnessType
 from omegaconf import MISSING
 
@@ -15,7 +16,6 @@ class CelebaKCBaselineConf:
     lr: float = MISSING
     weight_decay: float = MISSING
     lr_gamma: float = MISSING
-    batch_norm: bool = True
 
 
 @dataclass
@@ -29,6 +29,10 @@ class LaftrBaselineConf:
     recon_weight: float = MISSING
     clf_weight: float = MISSING
     adv_weight: float = MISSING
+    encoding_dim: int = 128
+    init_hidden_channels: int = 64
+    levels: int = 3
+    decoder_out_act: DecoderOutAct = DecoderOutAct.none
 
 
 @dataclass
@@ -37,4 +41,3 @@ class CelebaErmBaselineConf:
     lr: float = MISSING
     weight_decay: float = MISSING
     lr_gamma: float = MISSING
-    batch_norm: bool = True
