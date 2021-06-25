@@ -32,9 +32,9 @@ class DataBatch(NamedTuple):
 
 
 class InputSize(NamedTuple):
-    h: int
-    w: int
-    c: int
+    C: int
+    H: int
+    W: int
 
 
 class NormalizationValues(NamedTuple):
