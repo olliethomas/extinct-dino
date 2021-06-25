@@ -157,9 +157,9 @@ class DINO(ModelBase):
         self.datamodule = datamodule
         self.eval_trainer = gcopy(
             trainer,
-            deep=True,
             max_epochs=self.lin_clf_epochs,
             max_steps=None,
+            val_check_interval=1.0,
         )
         bar = ProgressBar()
         bar._trainer = self.eval_trainer

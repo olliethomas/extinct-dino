@@ -11,7 +11,14 @@ import torch
 from torch import Tensor
 from torch.utils.data import Dataset
 
-__all__ = ["DataBatch", "TiWrapper", "AlbumentationsDataset", "Stage", "InputSize"]
+__all__ = [
+    "DataBatch",
+    "TiWrapper",
+    "AlbumentationsDataset",
+    "Stage",
+    "InputSize",
+    "NormalizationValues",
+]
 
 
 Stage = Literal["train", "val", "test"]
@@ -28,6 +35,11 @@ class InputSize(NamedTuple):
     h: int
     w: int
     c: int
+
+
+class NormalizationValues(NamedTuple):
+    mean: tuple[float, ...]
+    std: tuple[float, ...]
 
 
 class TiWrapper(Dataset):

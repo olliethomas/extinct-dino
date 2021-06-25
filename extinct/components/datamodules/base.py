@@ -3,7 +3,7 @@ from abc import abstractmethod
 import copy
 from enum import Enum, auto
 import logging
-from typing import Optional
+from typing import ClassVar, Optional
 
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
@@ -15,7 +15,7 @@ from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, SequentialSampler
 from torch.utils.data.sampler import BatchSampler
 
-from extinct.components.datamodules.structures import InputSize
+from extinct.components.datamodules.structures import InputSize, NormalizationValues
 from extinct.components.datamodules.utils import extract_labels_from_dataset
 
 from .dino import DINOAugmentation
@@ -34,6 +34,9 @@ class TrainAugMode(Enum):
 
 class VisionDataModule(VisionBaseDataModule):
     _input_size: InputSize
+    norm_values: ClassVar[NormalizationValues] = NormalizationValues(
+        mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)
+    )
 
     def __init__(
         self,

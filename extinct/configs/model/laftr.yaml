@@ -13,3 +13,4 @@ encoding_dim: 256
 lr: 4.e-4
 lr_gamma: 0
 weight_decay: 0
+image_logging_freq: 0.05

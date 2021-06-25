@@ -11,6 +11,7 @@ import torch
 from torch import Tensor, nn, optim
 import torchmetrics
 
+from extinct.components.callbacks.logging import ImageLogger
 from extinct.components.datamodules import VisionDataModule
 from extinct.components.datamodules.structures import DataBatch
 from extinct.components.models import ModelBase
@@ -51,6 +52,7 @@ class LaftrBaseline(ModelBase):
         encoding_dim: int = 128,
         init_hidden_channels: int = 64,
         levels: int = 3,
+        image_logging_freq: int | float = 0.1,
         decoder_out_act: DecoderOutAct = DecoderOutAct.none,
     ) -> None:
         super().__init__()
@@ -77,6 +79,13 @@ class LaftrBaseline(ModelBase):
         self.train_acc = torchmetrics.Accuracy()
         self.val_acc = torchmetrics.Accuracy()
 
+        if isinstance(image_logging_freq, float) and not (0 <= image_logging_freq <= 1):
+            raise ValueError(
+                "If image_logging_freq is of type 'float' its value must be between 0 and 1,"
+                " corresponding to the fraction of the total number of steps after which to log."
+            )
+        self.image_logging_freq = image_logging_freq
+
     def build(self, datamodule: VisionDataModule, trainer: pl.Trainer) -> None:
         input_shape = datamodule.input_size
         self.enc = Encoder(
@@ -102,6 +111,15 @@ class LaftrBaseline(ModelBase):
             [*self.enc.parameters(), *self.dec.parameters(), *self.clf.parameters()]
         )
         self.adv_params = self.adv.parameters()
+        image_logging_freq = (
+            self.image_logging_freq
+            if isinstance(self.image_logging_freq, int)
+            else self.image_logging_freq * trainer.max_steps
+        )
+        image_logger = ImageLogger(
+            logging_freq=image_logging_freq, norm_values=datamodule.norm_values
+        )
+        trainer.callbacks.append(image_logger)
 
     def _adv_loss(self, s_pred: Tensor, batch: DataBatch) -> Tensor:
         # For Demographic Parity, for EqOpp is a different loss term.
@@ -269,6 +287,9 @@ class LaftrBaseline(ModelBase):
         s_pred = self.adv(embedding)
         recon = self.dec(embedding, s)
         return ModelOut(y=y_pred, z=embedding, x=recon, s=s_pred)
+
+    def reconstruct(self, x: Tensor) -> Tensor:
+        return self.dec(self.enc(x))
 
     @staticmethod
     def set_requires_grad(nets: nn.Module | list[nn.Module], requires_grad: bool) -> None:
