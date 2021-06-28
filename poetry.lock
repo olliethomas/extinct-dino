@@ -274,6 +274,7 @@ python-versions = "^3.7"
 develop = false
 
 [package.dependencies]
+albumentations = "^1.0.0"
 EthicML = "*"
 lightning-bolts = "branch master"
 pal-bolts = "branch main"
@@ -285,7 +286,7 @@ torchvision = "*"
 type = "git"
 url = "https://github.com/predictive-analytics-lab/fair-bolts.git"
 reference = "main"
-resolved_reference = "d1e4b540d54ece48e36e9482e0ef9ccb7f878882"
+resolved_reference = "a1481611c5da39e19fefdd0d73f16367070adf5f"
 
 [[package]]
 name = "filelock"
@@ -550,7 +551,7 @@ test = ["codecov (>=2.1)", "pytest (>=6.0)", "pytest-cov (>2.10)", "flake8", "ch
 type = "git"
 url = "https://github.com/PyTorchLightning/lightning-bolts.git"
 reference = "master"
-resolved_reference = "9990749f53ee5992dc89ff106a24e609300dca40"
+resolved_reference = "48e75217d8c10e5726eafca2c85e795a993477e7"
 
 [[package]]
 name = "markdown"
@@ -736,15 +737,18 @@ pyparsing = ">=2.0.2"
 
 [[package]]
 name = "pal-bolts"
-version = "0.1.0"
-description = ""
+version = "0.0.1.dev0"
+description = "Useful PyTorch Lightning modules."
 category = "main"
 optional = false
 python-versions = "^3.7"
 develop = false
 
 [package.dependencies]
+albumentations = "^1.0.0"
+EthicML = "*"
 lightning-bolts = "branch master"
+palkit = "*"
 torch = "*"
 torchvision = "*"
 
@@ -752,11 +756,11 @@ torchvision = "*"
 type = "git"
 url = "https://github.com/predictive-analytics-lab/pal-bolts.git"
 reference = "main"
-resolved_reference = "07fef817004921a9f7d90fa3187602793b562a4e"
+resolved_reference = "c37d7c1c8f06028c17b5b80dce4d19e59b448b4c"
 
 [[package]]
 name = "palkit"
-version = "0.3.1"
+version = "0.3.2"
 description = "Useful functions."
 category = "main"
 optional = false
@@ -2041,8 +2045,8 @@ packaging = [
 ]
 pal-bolts = []
 palkit = [
-    {file = "palkit-0.3.1-py3-none-any.whl", hash = "sha256:dda225404e1255bdf4628a69c41baaa8507bebce64eafc67d950ae02cd5c124b"},
-    {file = "palkit-0.3.1.tar.gz", hash = "sha256:6f01220cf1594c6f07dc686e164f425f1585aeb5533827b35e744b6537d8a418"},
+    {file = "palkit-0.3.2-py3-none-any.whl", hash = "sha256:68fb979c1dd1fd890f16ed0b6f92dbe694e9cc435c7cd259ddba0bdbfc3b6c30"},
+    {file = "palkit-0.3.2.tar.gz", hash = "sha256:53c2971616eebcc64acca48387d755bfe3ae6c227174c927406b2b6276fdbe0b"},
 ]
 pandas = [
     {file = "pandas-1.2.5-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:1102d719038e134e648e7920672188a00375f3908f0383fd3b202fbb9d2c3a95"},
