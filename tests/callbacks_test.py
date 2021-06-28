@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Any
 
-from fair_bolts.datamodules.base_datamodule import BaseDataModule
+from bolts.datamodules.base_datamodule import BaseDataModule
 from kit import implements
 from kit.pl import IterationBasedProgBar
 from kit.torch import InfSequentialBatchSampler
