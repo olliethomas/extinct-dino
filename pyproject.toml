@@ -1,19 +1,29 @@
 [tool.poetry]
 name = "extinct"
-version = "0.1.0"
-description = ""
-authors = ["Your Name <you@example.com>"]
-license = "Apache 2"
+version = "1.0.0.dev0"
+description = "Dino do stuff."
+authors = ["PAL <info@predictive-analytics-lab.com>"]
+license = "Apache License 2.0"
+include=["extinct/py.typed"]
+classifiers=[
+  "Programming Language :: Python :: 3.9",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: OS Independent",
+  "Typing :: Typed",
+]
+keywords=["python", "rawr"]
+repository="https://github.com/olliethomas/extinct-dino"
+readme="README.md"
 
 [tool.poetry.dependencies]
-fair-bolts = {git = "https://github.com/predictive-analytics-lab/fair-bolts.git", branch = "main"}
+python = "^3.9"
+albumentations = "^1.0.0"
 hydra-submitit-launcher = {version = "^1.1.1", allow-prereleases = true}
 neoconfigen = {git = "https://github.com/predictive-analytics-lab/neoconfigen.git", branch = "master"}
+palbolts = {git = "https://github.com/predictive-analytics-lab/pal-bolts.git", branch = "main"}
 palkit = "*"
-python = "^3.9"
 pytorch-lightning = "*"
 wandb = "*"
-albumentations = "^1.0.0"
 
 [tool.poetry.dev-dependencies]
 black = "*"
