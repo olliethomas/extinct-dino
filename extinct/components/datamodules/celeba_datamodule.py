@@ -7,9 +7,8 @@ import albumentations as A
 import ethicml as em
 import ethicml.vision as emvi
 from kit import implements
+from kit.torch.data import prop_random_split
 from pytorch_lightning import LightningDataModule
-import torch
-from torch.utils.data.dataset import random_split
 
 from extinct.components.datamodules.base import TrainAugMode, VisionDataModule
 from extinct.components.datamodules.structures import AlbumentationsDataset, TiWrapper
@@ -133,20 +132,9 @@ class CelebaDataModule(VisionDataModule):
             )
         )
 
-        num_train_val, _ = self._get_splits(int(len(all_data)), self.test_split)
-        num_train, num_val = self._get_splits(num_train_val, self.val_split)
-
-        g_cpu = torch.Generator()
-        g_cpu = g_cpu.manual_seed(self.seed)
-        train_data, val_data, test_data = random_split(
-            all_data,
-            lengths=(
-                num_train,
-                num_val,
-                len(all_data) - num_train - num_val,
-            ),
-            generator=g_cpu,
+        val_data, test_data, train_data = prop_random_split(
+            dataset=all_data, props=(self.val_pcnt, self.test_pcnt), seed=self.seed
         )
-        self._train_data = AlbumentationsDataset(dataset=train_data, transform=train_transform)
-        self._val_data = AlbumentationsDataset(dataset=val_data, transform=test_transform)
-        self._test_data = AlbumentationsDataset(dataset=test_data, transform=test_transform)
+        self.train_data = AlbumentationsDataset(dataset=train_data, transform=train_transform)
+        self.val_data = AlbumentationsDataset(dataset=val_data, transform=test_transform)
+        self.test_data = AlbumentationsDataset(dataset=test_data, transform=test_transform)

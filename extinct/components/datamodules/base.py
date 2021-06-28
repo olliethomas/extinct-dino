@@ -2,26 +2,101 @@ from __future__ import annotations
 from abc import abstractmethod
 from enum import Enum, auto
 import logging
-from typing import Optional
+import os
+from typing import Optional, Sequence
 
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
-from fair_bolts.datamodules.vision_datamodule import VisionBaseDataModule
 from kit import gcopy, implements
-from kit.torch import InfSequentialBatchSampler as InfSequentialBatchSampler
-from kit.torch import StratifiedSampler
+from kit.torch import InfSequentialBatchSampler, StratifiedSampler
+import pytorch_lightning as pl
 from pytorch_lightning import LightningDataModule
-from torch.utils.data import DataLoader, SequentialSampler
-from torch.utils.data.sampler import BatchSampler
+from torch.utils.data import (
+    BatchSampler,
+    DataLoader,
+    Dataset,
+    Sampler,
+    SequentialSampler,
+)
 
 from extinct.components.datamodules.utils import extract_labels_from_dataset
 
 from .dino import DINOAugmentation
 
-__all__ = ["VisionDataModule", "TrainAugMode"]
+__all__ = [
+    "BaseDataModule",
+    "VisionDataModule",
+    "TrainAugMode",
+]
 
 
 LOGGER = logging.getLogger(__name__.split(".")[-1].upper())
+
+
+class BaseDataModule(pl.LightningDataModule):
+    """Base DataModule of both Tabular and Vision DataModules."""
+
+    train_data: Dataset
+    test_data: Dataset
+    val_data: Dataset
+
+    def __init__(
+        self,
+        data_dir: str | None,
+        y_dim: int,
+        s_dim: int,
+        batch_size: int,
+        val_pcnt: float,
+        test_pcnt: float,
+        num_workers: int,
+        seed: int,
+        persist_workers: bool,
+        pin_memory: bool,
+    ):
+        super().__init__()
+        self.batch_size = batch_size
+        self.num_workers = num_workers
+        self.val_pcnt = val_pcnt
+        self.test_pcnt = test_pcnt
+        self.seed = seed
+        self.persist_workers = persist_workers
+        self.pin_memory = pin_memory
+
+        self.data_dir = data_dir if data_dir is not None else os.getcwd()
+        self.y_dim = y_dim
+        self.s_dim = s_dim
+        self.seed = seed
+
+    def make_dataloader(
+        self,
+        ds: Dataset,
+        shuffle: bool = False,
+        drop_last: bool = False,
+        batch_sampler: Optional[Sampler[Sequence[int]]] = None,
+    ) -> DataLoader:
+        """Make DataLoader."""
+        return DataLoader(
+            ds,
+            batch_size=1 if batch_sampler is not None else self.batch_size,
+            shuffle=shuffle,
+            num_workers=self.num_workers,
+            pin_memory=self.pin_memory,
+            drop_last=drop_last,
+            persistent_workers=self.persist_workers,
+            batch_sampler=batch_sampler,
+        )
+
+    @implements(LightningDataModule)
+    def train_dataloader(self, eval_: bool = False, batch_size: int | None = None) -> DataLoader:
+        return self.make_dataloader(self.train_data)
+
+    @implements(pl.LightningDataModule)
+    def val_dataloader(self) -> DataLoader:
+        return self.make_dataloader(self.val_data)
+
+    @implements(pl.LightningDataModule)
+    def test_dataloader(self) -> DataLoader:
+        return self.make_dataloader(self.test_data)
 
 
 class TrainAugMode(Enum):
@@ -30,7 +105,7 @@ class TrainAugMode(Enum):
     dino = auto()
 
 
-class VisionDataModule(VisionBaseDataModule):
+class VisionDataModule(BaseDataModule):
     def __init__(
         self,
         y_dim: int,
@@ -42,6 +117,7 @@ class VisionDataModule(VisionBaseDataModule):
         test_split: float = 0.2,
         seed: int = 0,
         persist_workers: bool = False,
+        pin_memory: bool = True,
         stratified_sampling: bool = False,
         sample_with_replacement: bool = True,
         aug_mode: TrainAugMode = TrainAugMode.none,
@@ -54,12 +130,13 @@ class VisionDataModule(VisionBaseDataModule):
             data_dir=data_dir,
             batch_size=batch_size,
             num_workers=num_workers,
-            val_split=val_split,
-            test_split=test_split,
+            val_pcnt=val_split,
+            test_pcnt=test_split,
             y_dim=y_dim,
             s_dim=s_dim,
             seed=seed,
             persist_workers=persist_workers,
+            pin_memory=pin_memory,
         )
         self.stratified_sampling = stratified_sampling
         self.sample_with_replacement = sample_with_replacement
@@ -67,6 +144,11 @@ class VisionDataModule(VisionBaseDataModule):
         self.global_crops_scale = global_crops_scale
         self.local_crops_scale = local_crops_scale
         self.local_crops_number = local_crops_number
+
+        self.data_dir = data_dir if data_dir is not None else os.getcwd()
+        self.y_dim = y_dim
+        self.s_dim = s_dim
+        self.seed = seed
 
     @property
     @abstractmethod
@@ -105,12 +187,12 @@ class VisionDataModule(VisionBaseDataModule):
 
     @implements(LightningDataModule)
     def train_dataloader(
-        self, shuffle: bool = True, eval: bool = False, batch_size: int | None = None
+        self, shuffle: bool = True, eval_: bool = False, batch_size: int | None = None
     ) -> DataLoader:
-        train_data = self._train_data
+        train_data = self.train_data
         batch_size: int = self.batch_size if batch_size is None else batch_size
 
-        if eval:
+        if eval_:
             batch_sampler = BatchSampler(
                 sampler=SequentialSampler(data_source=train_data),
                 batch_size=batch_size,
@@ -128,7 +210,7 @@ class VisionDataModule(VisionBaseDataModule):
                 train_data = gcopy(train_data, transform=dino_eval_transforms)
         else:
             if self.stratified_sampling:
-                s_all, y_all = extract_labels_from_dataset(self._train_data)
+                s_all, y_all = extract_labels_from_dataset(self.train_data)
                 group_ids = (y_all * len(s_all.unique()) + s_all).squeeze()
                 num_samples_per_group = batch_size // (num_groups := len(group_ids.unique()))
                 if self.batch_size % num_groups:
@@ -148,10 +230,4 @@ class VisionDataModule(VisionBaseDataModule):
                 batch_sampler = InfSequentialBatchSampler(
                     data_source=self._train_data, batch_size=batch_size, shuffle=shuffle  # type: ignore
                 )
-        return DataLoader(
-            train_data,
-            pin_memory=True,
-            num_workers=self.num_workers,
-            persistent_workers=self.persist_workers,
-            batch_sampler=batch_sampler,
-        )
+        return self.make_dataloader(train_data, batch_sampler=batch_sampler)
