@@ -72,7 +72,7 @@ class BaseDataModule(pl.LightningDataModule):
         ds: Dataset,
         shuffle: bool = False,
         drop_last: bool = False,
-        batch_sampler: Optional[Sampler[Sequence[int]]] = None,
+        batch_sampler: Sampler[Sequence[int]] | None = None,
     ) -> DataLoader:
         """Make DataLoader."""
         return DataLoader(
