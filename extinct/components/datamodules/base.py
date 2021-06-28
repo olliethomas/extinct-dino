@@ -36,9 +36,9 @@ LOGGER = logging.getLogger(__name__.split(".")[-1].upper())
 class BaseDataModule(pl.LightningDataModule):
     """Base DataModule of both Tabular and Vision DataModules."""
 
-    train_data: Dataset
-    test_data: Dataset
-    val_data: Dataset
+    _train_data: Dataset
+    _val_data: Dataset
+    _test_data: Dataset
 
     def __init__(
         self,
@@ -88,15 +88,15 @@ class BaseDataModule(pl.LightningDataModule):
 
     @implements(LightningDataModule)
     def train_dataloader(self, eval_: bool = False, batch_size: int | None = None) -> DataLoader:
-        return self.make_dataloader(self.train_data)
+        return self.make_dataloader(self._train_data)
 
     @implements(pl.LightningDataModule)
     def val_dataloader(self) -> DataLoader:
-        return self.make_dataloader(self.val_data)
+        return self.make_dataloader(self._val_data)
 
     @implements(pl.LightningDataModule)
     def test_dataloader(self) -> DataLoader:
-        return self.make_dataloader(self.test_data)
+        return self.make_dataloader(self._test_data)
 
 
 class TrainAugMode(Enum):
@@ -189,7 +189,7 @@ class VisionDataModule(BaseDataModule):
     def train_dataloader(
         self, shuffle: bool = True, eval_: bool = False, batch_size: int | None = None
     ) -> DataLoader:
-        train_data = self.train_data
+        train_data = self._train_data
         batch_size: int = self.batch_size if batch_size is None else batch_size
 
         if eval_:
@@ -210,7 +210,7 @@ class VisionDataModule(BaseDataModule):
                 train_data = gcopy(train_data, transform=dino_eval_transforms)
         else:
             if self.stratified_sampling:
-                s_all, y_all = extract_labels_from_dataset(self.train_data)
+                s_all, y_all = extract_labels_from_dataset(self._train_data)
                 group_ids = (y_all * len(s_all.unique()) + s_all).squeeze()
                 num_samples_per_group = batch_size // (num_groups := len(group_ids.unique()))
                 if self.batch_size % num_groups:

@@ -135,6 +135,6 @@ class CelebaDataModule(VisionDataModule):
         val_data, test_data, train_data = prop_random_split(
             dataset=all_data, props=(self.val_pcnt, self.test_pcnt), seed=self.seed
         )
-        self.train_data = AlbumentationsDataset(dataset=train_data, transform=train_transform)
-        self.val_data = AlbumentationsDataset(dataset=val_data, transform=test_transform)
-        self.test_data = AlbumentationsDataset(dataset=test_data, transform=test_transform)
+        self._train_data = AlbumentationsDataset(dataset=train_data, transform=train_transform)
+        self._val_data = AlbumentationsDataset(dataset=val_data, transform=test_transform)
+        self._test_data = AlbumentationsDataset(dataset=test_data, transform=test_transform)
