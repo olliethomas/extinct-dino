@@ -52,6 +52,8 @@ class BaseDataModule(pl.LightningDataModule):
         seed: int,
         persist_workers: bool,
         pin_memory: bool,
+        stratified_sampling: bool = False,
+        sample_with_replacement: bool = True,
     ):
         super().__init__()
         self.batch_size = batch_size
@@ -67,28 +69,63 @@ class BaseDataModule(pl.LightningDataModule):
         self.s_dim = s_dim
         self.seed = seed
 
+        self.stratified_sampling = stratified_sampling
+        self.sample_with_replacement = sample_with_replacement
+
     def make_dataloader(
         self,
         ds: Dataset,
-        shuffle: bool = False,
-        drop_last: bool = False,
         batch_sampler: Sampler[Sequence[int]] | None = None,
     ) -> DataLoader:
         """Make DataLoader."""
         return DataLoader(
             ds,
-            batch_size=1 if batch_sampler is not None else self.batch_size,
-            shuffle=shuffle,
             num_workers=self.num_workers,
             pin_memory=self.pin_memory,
-            drop_last=drop_last,
+            drop_last=False,
             persistent_workers=self.persist_workers,
             batch_sampler=batch_sampler,
         )
 
+    def _get_train_data(self, eval_: bool) -> Dataset:
+        return self._train_data
+
     @implements(LightningDataModule)
-    def train_dataloader(self, eval_: bool = False, batch_size: int | None = None) -> DataLoader:
-        return self.make_dataloader(self._train_data)
+    def train_dataloader(
+        self, batch_size: int | None = None, shuffle: bool = True, eval_: bool = False
+    ) -> DataLoader:
+        train_data = self._get_train_data(eval_=eval_)
+        batch_size = self.batch_size if batch_size is None else batch_size
+
+        if eval_:
+            batch_sampler = BatchSampler(
+                sampler=SequentialSampler(data_source=train_data),
+                batch_size=batch_size,
+                drop_last=False,
+            )
+        else:
+            if self.stratified_sampling:
+                s_all, y_all = extract_labels_from_dataset(self._train_data)
+                group_ids = (y_all * len(s_all.unique()) + s_all).squeeze()
+                num_samples_per_group = batch_size // (num_groups := len(group_ids.unique()))
+                if self.batch_size % num_groups:
+                    LOGGER.info(
+                        f"For stratified sampling, the batch size must be a multiple of the number of groups."
+                        "Since the batch size is not integer divisible by the number of groups ({num_groups}),"
+                        "the batch size is being reduced to {num_samples_per_group * num_groups}."
+                    )
+                batch_sampler = StratifiedSampler(
+                    group_ids.squeeze().tolist(),
+                    num_samples_per_group=num_samples_per_group,
+                    replacement=self.sample_with_replacement,
+                    base_sampler="sequential",
+                    shuffle=shuffle,
+                )
+            else:
+                batch_sampler = InfSequentialBatchSampler(
+                    data_source=self._train_data, batch_size=batch_size, shuffle=shuffle  # type: ignore
+                )
+        return self.make_dataloader(train_data, batch_sampler=batch_sampler)
 
     @implements(pl.LightningDataModule)
     def val_dataloader(self) -> DataLoader:
@@ -118,9 +155,10 @@ class VisionDataModule(BaseDataModule):
         seed: int = 0,
         persist_workers: bool = False,
         pin_memory: bool = True,
+        aug_mode: TrainAugMode = TrainAugMode.none,
+        # Sampling settings
         stratified_sampling: bool = False,
         sample_with_replacement: bool = True,
-        aug_mode: TrainAugMode = TrainAugMode.none,
         # DINO parameters
         global_crops_scale: tuple[float, float] = (0.4, 1.0),
         local_crops_scale: tuple[float, float] = (0.05, 0.4),
@@ -137,9 +175,9 @@ class VisionDataModule(BaseDataModule):
             seed=seed,
             persist_workers=persist_workers,
             pin_memory=pin_memory,
+            stratified_sampling=stratified_sampling,
+            sample_with_replacement=sample_with_replacement,
         )
-        self.stratified_sampling = stratified_sampling
-        self.sample_with_replacement = sample_with_replacement
         self.aug_mode = aug_mode
         self.global_crops_scale = global_crops_scale
         self.local_crops_scale = local_crops_scale
@@ -185,49 +223,16 @@ class VisionDataModule(BaseDataModule):
             augs.append(self._normalization)
         return A.Compose(augs)
 
-    @implements(LightningDataModule)
-    def train_dataloader(
-        self, shuffle: bool = True, eval_: bool = False, batch_size: int | None = None
-    ) -> DataLoader:
+    def _get_train_data(self, eval_: bool) -> Dataset:
         train_data = self._train_data
-        batch_size: int = self.batch_size if batch_size is None else batch_size
-
-        if eval_:
-            batch_sampler = BatchSampler(
-                sampler=SequentialSampler(data_source=train_data),
-                batch_size=batch_size,
-                drop_last=False,
+        if self.aug_mode is TrainAugMode.dino:
+            dino_eval_transforms = A.Compose(
+                [
+                    A.RandomResizedCrop(height=224, width=224),
+                    A.HorizontalFlip(p=0.5),
+                    A.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+                    ToTensorV2(),
+                ]
             )
-            if self.aug_mode is TrainAugMode.dino:
-                dino_eval_transforms = A.Compose(
-                    [
-                        A.RandomResizedCrop(height=224, width=224),
-                        A.HorizontalFlip(p=0.5),
-                        A.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
-                        ToTensorV2(),
-                    ]
-                )
-                train_data = gcopy(train_data, transform=dino_eval_transforms)
-        else:
-            if self.stratified_sampling:
-                s_all, y_all = extract_labels_from_dataset(self._train_data)
-                group_ids = (y_all * len(s_all.unique()) + s_all).squeeze()
-                num_samples_per_group = batch_size // (num_groups := len(group_ids.unique()))
-                if self.batch_size % num_groups:
-                    LOGGER.info(
-                        f"For stratified sampling, the batch size must be a multiple of the number of groups."
-                        "Since the batch size is not integer divisible by the number of groups ({num_groups}),"
-                        "the batch size is being reduced to {num_samples_per_group * num_groups}."
-                    )
-                batch_sampler = StratifiedSampler(
-                    group_ids.squeeze().tolist(),
-                    num_samples_per_group=num_samples_per_group,
-                    replacement=self.sample_with_replacement,
-                    base_sampler="sequential",
-                    shuffle=shuffle,
-                )
-            else:
-                batch_sampler = InfSequentialBatchSampler(
-                    data_source=self._train_data, batch_size=batch_size, shuffle=shuffle  # type: ignore
-                )
-        return self.make_dataloader(train_data, batch_sampler=batch_sampler)
+            train_data = gcopy(train_data, transform=dino_eval_transforms)
+        return train_data
