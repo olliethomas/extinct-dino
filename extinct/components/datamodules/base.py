@@ -1,6 +1,5 @@
 from __future__ import annotations
 from abc import abstractmethod
-import copy
 from enum import Enum, auto
 import logging
 from typing import ClassVar, Optional
@@ -8,7 +7,7 @@ from typing import ClassVar, Optional
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 from fair_bolts.datamodules.vision_datamodule import VisionBaseDataModule
-from kit import implements
+from kit import gcopy, implements
 from kit.torch import InfSequentialBatchSampler as InfSequentialBatchSampler
 from kit.torch import StratifiedSampler
 from pytorch_lightning import LightningDataModule
@@ -133,8 +132,7 @@ class VisionDataModule(VisionBaseDataModule):
                 drop_last=False,
             )
             if self.aug_mode is TrainAugMode.dino:
-                train_data = copy.deepcopy(train_data)
-                train_data.transform = A.Compose(
+                dino_eval_transforms = A.Compose(
                     [
                         A.RandomResizedCrop(height=224, width=224),
                         A.HorizontalFlip(p=0.5),
@@ -142,6 +140,7 @@ class VisionDataModule(VisionBaseDataModule):
                         ToTensorV2(),
                     ]
                 )
+                train_data = gcopy(train_data, transform=dino_eval_transforms)
         else:
             if self.stratified_sampling:
                 s_all, y_all = extract_labels_from_dataset(self._train_data)
@@ -157,6 +156,8 @@ class VisionDataModule(VisionBaseDataModule):
                     group_ids.squeeze().tolist(),
                     num_samples_per_group=num_samples_per_group,
                     replacement=self.sample_with_replacement,
+                    base_sampler="sequential",
+                    shuffle=shuffle,
                 )
             else:
                 batch_sampler = InfSequentialBatchSampler(

@@ -18,7 +18,6 @@ class CelebaKCBaselineConf:
     weight_decay: float = MISSING
     lr_gamma: float = MISSING
 
-
 @dataclass
 class LaftrBaselineConf:
     _target_: str = "extinct.components.models.LaftrBaseline"
@@ -35,7 +34,6 @@ class LaftrBaselineConf:
     levels: int = 3
     image_logging_freq: Any = 0.1  # Union[int, float]
     decoder_out_act: DecoderOutAct = DecoderOutAct.none
-
 
 @dataclass
 class CelebaErmBaselineConf:
