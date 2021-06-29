@@ -55,7 +55,7 @@ class DINOEvaluator(pl.Callback):
             pl_module.eval_trainer.fit(
                 pl_module.eval_clf,
                 train_dataloader=pl_module.datamodule.train_dataloader(
-                    eval=True, batch_size=pl_module.batch_size_eval
+                    eval_=True, batch_size=pl_module.batch_size_eval
                 ),
             )
         else:

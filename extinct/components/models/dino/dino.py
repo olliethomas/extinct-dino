@@ -138,7 +138,7 @@ class DINO(ModelBase):
     def _encode_dataset(self, stage: Stage) -> DataBatch:
         # It's not strictly necessary to disable shuffling but pytorch-lightning complains if its
         # enabled during 'testing'
-        dl_kwargs = dict(eval=True) if stage == "train" else {}
+        dl_kwargs = dict(eval_=True) if stage == "train" else {}
         # Sampler needs to be set to None, meaning the default sequential/batch sampler combination
         # is used, so that the full dataset is encoded (with no duplicates)
         dataloader = cast(DataLoader, getattr(self.datamodule, f"{stage}_dataloader")(**dl_kwargs))
