@@ -4,7 +4,7 @@
 # isort:skip_file
 # flake8: noqa
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from extinct.components.models.laftr_baseline import FairnessType
 from omegaconf import MISSING
 
@@ -38,3 +38,11 @@ class CelebaErmBaselineConf:
     weight_decay: float = MISSING
     lr_gamma: float = MISSING
     batch_norm: bool = True
+
+
+@dataclass
+class GaninConf:
+    _target_: str = "extinct.components.models.Ganin"
+    lr: float = MISSING
+    weight_decay: float = MISSING
+    grl_lambda: float = 1.0

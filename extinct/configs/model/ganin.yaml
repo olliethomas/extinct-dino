@@ -1,0 +1,6 @@
+defaults:
+  - /schema/model: ganin
+
+lr: 1e-3
+weight_decay: 1e-6
+grl_lambda: 1.0

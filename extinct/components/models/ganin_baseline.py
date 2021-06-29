@@ -15,3 +15,6 @@ class Ganin(Dann):
         super(Ganin, self).__init__(
             enc=enc, adv=adv, clf=clf, lr=lr, weight_decay=weight_decay, grl_lambda=grl_lambda
         )
+
+    def build(self, *args, **kwargs):
+        """Function not needed, but currently expected in main.py."""
