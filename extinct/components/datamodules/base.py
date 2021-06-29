@@ -6,7 +6,7 @@ from typing import Optional
 
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
-from fair_bolts.datamodules.vision_datamodule import VisionBaseDataModule
+from bolts.datamodules.vision_datamodule import VisionBaseDataModule
 from kit import gcopy, implements
 from kit.torch import InfSequentialBatchSampler as InfSequentialBatchSampler
 from kit.torch import StratifiedSampler

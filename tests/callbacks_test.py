@@ -89,7 +89,15 @@ class _DummyDM(BaseDataModule):
 
 def test_progbar() -> None:
     dm = _DummyDM(
-        batch_size=8, val_split=1, test_split=1, num_workers=0, seed=1, persist_workers=False
+        batch_size=8,
+        val_split=1,
+        test_split=1,
+        num_workers=0,
+        seed=1,
+        persist_workers=False,
+        pin_memory=False,
+        stratified_sampling=False,
+        sample_with_replacement=False,
     )
     model = _DummyModel(1)
     max_steps = 9

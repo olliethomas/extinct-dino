@@ -24,6 +24,7 @@ configen:
         - CelebaKCBaseline
         - LaftrBaseline
         - CelebaErmBaseline
+        - Ganin
     - name: extinct.components.models.dino
       classes:
         - DINO
