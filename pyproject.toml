@@ -110,7 +110,6 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = [
     "ethicml.*",
-    "fair_bolts.*",
     "hydra.*",
     "kit.*",
     "omegaconf.*",
