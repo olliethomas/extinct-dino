@@ -22,7 +22,6 @@ hydra-submitit-launcher = {version = "^1.1.1", allow-prereleases = true}
 neoconfigen = {git = "https://github.com/predictive-analytics-lab/neoconfigen.git", branch = "master"}
 palbolts = {git = "https://github.com/predictive-analytics-lab/pal-bolts.git", branch = "main"}
 palkit = "*"
-pytorch-lightning = "*"
 wandb = "*"
 
 [tool.poetry.dev-dependencies]

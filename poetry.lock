@@ -239,30 +239,30 @@ six = ">=1.4.0"
 
 [[package]]
 name = "ethicml"
-version = "0.2.3"
-description = "A toolkit for understanding and researching algorithmic bias"
+version = "0.2.5"
+description = "EthicML is a library for performing and assessing algorithmic fairness. Unlike other libraries, EthicML isn't an education tool, but rather a researcher's toolkit."
 category = "main"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.7,<4.0"
 
 [package.dependencies]
-GitPython = ">=2.1.11"
+GitPython = ">=2.1.11,<3.0.0"
 matplotlib = ">=3.0.2"
-numpy = ">=1.14.2"
-pandas = ">=1.0"
-pillow = "*"
+numpy = ">=1.20.1"
+palkit = ">=0.1.7"
+pandas = ">=1.0,<2.0"
+Pillow = ">=8.1.2,<9.0.0"
 pipenv = ">=2018.11.26"
 scikit-learn = ">=0.20.1"
 seaborn = ">=0.9.0"
-teext = "*"
+teext = ">=0.1.2,<0.2.0"
 tqdm = ">=4.31.1"
 typed-argument-parser = "1.4"
 typing-extensions = ">=3.7.2"
 
 [package.extras]
+ci = ["fairlearn (0.4.6)", "pytest (>=6.0.0,<7.0.0)", "pytest-cov (>=2.6.0,<3.0.0)", "torch (>=1.8,<2.0)", "torchvision (>=0.9.0,<0.10.0)"]
 all = ["fairlearn (0.4.6)"]
-ci = ["fairlearn (0.4.6)", "pytest (>=3.3.2)", "pytest-cov (>=2.6.0)", "torch (1.8.0)", "torchvision (0.9.0)"]
-dev = ["black", "isort (5.5.4)", "mypy", "pydocstyle", "pylint", "pytest", "pytest-cov", "pre-commit"]
 
 [[package]]
 name = "filelock"
@@ -309,26 +309,26 @@ optional = false
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 
 [[package]]
-name = "gitdb"
-version = "4.0.7"
+name = "gitdb2"
+version = "2.0.6"
 description = "Git Object Database"
 category = "main"
 optional = false
-python-versions = ">=3.4"
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [package.dependencies]
-smmap = ">=3.0.1,<5"
+smmap2 = ">=2.0.0"
 
 [[package]]
 name = "gitpython"
-version = "3.1.18"
+version = "2.1.15"
 description = "Python Git Library"
 category = "main"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [package.dependencies]
-gitdb = ">=4.0.1,<5"
+gitdb2 = ">=2,<3"
 
 [[package]]
 name = "google-auth"
@@ -521,12 +521,6 @@ loggers = ["matplotlib", "wandb", "scipy"]
 models = ["torchvision (>=0.7)", "scikit-learn (>=0.23)", "pillow", "opencv-python-headless", "gym (>=0.17.2)", "atari-py (>=0.2.0,<0.3.0)", "box2d-py (>=2.3.0,<2.4.0)"]
 test = ["codecov (>=2.1)", "pytest (>=6.0)", "pytest-cov (>2.10)", "flake8", "check-manifest", "twine (>=3.2)", "isort (>=5.6.4)", "pre-commit (>=1.0)", "mypy (>=0.790)", "yapf (>=0.29.0)", "atari-py (0.2.6)", "scikit-learn (>=0.23)"]
 
-[package.source]
-type = "git"
-url = "https://github.com/PyTorchLightning/lightning-bolts.git"
-reference = "master"
-resolved_reference = "48e75217d8c10e5726eafca2c85e795a993477e7"
-
 [[package]]
 name = "markdown"
 version = "3.3.4"
@@ -718,8 +712,8 @@ python-versions = "^3.7"
 
 [package.dependencies]
 albumentations = "^1.0.0"
-EthicML = "*"
-lightning-bolts = "branch master"
+ethicml = "^0.2.5"
+lightning-bolts = "^0.3.4"
 palkit = "*"
 torch = "*"
 torchvision = "*"
@@ -728,7 +722,7 @@ torchvision = "*"
 type = "git"
 url = "https://github.com/predictive-analytics-lab/pal-bolts.git"
 reference = "main"
-resolved_reference = "13eb31927653c5bf07cb3991b27e4846624fdabf"
+resolved_reference = "c5aa37a6f5d9cc1ee3f91e1abc00b0d22a09adf8"
 
 [[package]]
 name = "palkit"
@@ -1092,7 +1086,7 @@ pyasn1 = ">=0.1.3"
 
 [[package]]
 name = "scikit-image"
-version = "0.18.1"
+version = "0.18.2"
 description = "Image processing in Python"
 category = "main"
 optional = false
@@ -1210,6 +1204,17 @@ description = "A pure Python implementation of a sliding window memory map manag
 category = "main"
 optional = false
 python-versions = ">=3.5"
+
+[[package]]
+name = "smmap2"
+version = "3.0.1"
+description = "A mirror package for smmap"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+smmap = ">=3.0.1"
 
 [[package]]
 name = "snowballstemmer"
@@ -1503,7 +1508,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "5e2528306ae26395fcad33c3bae26c30261b54ca72886a2b118bd7aaeb147b09"
+content-hash = "e4d89bebdf589117a6723045dc9af94f904b1b1484e398981d86925dd294560e"
 
 [metadata.files]
 absl-py = [
@@ -1629,8 +1634,8 @@ docker-pycreds = [
     {file = "docker_pycreds-0.4.0-py2.py3-none-any.whl", hash = "sha256:7266112468627868005106ec19cd0d722702d2b7d5912a28e19b826c3d37af49"},
 ]
 ethicml = [
-    {file = "EthicML-0.2.3-py3-none-any.whl", hash = "sha256:90d051d492702c4595dab95e5d3fff63681600c1cbc7b9e2dee21a6429c5adf4"},
-    {file = "EthicML-0.2.3.tar.gz", hash = "sha256:a836800c758b644fb1a04d9f9f25aa167d152caf2c2864b80d23c2239e588c58"},
+    {file = "EthicML-0.2.5-py3-none-any.whl", hash = "sha256:a3deb0cddf1f101eb8487da15c424d8cca45946b5b728c12c6dcb8f3f50af511"},
+    {file = "EthicML-0.2.5.tar.gz", hash = "sha256:6b2899063f9a2ccbc90dbe4bd065bf57e76babe4498db04cf84f16364298ac9d"},
 ]
 filelock = [
     {file = "filelock-3.0.12-py3-none-any.whl", hash = "sha256:929b7d63ec5b7d6b71b0fa5ac14e030b3f70b75747cef1b10da9b879fef15836"},
@@ -1643,13 +1648,13 @@ fsspec = [
 future = [
     {file = "future-0.18.2.tar.gz", hash = "sha256:b1bead90b70cf6ec3f0710ae53a525360fa360d306a86583adc6bf83a4db537d"},
 ]
-gitdb = [
-    {file = "gitdb-4.0.7-py3-none-any.whl", hash = "sha256:6c4cc71933456991da20917998acbe6cf4fb41eeaab7d6d67fbc05ecd4c865b0"},
-    {file = "gitdb-4.0.7.tar.gz", hash = "sha256:96bf5c08b157a666fec41129e6d327235284cca4c81e92109260f353ba138005"},
+gitdb2 = [
+    {file = "gitdb2-2.0.6-py2.py3-none-any.whl", hash = "sha256:96bbb507d765a7f51eb802554a9cfe194a174582f772e0d89f4e87288c288b7b"},
+    {file = "gitdb2-2.0.6.tar.gz", hash = "sha256:1b6df1433567a51a4a9c1a5a0de977aa351a405cc56d7d35f3388bad1f630350"},
 ]
 gitpython = [
-    {file = "GitPython-3.1.18-py3-none-any.whl", hash = "sha256:fce760879cd2aebd2991b3542876dc5c4a909b30c9d69dfc488e504a8db37ee8"},
-    {file = "GitPython-3.1.18.tar.gz", hash = "sha256:b838a895977b45ab6f0cc926a9045c8d1c44e2b653c1fcc39fe91f42c6e8f05b"},
+    {file = "GitPython-2.1.15-py2.py3-none-any.whl", hash = "sha256:23b4de99c5fc1564701301cead04e16aa3e47019034668327206d1b52e1e54f7"},
+    {file = "GitPython-2.1.15.tar.gz", hash = "sha256:838c38d882a97b2fd146dbd4eb9baaf857cb65ebaa64e4c06fca48aaa491e1c6"},
 ]
 google-auth = [
     {file = "google-auth-1.32.0.tar.gz", hash = "sha256:e34e5f5de5610b202f9b40ebd9f8b27571d5c5537db9afed3a72b2db5a345039"},
@@ -1806,7 +1811,10 @@ lazy-object-proxy = [
     {file = "lazy_object_proxy-1.6.0-cp39-cp39-win32.whl", hash = "sha256:1fee665d2638491f4d6e55bd483e15ef21f6c8c2095f235fef72601021e64f61"},
     {file = "lazy_object_proxy-1.6.0-cp39-cp39-win_amd64.whl", hash = "sha256:f5144c75445ae3ca2057faac03fda5a902eff196702b0a24daf1d6ce0650514b"},
 ]
-lightning-bolts = []
+lightning-bolts = [
+    {file = "lightning-bolts-0.3.4.tar.gz", hash = "sha256:72b9c5fcc17ff85f76e27654c51951d837143ae930bbeae3e0c8880f9e7f4c5c"},
+    {file = "lightning_bolts-0.3.4-py3-none-any.whl", hash = "sha256:c5cbeb358a8d09c3bd912cd8fffdf3b435c5ac4516d6dae84a9ea3229facf39f"},
+]
 markdown = [
     {file = "Markdown-3.3.4-py3-none-any.whl", hash = "sha256:96c3ba1261de2f7547b46a00ea8463832c921d3f9d6aba3f255a6f71386db20c"},
     {file = "Markdown-3.3.4.tar.gz", hash = "sha256:31b5b491868dcc87d6c24b7e3d19a0d730d59d3e46f4eea6430a321bed387a49"},
@@ -2329,22 +2337,25 @@ rsa = [
     {file = "rsa-4.7.2.tar.gz", hash = "sha256:9d689e6ca1b3038bc82bf8d23e944b6b6037bc02301a574935b2dd946e0353b9"},
 ]
 scikit-image = [
-    {file = "scikit-image-0.18.1.tar.gz", hash = "sha256:fbb618ca911867bce45574c1639618cdfb5d94e207432b19bc19563d80d2f171"},
-    {file = "scikit_image-0.18.1-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:1cd05c882ffb2a271a1f20b4afe937d63d55b8753c3d652f11495883a7800ebe"},
-    {file = "scikit_image-0.18.1-cp37-cp37m-manylinux1_i686.whl", hash = "sha256:e972c628ad9ba52c298b032368e29af9bd5eeb81ce33bc2d9b039a81661c99c5"},
-    {file = "scikit_image-0.18.1-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:1256017c513e8e1b8b9da73e5fd1e605d0077bbbc8e5c8d6c2cab36400131c6c"},
-    {file = "scikit_image-0.18.1-cp37-cp37m-win32.whl", hash = "sha256:ec25e4110951d3a280421bb10dd510a082ba83d86e20d706294faf7899cdb3d5"},
-    {file = "scikit_image-0.18.1-cp37-cp37m-win_amd64.whl", hash = "sha256:2eea42706a25ae6e0cebaf1914e2ab1c04061b1f3c9966d76025d58a2e9188fc"},
-    {file = "scikit_image-0.18.1-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:76446e2402e64d7dba78eeae8aa86e92a0cafe5b1c9e6235bd8d067471ed2788"},
-    {file = "scikit_image-0.18.1-cp38-cp38-manylinux1_i686.whl", hash = "sha256:d5ad4a9b4c9797d4c4c48f45fa224c5ebff22b9b0af636c3ecb8addbb66c21e6"},
-    {file = "scikit_image-0.18.1-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:23f9178b21c752bfb4e4ea3a3fa0ff79bc5a401bc75ddb4661f2cebd1c2b0e24"},
-    {file = "scikit_image-0.18.1-cp38-cp38-win32.whl", hash = "sha256:d746540cafe7776c6d05a0b40ec744bb8d33d1ddc51faba601d26c02593d8bcc"},
-    {file = "scikit_image-0.18.1-cp38-cp38-win_amd64.whl", hash = "sha256:30447af3f5b7c9491f2d3db5bc275493d1b91bf1dd16b67e2fd79a6bb95d8ee9"},
-    {file = "scikit_image-0.18.1-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:ae6659b3a8bd4bba7e9dcbfd0064e443b32c7054bf09174749db896730fcf42e"},
-    {file = "scikit_image-0.18.1-cp39-cp39-manylinux1_i686.whl", hash = "sha256:2c058770c6ad6e0fe6c30f59970c9c65fa740ff014d121d8c341664cd792cf49"},
-    {file = "scikit_image-0.18.1-cp39-cp39-manylinux1_x86_64.whl", hash = "sha256:c700336a7f96109c74154090c5e693693a8e3fa09ed6156a5996cdc9a3bb1534"},
-    {file = "scikit_image-0.18.1-cp39-cp39-win32.whl", hash = "sha256:3515b890e771f99bbe1051a0dcfe0fc477da961da933c34f89808a0f1eeb7dc2"},
-    {file = "scikit_image-0.18.1-cp39-cp39-win_amd64.whl", hash = "sha256:5f602779258807d03e72c0a439cfb221f647e628be166fb3594397435f13c76b"},
+    {file = "scikit-image-0.18.2.tar.gz", hash = "sha256:32ff472355fbf8ab40a8e9ed685906c6c51a863f1ea8737882d26be9221631f3"},
+    {file = "scikit_image-0.18.2-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:6f6d0e79a91c62360708111951abb3a774cefac865902ea797c3b72d8ece6382"},
+    {file = "scikit_image-0.18.2-cp37-cp37m-manylinux1_i686.whl", hash = "sha256:49a9b48bc428d2d56aaefbc042fd79c67ebc908a1cbf542e9c863c49339ca496"},
+    {file = "scikit_image-0.18.2-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:32620792e989beb2c3eb67eae38b59291be412be59ad3485ee0f67cb7b37c16f"},
+    {file = "scikit_image-0.18.2-cp37-cp37m-manylinux2014_aarch64.whl", hash = "sha256:38efc3fd9023c7849175fc18b2cc96a08629da840b6100ec5038f487fba7d34e"},
+    {file = "scikit_image-0.18.2-cp37-cp37m-win32.whl", hash = "sha256:5510b133999a45b2c8ed4c1b659fa0a1cf4ca0db949353d0f54fc6290dac4d5a"},
+    {file = "scikit_image-0.18.2-cp37-cp37m-win_amd64.whl", hash = "sha256:b3aa7230d84b12d8a4a9f0b65ee895603d27fe85366bf2b57929ba1cce2e8987"},
+    {file = "scikit_image-0.18.2-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:b21d65dcee453539fe70b5903edd8429ad9fe46233b049dd622368bad435f39e"},
+    {file = "scikit_image-0.18.2-cp38-cp38-manylinux1_i686.whl", hash = "sha256:f61d65de826abe2f5f6c171c75d2bb93df56aa4a690d1bab5911412f49b9e768"},
+    {file = "scikit_image-0.18.2-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:a4fdba1bdd883a8028ddff0b8fe8d43c8dd43360bdab6e1f40599fa210613f1d"},
+    {file = "scikit_image-0.18.2-cp38-cp38-manylinux2014_aarch64.whl", hash = "sha256:8e62228a91b770fbe89d310e833f8797f14136b9635bb67d8b780f1b8cf237e6"},
+    {file = "scikit_image-0.18.2-cp38-cp38-win32.whl", hash = "sha256:f80d16ce57e05af8e282620a23e90bb8886e5efa6eedcacb4da1c15293ba5e9a"},
+    {file = "scikit_image-0.18.2-cp38-cp38-win_amd64.whl", hash = "sha256:6d576a8249114e6169ea1c2b05a22168745eedba90b06d5765368dbd59b27c7f"},
+    {file = "scikit_image-0.18.2-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:278b0034c509d8b31a9b117837b3d45957dd3408e062ad0f2b24edeb1a460e91"},
+    {file = "scikit_image-0.18.2-cp39-cp39-manylinux2010_i686.whl", hash = "sha256:f9648093a0865150fc4ac9eaf02256afbf471a43216b0b6ee6585a4d57674563"},
+    {file = "scikit_image-0.18.2-cp39-cp39-manylinux2010_x86_64.whl", hash = "sha256:2c7e91fb3df5cc58cb13c39094a32bb2e990ced30b08ee34bf0976ff8a1ba579"},
+    {file = "scikit_image-0.18.2-cp39-cp39-manylinux2014_aarch64.whl", hash = "sha256:4f42a36e34a3e659dd5e0fe9c0b07f797f9b66680224a7f2545a564484574d78"},
+    {file = "scikit_image-0.18.2-cp39-cp39-win32.whl", hash = "sha256:66ea3bc8f53efbaf751fdae472fe1cbc55ad5e4fadbf6d3a0a268dc7e34d83b6"},
+    {file = "scikit_image-0.18.2-cp39-cp39-win_amd64.whl", hash = "sha256:74f7c5920c0b893608ef0d159a61a15e87aa9f31d2707d1ed6621a65233646cd"},
 ]
 scikit-learn = [
     {file = "scikit-learn-0.24.2.tar.gz", hash = "sha256:d14701a12417930392cd3898e9646cf5670c190b933625ebe7511b1f7d7b8736"},
@@ -2421,6 +2432,10 @@ six = [
 smmap = [
     {file = "smmap-4.0.0-py2.py3-none-any.whl", hash = "sha256:a9a7479e4c572e2e775c404dcd3080c8dc49f39918c2cf74913d30c4c478e3c2"},
     {file = "smmap-4.0.0.tar.gz", hash = "sha256:7e65386bd122d45405ddf795637b7f7d2b532e7e401d46bbe3fb49b9986d5182"},
+]
+smmap2 = [
+    {file = "smmap2-3.0.1-py3-none-any.whl", hash = "sha256:0cb6ea470b1ad9a65a02ca7f4c7ae601861f7dd24a43812ca51cfca2892bb524"},
+    {file = "smmap2-3.0.1.tar.gz", hash = "sha256:44cc8bdaf96442dbb9a8e2e14377d074b3d0eea292eee3c95c8c449b6c92c557"},
 ]
 snowballstemmer = [
     {file = "snowballstemmer-2.1.0-py2.py3-none-any.whl", hash = "sha256:b51b447bea85f9968c13b650126a888aabd4cb4463fca868ec596826325dedc2"},
