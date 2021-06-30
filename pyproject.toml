@@ -90,6 +90,7 @@ exclude = "hydra"
 [[tool.mypy.overrides]]
 module = [
     "albumentations.*",
+    "bolts.*",
     "cv2.*",
     "cvxpy.*",
     "cvxpylayers.*",
@@ -109,6 +110,7 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = [
+    "bolts.*",
     "ethicml.*",
     "hydra.*",
     "kit.*",

@@ -18,5 +18,5 @@ class Dann(_Dann):
             enc=enc, adv=adv, clf=clf, lr=lr, weight_decay=weight_decay, grl_lambda=grl_lambda
         )
 
-    def build(self, trainer: pl.Trainer, datamodule: VisionDataModule):
+    def build(self, trainer: pl.Trainer, datamodule: VisionDataModule) -> None:
         """Function not needed, but currently expected in main.py."""

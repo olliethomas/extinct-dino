@@ -1,9 +1,9 @@
-from collections import namedtuple
-from enum import Enum
+from enum import Enum, auto
+from typing import NamedTuple
 
 from bolts.models import Laftr as _Laftr
 import pytorch_lightning as pl
-from torch import nn
+from torch import Tensor, nn
 
 from extinct.components.datamodules import VisionDataModule
 from extinct.components.models.predefined import Decoder, EmbeddingClf, Encoder
@@ -11,8 +11,17 @@ from extinct.components.models.predefined import Decoder, EmbeddingClf, Encoder
 __all__ = ["Laftr"]
 
 
-ModelOut = namedtuple("ModelOut", ["y", "z", "s", "x"])
-FairnessType = Enum("FairnessType", "DP EO EqOp")
+class ModelOut(NamedTuple):
+    s: Tensor
+    x: Tensor
+    y: Tensor
+    z: Tensor
+
+
+class FairnessType(Enum):
+    DP = auto()
+    EO = auto()
+    EqOp = auto()
 
 
 class Laftr(_Laftr):
@@ -22,12 +31,11 @@ class Laftr(_Laftr):
         weight_decay: float,
         lr_gamma: float,
         disc_steps: int,
-        fairness: str,
+        fairness: FairnessType,
         recon_weight: float,
         clf_weight: float,
         adv_weight: float,
     ) -> None:
-        assert fairness in FairnessType._member_names_
         enc = Encoder(
             input_shape=(3, 64, 64), initial_hidden_channels=64, levels=3, encoding_dim=128
         )
