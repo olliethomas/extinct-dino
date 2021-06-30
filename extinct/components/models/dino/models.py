@@ -16,7 +16,7 @@ class MultiCropNet(nn.Module):
         norm_last_layer: bool,
         use_bn_in_head: bool,
         out_dim: int,
-    ):
+    ) -> None:
         super().__init__()
         self.backbone = arch_fn(patch_size)
         embed_dim = self.backbone.embed_dim

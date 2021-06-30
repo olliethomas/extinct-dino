@@ -6,12 +6,12 @@ __all__ = ["Ganin"]
 
 
 class Ganin(Dann):
-    def __init__(self, lr: float, weight_decay: float, grl_lambda: float = 1.0):
+    def __init__(self, lr: float, weight_decay: float, grl_lambda: float = 1.0) -> None:
         enc = Encoder(
             input_shape=(3, 64, 64), initial_hidden_channels=64, levels=3, encoding_dim=128
         )
-        adv = EmbeddingClf(encoding_dim=128)
-        clf = EmbeddingClf(encoding_dim=128)
+        adv = EmbeddingClf(encoding_dim=128, out_dim=2)
+        clf = EmbeddingClf(encoding_dim=128, out_dim=2)
         super(Ganin, self).__init__(
             enc=enc, adv=adv, clf=clf, lr=lr, weight_decay=weight_decay, grl_lambda=grl_lambda
         )

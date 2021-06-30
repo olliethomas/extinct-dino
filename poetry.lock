@@ -66,7 +66,7 @@ python-versions = "*"
 
 [[package]]
 name = "astroid"
-version = "2.5.6"
+version = "2.6.2"
 description = "An abstract syntax tree for Python with inference support."
 category = "dev"
 optional = false
@@ -735,7 +735,7 @@ torchvision = "*"
 type = "git"
 url = "https://github.com/predictive-analytics-lab/pal-bolts.git"
 reference = "main"
-resolved_reference = "c5aa37a6f5d9cc1ee3f91e1abc00b0d22a09adf8"
+resolved_reference = "0e7595bb69db218e3f9454efe1835bcfaaac4f77"
 
 [[package]]
 name = "palkit"
@@ -921,14 +921,14 @@ toml = ["toml"]
 
 [[package]]
 name = "pylint"
-version = "2.8.3"
+version = "2.9.1"
 description = "python code static checker"
 category = "dev"
 optional = false
 python-versions = "~=3.6"
 
 [package.dependencies]
-astroid = "2.5.6"
+astroid = ">=2.6.2,<2.7"
 colorama = {version = "*", markers = "sys_platform == \"win32\""}
 isort = ">=4.2.5,<6"
 mccabe = ">=0.6,<0.7"
@@ -1420,7 +1420,7 @@ typing-extensions = ">=3.7.4"
 
 [[package]]
 name = "urllib3"
-version = "1.26.6"
+version = "1.25.11"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 category = "main"
 optional = false
@@ -1459,14 +1459,14 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [[package]]
 name = "wandb"
-version = "0.10.31"
+version = "0.10.33"
 description = "A CLI and library for interacting with the Weights and Biases API."
 category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [package.dependencies]
-Click = ">=7.0"
+Click = ">=7.0,<8.0.0 || >8.0.0"
 configparser = ">=3.8.1"
 docker-pycreds = ">=0.4.0"
 GitPython = ">=1.0.0"
@@ -1481,6 +1481,7 @@ sentry-sdk = ">=0.4.0"
 shortuuid = ">=0.5.0"
 six = ">=1.13.0"
 subprocess32 = ">=3.5.3"
+urllib3 = {version = "<=1.25.11", markers = "sys_platform == \"win32\" or sys_platform == \"cygwin\""}
 
 [package.extras]
 aws = ["boto3"]
@@ -1582,8 +1583,8 @@ appdirs = [
     {file = "appdirs-1.4.4.tar.gz", hash = "sha256:7d5d0167b2b1ba821647616af46a749d1c653740dd0d2415100fe26e27afdf41"},
 ]
 astroid = [
-    {file = "astroid-2.5.6-py3-none-any.whl", hash = "sha256:4db03ab5fc3340cf619dbc25e42c2cc3755154ce6009469766d7143d1fc2ee4e"},
-    {file = "astroid-2.5.6.tar.gz", hash = "sha256:8a398dfce302c13f14bab13e2b14fe385d32b73f4e4853b9bdfb64598baa1975"},
+    {file = "astroid-2.6.2-py3-none-any.whl", hash = "sha256:606b2911d10c3dcf35e58d2ee5c97360e8477d7b9f3efc3f24811c93e6fc2cd9"},
+    {file = "astroid-2.6.2.tar.gz", hash = "sha256:38b95085e9d92e2ca06cf8b35c12a74fa81da395a6f9e65803742e6509c05892"},
 ]
 async-timeout = [
     {file = "async-timeout-3.0.1.tar.gz", hash = "sha256:0c3c816a028d47f659d6ff5c745cb2acf1f966da1fe5c19c77a70282b25f4c5f"},
@@ -2221,8 +2222,8 @@ pydocstyle = [
     {file = "pydocstyle-6.1.1.tar.gz", hash = "sha256:1d41b7c459ba0ee6c345f2eb9ae827cab14a7533a88c5c6f7e94923f72df92dc"},
 ]
 pylint = [
-    {file = "pylint-2.8.3-py3-none-any.whl", hash = "sha256:792b38ff30903884e4a9eab814ee3523731abd3c463f3ba48d7b627e87013484"},
-    {file = "pylint-2.8.3.tar.gz", hash = "sha256:0a049c5d47b629d9070c3932d13bff482b12119b6a241a93bc460b0be16953c8"},
+    {file = "pylint-2.9.1-py3-none-any.whl", hash = "sha256:647fa5882fd49d7f34d07d0a23702689d5cf10a81dcd74e79bd524603d40b371"},
+    {file = "pylint-2.9.1.tar.gz", hash = "sha256:d8f9e6ff7bc2e64a724b1b4409f0a30014891fc006ffbf68b590015e364322ec"},
 ]
 pyparsing = [
     {file = "pyparsing-2.4.7-py2.py3-none-any.whl", hash = "sha256:ef9d7589ef3c200abe66653d3f1ab1033c3c419ae9b9bdb1240a85b024efc88b"},
@@ -2551,8 +2552,8 @@ typing-inspect = [
     {file = "typing_inspect-0.7.1.tar.gz", hash = "sha256:047d4097d9b17f46531bf6f014356111a1b6fb821a24fe7ac909853ca2a782aa"},
 ]
 urllib3 = [
-    {file = "urllib3-1.26.6-py2.py3-none-any.whl", hash = "sha256:39fb8672126159acb139a7718dd10806104dec1e2f0f6c88aab05d17df10c8d4"},
-    {file = "urllib3-1.26.6.tar.gz", hash = "sha256:f57b4c16c62fa2760b7e3d97c35b255512fb6b59a259730f36ba32ce9f8e342f"},
+    {file = "urllib3-1.25.11-py2.py3-none-any.whl", hash = "sha256:f5321fbe4bf3fefa0efd0bfe7fb14e90909eb62a48ccda331726b4319897dd5e"},
+    {file = "urllib3-1.25.11.tar.gz", hash = "sha256:8d7eaa5a82a1cac232164990f04874c594c9453ec55eef02eab885aa02fc17a2"},
 ]
 virtualenv = [
     {file = "virtualenv-20.4.7-py2.py3-none-any.whl", hash = "sha256:2b0126166ea7c9c3661f5b8e06773d28f83322de7a3ff7d06f0aed18c9de6a76"},
@@ -2563,8 +2564,8 @@ virtualenv-clone = [
     {file = "virtualenv_clone-0.5.4-py2.py3-none-any.whl", hash = "sha256:07e74418b7cc64f4fda987bf5bc71ebd59af27a7bc9e8a8ee9fd54b1f2390a27"},
 ]
 wandb = [
-    {file = "wandb-0.10.31-py2.py3-none-any.whl", hash = "sha256:7a52bf0c853130f65be106c32bea4f4b56bda66c0151b4d1234c08467a403269"},
-    {file = "wandb-0.10.31.tar.gz", hash = "sha256:da706a93b02966085f1849798d7eeb4dc8fb96830b4cfe50099aa514bd57a188"},
+    {file = "wandb-0.10.33-py2.py3-none-any.whl", hash = "sha256:84f111e31cc4d6e95dcb62028c0c2a9fed7cdf0f8c563d86438aeadcf6d5f495"},
+    {file = "wandb-0.10.33.tar.gz", hash = "sha256:ee69d4e251ae55e73d7d8b1a88b5629a588c820cce8dc8d5f5da15ac298556a7"},
 ]
 werkzeug = [
     {file = "Werkzeug-2.0.1-py3-none-any.whl", hash = "sha256:6c1ec500dcdba0baa27600f6a22f6333d8b662d22027ff9f6202e3367413caa8"},

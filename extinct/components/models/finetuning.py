@@ -1,11 +1,10 @@
 from __future__ import annotations
 
+from bolts.models import ErmBaseline
 from kit import implements
 import pytorch_lightning as pl
 import torch
 from torch import Tensor, nn, optim
-
-from extinct.components.models import ErmBaseline
 
 __all__ = ["FineTuner"]
 

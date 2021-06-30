@@ -5,7 +5,6 @@
 # flake8: noqa
 
 from dataclasses import dataclass
-from extinct.components.models.laftr_baseline import FairnessType
 from omegaconf import MISSING
 
 
@@ -25,7 +24,7 @@ class LaftrBaselineConf:
     weight_decay: float = MISSING
     lr_gamma: float = MISSING
     disc_steps: int = MISSING
-    fairness: FairnessType = MISSING
+    fairness: str = MISSING
     recon_weight: float = MISSING
     clf_weight: float = MISSING
     adv_weight: float = MISSING
