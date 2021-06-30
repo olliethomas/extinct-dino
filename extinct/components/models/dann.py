@@ -1,6 +1,7 @@
 from bolts.models import Dann as _Dann
 import pytorch_lightning as pl
 
+from extinct.components.datamodules import VisionDataModule
 from extinct.components.models.predefined import EmbeddingClf, Encoder
 
 __all__ = ["Dann"]
@@ -17,5 +18,5 @@ class Dann(_Dann):
             enc=enc, adv=adv, clf=clf, lr=lr, weight_decay=weight_decay, grl_lambda=grl_lambda
         )
 
-    def build(self, trainer: pl.Trainer, datamodule: pl.LightningDataModule):
+    def build(self, trainer: pl.Trainer, datamodule: VisionDataModule):
         """Function not needed, but currently expected in main.py."""
