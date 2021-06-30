@@ -1,21 +1,21 @@
 from collections import namedtuple
 from enum import Enum
 
-from bolts.models import Laftr
+from bolts.models import Laftr as _Laftr
 import pytorch_lightning as pl
 from torch import nn
 
 from extinct.components.datamodules import VisionDataModule
 from extinct.components.models.predefined import Decoder, EmbeddingClf, Encoder
 
-__all__ = ["LaftrBaseline"]
+__all__ = ["Laftr"]
 
 
 ModelOut = namedtuple("ModelOut", ["y", "z", "s", "x"])
 FairnessType = Enum("FairnessType", "DP EO EqOp")
 
 
-class LaftrBaseline(Laftr):
+class Laftr(_Laftr):
     def __init__(
         self,
         lr: float,

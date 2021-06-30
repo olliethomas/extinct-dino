@@ -9,8 +9,8 @@ from omegaconf import MISSING
 
 
 @dataclass
-class CelebaKCBaselineConf:
-    _target_: str = "extinct.components.models.CelebaKCBaseline"
+class CelebaKCConf:
+    _target_: str = "extinct.components.models.CelebaKC"
     lr: float = MISSING
     weight_decay: float = MISSING
     lr_gamma: float = MISSING
@@ -18,8 +18,8 @@ class CelebaKCBaselineConf:
 
 
 @dataclass
-class LaftrBaselineConf:
-    _target_: str = "extinct.components.models.LaftrBaseline"
+class LaftrConf:
+    _target_: str = "extinct.components.models.Laftr"
     lr: float = MISSING
     weight_decay: float = MISSING
     lr_gamma: float = MISSING
@@ -31,8 +31,8 @@ class LaftrBaselineConf:
 
 
 @dataclass
-class CelebaErmBaselineConf:
-    _target_: str = "extinct.components.models.CelebaErmBaseline"
+class CelebaErmConf:
+    _target_: str = "extinct.components.models.CelebaErm"
     lr: float = MISSING
     weight_decay: float = MISSING
     lr_gamma: float = MISSING
@@ -40,8 +40,8 @@ class CelebaErmBaselineConf:
 
 
 @dataclass
-class GaninConf:
-    _target_: str = "extinct.components.models.Ganin"
+class DannConf:
+    _target_: str = "extinct.components.models.Dann"
     lr: float = MISSING
     weight_decay: float = MISSING
     grl_lambda: float = 1.0

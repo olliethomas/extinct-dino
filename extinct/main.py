@@ -18,10 +18,10 @@ from extinct.hydra.extinct.components.datamodules.configs import (  # type: igno
     CelebaDataModuleConf,
 )
 from extinct.hydra.extinct.components.models.configs import (  # type: ignore[import]
-    CelebaErmBaselineConf,
-    CelebaKCBaselineConf,
-    GaninConf,
-    LaftrBaselineConf,
+    CelebaErmConf,
+    CelebaKCConf,
+    DannConf,
+    LaftrConf,
 )
 from extinct.hydra.extinct.components.models.dino.configs import (  # type: ignore[import]
     DINOConf,
@@ -63,11 +63,11 @@ DATA: Final[str] = "data"
 cs.store(group=f"schema/{DATA}", name="celeba", node=CelebaDataModuleConf, package=DATA)
 
 MODEL: Final[str] = "model"
-cs.store(group=f"schema/{MODEL}", name="kc", node=CelebaKCBaselineConf, package=MODEL)
-cs.store(group=f"schema/{MODEL}", name="erm", node=CelebaErmBaselineConf, package=MODEL)
-cs.store(group=f"schema/{MODEL}", name="laftr", node=LaftrBaselineConf, package=MODEL)
+cs.store(group=f"schema/{MODEL}", name="kc", node=CelebaKCConf, package=MODEL)
+cs.store(group=f"schema/{MODEL}", name="erm", node=CelebaErmConf, package=MODEL)
+cs.store(group=f"schema/{MODEL}", name="laftr", node=LaftrConf, package=MODEL)
 cs.store(group=f"schema/{MODEL}", name="dino", node=DINOConf, package=MODEL)
-cs.store(group=f"schema/{MODEL}", name="ganin", node=GaninConf, package=MODEL)
+cs.store(group=f"schema/{MODEL}", name="ganin", node=DannConf, package=MODEL)
 
 
 @hydra.main(config_path="configs", config_name="main")

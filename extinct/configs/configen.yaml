@@ -21,10 +21,10 @@ configen:
         - CelebaDataModule
     - name: extinct.components.models
       classes:
-        - CelebaKCBaseline
-        - LaftrBaseline
-        - CelebaErmBaseline
-        - Ganin
+        - CelebaKC
+        - Laftr
+        - CelebaErm
+        - Dann
     - name: extinct.components.models.dino
       classes:
         - DINO

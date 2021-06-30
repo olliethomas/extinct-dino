@@ -6,10 +6,10 @@ from torch import nn
 
 from extinct.components.models.predefined import Mp64x64Net
 
-__all__ = ["CelebaErmBaseline"]
+__all__ = ["CelebaErm"]
 
 
-class CelebaErmBaseline(ErmBaseline):
+class CelebaErm(ErmBaseline):
     def __init__(
         self,
         lr: float,
