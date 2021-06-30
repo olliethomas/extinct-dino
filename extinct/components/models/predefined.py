@@ -176,12 +176,9 @@ class Decoder(nn.Module):
 
 
 class EmbeddingClf(nn.Module):
-    def __init__(
-        self,
-        encoding_dim: int,
-    ) -> None:
+    def __init__(self, encoding_dim: int, out_dim: int) -> None:
         super().__init__()
-        self.classifier = nn.Sequential(nn.Flatten(), nn.Linear(encoding_dim, 1))
+        self.classifier = nn.Sequential(nn.Flatten(), nn.Linear(encoding_dim, out_dim))
 
     def forward(self, z: Tensor) -> Tensor:
         return self.classifier(z)

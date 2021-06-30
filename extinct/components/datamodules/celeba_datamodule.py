@@ -66,7 +66,7 @@ class CelebaDataModule(VisionDataModule):
             val_split=val_split,
             test_split=test_split,
             s_dim=1,
-            y_dim=1,
+            y_dim=2,
             seed=seed,
             persist_workers=persist_workers,
             stratified_sampling=stratified_sampling,

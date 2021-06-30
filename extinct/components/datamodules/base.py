@@ -54,7 +54,7 @@ class BaseDataModule(pl.LightningDataModule):
         pin_memory: bool,
         stratified_sampling: bool = False,
         sample_with_replacement: bool = True,
-    ):
+    ) -> None:
         super().__init__()
         self.batch_size = batch_size
         self.num_workers = num_workers

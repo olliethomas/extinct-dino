@@ -18,9 +18,10 @@ from extinct.hydra.extinct.components.datamodules.configs import (  # type: igno
     CelebaDataModuleConf,
 )
 from extinct.hydra.extinct.components.models.configs import (  # type: ignore[import]
-    CelebaErmBaselineConf,
-    CelebaKCBaselineConf,
-    LaftrBaselineConf,
+    CelebaErmConf,
+    CelebaKCConf,
+    DannConf,
+    LaftrConf,
 )
 from extinct.hydra.extinct.components.models.dino.configs import (  # type: ignore[import]
     DINOConf,
@@ -62,10 +63,11 @@ DATA: Final[str] = "data"
 cs.store(group=f"schema/{DATA}", name="celeba", node=CelebaDataModuleConf, package=DATA)
 
 MODEL: Final[str] = "model"
-cs.store(group=f"schema/{MODEL}", name="kc", node=CelebaKCBaselineConf, package=MODEL)
-cs.store(group=f"schema/{MODEL}", name="erm", node=CelebaErmBaselineConf, package=MODEL)
-cs.store(group=f"schema/{MODEL}", name="laftr", node=LaftrBaselineConf, package=MODEL)
+cs.store(group=f"schema/{MODEL}", name="kc", node=CelebaKCConf, package=MODEL)
+cs.store(group=f"schema/{MODEL}", name="erm", node=CelebaErmConf, package=MODEL)
+cs.store(group=f"schema/{MODEL}", name="laftr", node=LaftrConf, package=MODEL)
 cs.store(group=f"schema/{MODEL}", name="dino", node=DINOConf, package=MODEL)
+cs.store(group=f"schema/{MODEL}", name="ganin", node=DannConf, package=MODEL)
 
 
 @hydra.main(config_path="configs", config_name="main")
@@ -97,7 +99,7 @@ def start(cfg: Config, raw_config: Optional[Dict[str, Any]]) -> None:
     cfg.data.prepare_data()
     cfg.data.setup()
 
-    cfg.model.target = cfg.data.train_data.dataset.dataset.ti.y_label
+    cfg.model.target = cfg.data._train_data.dataset.dataset.ti.y_label
     callbacks: list[pl.Callback] = (
         [IterationBasedProgBar()] + [DINOEvaluator()] if isinstance(cfg.model, DINO) else []
     )
@@ -110,11 +112,11 @@ def start(cfg: Config, raw_config: Optional[Dict[str, Any]]) -> None:
     # Test the model
     cfg.trainer.test(model=cfg.model, datamodule=cfg.data)
     # Test the model with additional target attributes
-    cfg.data.train_data.dataset.dataset.ti.new_task("Smiling")  # Amends the underlying dataset
-    cfg.model.target = cfg.data.train_data.dataset.dataset.ti.y_label
+    cfg.data._train_data.dataset.dataset.ti.new_task("Smiling")  # Amends the underlying dataset
+    cfg.model.target = cfg.data._train_data.dataset.dataset.ti.y_label
     cfg.trainer.test(model=cfg.model, datamodule=cfg.data)
-    cfg.data.train_data.dataset.dataset.ti.new_task("Rosy_Cheeks")  # Amends the underlying dataset
-    cfg.model.target = cfg.data.train_data.dataset.dataset.ti.y_label
+    cfg.data._train_data.dataset.dataset.ti.new_task("Rosy_Cheeks")  # Amends the underlying dataset
+    cfg.model.target = cfg.data._train_data.dataset.dataset.ti.y_label
     cfg.trainer.test(model=cfg.model, datamodule=cfg.data)
 
     exp_logger.experiment.finish()

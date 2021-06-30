@@ -4,14 +4,13 @@
 # isort:skip_file
 # flake8: noqa
 
-from dataclasses import dataclass, field
-from extinct.components.models.laftr_baseline import FairnessType
+from dataclasses import dataclass
 from omegaconf import MISSING
 
 
 @dataclass
-class CelebaKCBaselineConf:
-    _target_: str = "extinct.components.models.CelebaKCBaseline"
+class CelebaKCConf:
+    _target_: str = "extinct.components.models.CelebaKC"
     lr: float = MISSING
     weight_decay: float = MISSING
     lr_gamma: float = MISSING
@@ -19,22 +18,30 @@ class CelebaKCBaselineConf:
 
 
 @dataclass
-class LaftrBaselineConf:
-    _target_: str = "extinct.components.models.LaftrBaseline"
+class LaftrConf:
+    _target_: str = "extinct.components.models.Laftr"
     lr: float = MISSING
     weight_decay: float = MISSING
     lr_gamma: float = MISSING
     disc_steps: int = MISSING
-    fairness: FairnessType = MISSING
+    fairness: str = MISSING
     recon_weight: float = MISSING
     clf_weight: float = MISSING
     adv_weight: float = MISSING
 
 
 @dataclass
-class CelebaErmBaselineConf:
-    _target_: str = "extinct.components.models.CelebaErmBaseline"
+class CelebaErmConf:
+    _target_: str = "extinct.components.models.CelebaErm"
     lr: float = MISSING
     weight_decay: float = MISSING
     lr_gamma: float = MISSING
     batch_norm: bool = True
+
+
+@dataclass
+class DannConf:
+    _target_: str = "extinct.components.models.Dann"
+    lr: float = MISSING
+    weight_decay: float = MISSING
+    grl_lambda: float = 1.0

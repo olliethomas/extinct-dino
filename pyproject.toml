@@ -66,7 +66,7 @@ exclude = '''
 '''
 
 [tool.isort]
-known_third_party = ["PIL", "albumentations", "cv2", "ethicml", "hydra", "kit", "numpy", "omegaconf", "pandas", "pytest", "pytorch_lightning", "torch", "torchmetrics"]
+known_third_party = ["PIL", "albumentations", "bolts", "cv2", "ethicml", "hydra", "kit", "numpy", "omegaconf", "pandas", "pytest", "pytorch_lightning", "torch", "torchmetrics"]
 known_future_library = []
 extra_standard_library = ["__future__", "typing_extensions"]
 line_length = 88
@@ -90,6 +90,7 @@ exclude = "hydra"
 [[tool.mypy.overrides]]
 module = [
     "albumentations.*",
+    "bolts.*",
     "cv2.*",
     "cvxpy.*",
     "cvxpylayers.*",
@@ -109,6 +110,7 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = [
+    "bolts.*",
     "ethicml.*",
     "hydra.*",
     "kit.*",
