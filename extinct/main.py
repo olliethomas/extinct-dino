@@ -1,12 +1,13 @@
 import copy
 from dataclasses import dataclass
+
 import os
 from pathlib import Path
 from typing import Any, Dict, Final, Optional
 
 import hydra
 from hydra.core.config_store import ConfigStore
-from hydra.utils import instantiate
+from hydra.utils import instantiate, to_absolute_path
 from kit.pl import IterationBasedProgBar
 from omegaconf import DictConfig, MISSING, OmegaConf
 import pytorch_lightning as pl
@@ -72,7 +73,7 @@ cs.store(group=f"schema/{MODEL}", name="dino", node=DINOConf, package=MODEL)
 def launcher(hydra_config: DictConfig) -> None:
     """Instantiate with hydra and get the experiments running!"""
     if hasattr(hydra_config.data, "data_dir"):
-        hydra_config.data.data_dir = Path(hydra_config.data.data_dir).expanduser()
+        hydra_config.data.data_dir = to_absolute_path(hydra_config.data.data_dir)
     cfg: Config = instantiate(hydra_config, _recursive_=True, _convert_="partial")
     start(cfg, raw_config=OmegaConf.to_container(hydra_config, resolve=True, enum_to_str=True))
 

@@ -127,7 +127,7 @@ class Block(nn.Module):
         attn_drop: float = 0.0,
         drop_path: float = 0.0,
         act_layer: type[nn.Module] = nn.GELU,
-        norm_layer: type[nn.LayerNorm] = nn.LayerNorm,
+        norm_layer: type[nn.LayerNorm] | type[nn.BatchNorm1d] = nn.LayerNorm,
     ) -> None:
         super().__init__()
         self.norm1 = norm_layer(dim)
@@ -192,8 +192,7 @@ class VisionTransformer(nn.Module):
         drop_rate: float = 0.0,
         attn_drop_rate: float = 0.0,
         drop_path_rate: float = 0.0,
-        norm_layer: nn.Module = nn.LayerNorm,
-        **kwargs: Any,
+        norm_layer: type[nn.LayerNorm] | type[nn.BatchNorm1d] = nn.LayerNorm,
     ) -> None:
         super().__init__()
         self.num_features = self.embed_dim = embed_dim
@@ -269,7 +268,7 @@ class VisionTransformer(nn.Module):
         return torch.cat((class_pos_embed.unsqueeze(0), patch_pos_embed), dim=1)
 
     def prepare_tokens(self, x: Tensor) -> Tensor:
-        B, nc, w, h = x.shape
+        B, _, w, h = x.shape
         x = self.patch_embed(x)  # patch linear embedding
 
         # add the [CLS] token to the embed patch tokens
