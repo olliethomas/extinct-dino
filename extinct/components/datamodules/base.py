@@ -103,28 +103,26 @@ class BaseDataModule(pl.LightningDataModule):
                 batch_size=batch_size,
                 drop_last=False,
             )
+        elif self.stratified_sampling:
+            s_all, y_all = extract_labels_from_dataset(self._train_data)
+            group_ids = (y_all * len(s_all.unique()) + s_all).squeeze()
+            num_samples_per_group = batch_size // (num_groups := len(group_ids.unique()))
+            if self.batch_size % num_groups:
+                LOGGER.info(
+                    'For stratified sampling, the batch size must be a multiple of the number of groups.Since the batch size is not integer divisible by the number of groups ({num_groups}),the batch size is being reduced to {num_samples_per_group * num_groups}.'
+                )
+
+            batch_sampler = StratifiedSampler(
+                group_ids.squeeze().tolist(),
+                num_samples_per_group=num_samples_per_group,
+                replacement=self.sample_with_replacement,
+                base_sampler="sequential",
+                shuffle=shuffle,
+            )
         else:
-            if self.stratified_sampling:
-                s_all, y_all = extract_labels_from_dataset(self._train_data)
-                group_ids = (y_all * len(s_all.unique()) + s_all).squeeze()
-                num_samples_per_group = batch_size // (num_groups := len(group_ids.unique()))
-                if self.batch_size % num_groups:
-                    LOGGER.info(
-                        f"For stratified sampling, the batch size must be a multiple of the number of groups."
-                        "Since the batch size is not integer divisible by the number of groups ({num_groups}),"
-                        "the batch size is being reduced to {num_samples_per_group * num_groups}."
-                    )
-                batch_sampler = StratifiedSampler(
-                    group_ids.squeeze().tolist(),
-                    num_samples_per_group=num_samples_per_group,
-                    replacement=self.sample_with_replacement,
-                    base_sampler="sequential",
-                    shuffle=shuffle,
-                )
-            else:
-                batch_sampler = InfSequentialBatchSampler(
-                    data_source=self._train_data, batch_size=batch_size, shuffle=shuffle  # type: ignore
-                )
+            batch_sampler = InfSequentialBatchSampler(
+                data_source=self._train_data, batch_size=batch_size, shuffle=shuffle  # type: ignore
+            )
         return self.make_dataloader(train_data, batch_sampler=batch_sampler)
 
     @implements(pl.LightningDataModule)
