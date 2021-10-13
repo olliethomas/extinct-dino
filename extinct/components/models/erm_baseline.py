@@ -112,12 +112,7 @@ class ErmBaseline(ModelBase):
         logits = self.forward(batch.x)
         loss = self._get_loss(logits, batch)
         acc = self.train_acc(logits >= 0, batch.y.long())
-        self.log_dict(
-            {
-                f"train/loss": loss.item(),
-                f"train/acc": acc,
-            }
-        )
+        self.log_dict({'train/loss': loss.item(), 'train/acc': acc})
         return loss
 
     @implements(nn.Module)

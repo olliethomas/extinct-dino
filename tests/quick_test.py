@@ -22,10 +22,7 @@ def test_entrypoint() -> None:
     """
     with initialize(config_path=CFG_PTH):
         # config is relative to a module
-        hydra_cfg = compose(
-            config_name="main",
-            overrides=[f"model=kc"] + SCHEMAS,
-        )
+        hydra_cfg = compose(config_name="main", overrides=['model=kc'] + SCHEMAS)
         if hasattr(hydra_cfg.data, "data_dir"):
             hydra_cfg.data.data_dir = Path(hydra_cfg.data.data_dir).expanduser()
         cfg: Config = instantiate(hydra_cfg, _recursive_=True, _convert_="partial")

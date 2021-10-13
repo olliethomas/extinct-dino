@@ -213,11 +213,12 @@ class LaftrBaseline(ModelBase):
             acc = self.train_acc(model_out.y >= 0, batch.y.long())
             self.log_dict(
                 {
-                    f"train/loss": (laftr_loss + adv_loss).item(),
-                    f"train/model_loss": laftr_loss.item(),
-                    f"train/acc": acc,
+                    'train/loss': (laftr_loss + adv_loss).item(),
+                    'train/model_loss': laftr_loss.item(),
+                    'train/acc': acc,
                 }
             )
+
             return laftr_loss + adv_loss
         elif optimizer_idx == 1:
             # Adversarial update
@@ -229,11 +230,12 @@ class LaftrBaseline(ModelBase):
             acc = self.train_acc(model_out.y >= 0, batch.y.long())
             self.log_dict(
                 {
-                    f"train/loss": (laftr_loss + adv_loss).item(),
-                    f"train/adv_loss": adv_loss.item(),
-                    f"train/acc": acc,
+                    'train/loss': (laftr_loss + adv_loss).item(),
+                    'train/adv_loss': adv_loss.item(),
+                    'train/acc': acc,
                 }
             )
+
             return -(laftr_loss + adv_loss)
         else:
             raise RuntimeError("There should only be 2 optimizers, but 3rd received.")
