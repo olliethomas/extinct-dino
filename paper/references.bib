@@ -1,38 +1,52 @@
-@article{caron2021emerging,
-  title        = {Emerging properties in self-supervised vision transformers},
+@InProceedings{caron2021emerging,
   author       = {Caron, Mathilde and 
                   Touvron, Hugo and 
                   Misra, Ishan and 
-                  J{\'e}gou, Herv{\'e} and 
+                  Jegou, Herve and 
                   Mairal, Julien and 
                   Bojanowski, Piotr and 
                   Joulin, Armand},
-  journal      = {arXiv preprint arXiv:2104.14294},
-  year         = {2021}
+  title        = {Emerging Properties in Self-Supervised Vision Transformers},
+  booktitle    = {Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV)},
+  month        = {October},
+  year         = {2021},
+  pages        = {9650-9660},
+  address      = {Online},
+  publisher    = {IEEE Computer Society, 1730 Massachusetts Ave., NW Washington, DC, United States.}
 }
 
-@inproceedings{beery2018recognition,
-  title        = {Recognition in terra incognita},
+@InProceedings{beery2018recognition,
   author       = {Beery, Sara and 
                   Van Horn, Grant and 
                   Perona, Pietro},
-  booktitle    = {Proceedings of the European Conference on Computer Vision (ECCV)},
-  pages        = {456--473},
-  year         = {2018}
+editor         = {Ferrari, Vittorio and 
+                  Hebert, Martial and 
+                  Sminchisescu, Cristian and 
+                  Weiss, Yair},
+title          = {Recognition in Terra Incognita},
+booktitle      = {Computer Vision -- ECCV 2018},
+year           = {2018},
+publisher      = {Springer International Publishing},
+address        = {Cham},
+pages          = {472--489},
+abstract       = {It is desirable for detection and classification algorithms to generalize to unfamiliar environments, but suitable benchmarks for quantitatively studying this phenomenon are not yet available. We present a dataset designed to measure recognition generalization to novel environments. The images in our dataset are harvested from twenty camera traps deployed to monitor animal populations. Camera traps are fixed at one location, hence the background changes little across images; capture is triggered automatically, hence there is no human bias. The challenge is learning recognition in a handful of locations, and generalizing animal detection and classification to new locations where no training data is available. In our experiments state-of-the-art algorithms show excellent performance when tested at the same location where they were trained. However, we find that generalization to new locations is poor, especially for classification systems.(The dataset is available at https://beerys.github.io/CaltechCameraTraps/)},
+isbn           = {978-3-030-01270-0}
 }
 
-@inproceedings{van2020scan,
-  title        = {Scan: Learning to classify images without labels},
-  author       = {Van Gansbeke, Wouter and 
-                  Vandenhende, Simon and 
-                  Georgoulis, Stamatios and 
-                  Proesmans, Marc and 
-                  Van Gool, Luc},
-  booktitle    = {European Conference on Computer Vision},
-  pages        = {268--285},
-  year         = {2020},
-  organization = {Springer}
+@InProceedings{van2020scan,
+  author       = "Van Gansbeke, Wouter and Vandenhende, Simon and Georgoulis, Stamatios and Proesmans, Marc and Van Gool, Luc",
+  editor       = "Vedaldi, Andrea and Bischof, Horst and Brox, Thomas and Frahm, Jan-Michael",
+  title        = "SCAN: Learning to Classify Images Without Labels",
+  booktitle    = "Computer Vision -- ECCV 2020",
+  year         = "2020",
+  publisher    = "Springer International Publishing",
+  address      = "Cham",
+  pages        = "268--285",
+  abstract     = "Can we automatically group images into semantically meaningful clusters when ground-truth annotations are absent? The task of unsupervised image classification remains an important, and open challenge in computer vision. Several recent approaches have tried to tackle this problem in an end-to-end fashion. In this paper, we deviate from recent works, and advocate a two-step approach where feature learning and clustering are decoupled. First, a self-supervised task from representation learning is employed to obtain semantically meaningful features. Second, we use the obtained features as a prior in a learnable clustering approach. In doing so, we remove the ability for cluster learning to depend on low-level features, which is present in current end-to-end learning approaches. Experimental evaluation shows that we outperform state-of-the-art methods by large margins, in particular {\$}{\$}+26.6{\backslash}{\%}{\$}{\$}+26.6{\%}on CIFAR10, {\$}{\$}+25.0{\backslash}{\%}{\$}{\$}+25.0{\%}on CIFAR100-20 and {\$}{\$}+21.3{\backslash}{\%}{\$}{\$}+21.3{\%}on STL10 in terms of classification accuracy. Furthermore, our method is the first to perform well on a large-scale dataset for image classification. In particular, we obtain promising results on ImageNet, and outperform several semi-supervised learning methods in the low-data regime without the use of any ground-truth annotations. The code is available at www.github.com/wvangansbeke/Unsupervised-Classification.git.",
+  isbn          = "978-3-030-58607-2"
 }
+
+
 
 @article{arjovsky2019invariant,
   title        = {Invariant risk minimization},
